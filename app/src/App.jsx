@@ -7,6 +7,7 @@ import CourseHub from './ui/CourseHub.jsx'
 import OfflineBanner from './ui/OfflineBanner.jsx'
 import QuizArena from './ui/QuizArena.jsx'
 import KabsatAI from './ui/KabsatAI.jsx'
+import Dashboard from './ui/Dashboard.jsx'
 import StoryReader from './ui/StoryReader.jsx'
 
 const TABS = [
@@ -98,7 +99,7 @@ export default function App() {
       </header>
 
       <main className="flex-1 px-4 py-6">
-        {tab === 'hub' ? (
+        {tab === 'hub' && (
           <CourseHub
             capsules={capsules}
             onOpen={openReader}
@@ -106,11 +107,8 @@ export default function App() {
             onShare={() => {}}
             downloadingId={downloadingId}
           />
-        ) : (
-          <p className="max-w-[38ch] text-[15px] leading-relaxed text-[var(--color-muted)]">
-            {EMPTY[tab]}
-          </p>
         )}
+        {tab === 'dashboard' && <Dashboard />}
       </main>
 
       <nav

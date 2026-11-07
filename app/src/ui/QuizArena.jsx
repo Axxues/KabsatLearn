@@ -8,6 +8,7 @@ import {
   scoreAnswer as computeScore,
 } from '../lib/adaptive.js'
 import { playCorrect, playLevelUp, playTick, playWrong } from '../lib/audio.js'
+import { queueEvent } from '../lib/telemetry.js'
 
 const LIMIT_MS = 15000
 const REVEAL_MS = 1600
@@ -113,6 +114,14 @@ export default function QuizArena({ capsule, onExit }) {
 
     if (isCorrect) playCorrect()
     else playWrong()
+
+    queueEvent({
+      type: 'answer',
+      competency: question.competency,
+      correct: isCorrect,
+      band: state.band,
+      points,
+    }).catch(() => {})
     if (nextState.changed) {
       setBadge(nextState.band)
       playLevelUp()
