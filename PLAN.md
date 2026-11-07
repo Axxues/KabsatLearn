@@ -13,7 +13,9 @@
 ## Global Constraints
 
 - 3 members. Feature freeze 14:30. Rehearsal 15:30. Submit 16:30.
-- Exactly 2 capsules. 10 questions per capsule across 3 bands. 12 intents each.
+- Exactly 2 capsules. 10 questions per capsule across 3 bands. 12 chunks each.
+- Deliverable is a **debug APK**, installed and tested on two physical Android
+  phones by 16:30. Not a hosted PWA.
 - No real personal data. Learner IDs are pseudonymous (`K-####`), never names.
 - Human approval before any remediation is recorded.
 - Must run in airplane mode after first load.
@@ -184,13 +186,24 @@ The failures most likely to bite a user, each pinned to a task below:
 - [ ] Verify on two physical phones on one hotspot.
 - [ ] **If it is not working by 14:30, stop and delete this task's UI entry point.** Import remains the demo.
 
-### Task 10: Deploy, offline rehearsal, pitch assets
+### Task 10: APK build, install test, pitch assets
 
 **Files:**
-- Create: `pitch/deck.md` (5 slides), `pitch/qa.md`, `pitch/prompts.md`
+- Create: `app/capacitor.config.json`, `app/android/` (generated), `pitch/deck.md`, `pitch/qa.md`, `pitch/prompts.md`
 
-- [ ] Deploy to a public HTTPS URL. Keep a local `npm run preview` fallback.
-- [ ] `pitch/prompts.md` must contain the system prompt, the four tool descriptions, and three sample conversations. This is a competition requirement.
+**Interfaces:**
+- Consumes: the built `dist/` from every earlier task.
+
+- [ ] `npm install @capacitor/core @capacitor/cli @capacitor/android`
+- [ ] `npx cap init KabsatLearn com.kabsatlearn.app --web-dir=dist`
+- [ ] `npm run build && npx cap add android && npx cap sync android`
+- [ ] `cd android && ./gradlew assembleDebug` (Windows: `gradlew.bat assembleDebug`)
+- [ ] Copy the APK to `pitch/kabsatlearn-debug.apk`; record its exact size in bytes.
+- [ ] Install on two physical Android phones: `adb install -r <apk>`.
+- [ ] Verify on device in airplane mode: open a capsule, finish a quiz, ask Kabsat
+      a covered question, see the refusal on an uncovered one.
+- [ ] `pitch/prompts.md` must contain the system prompt, the four tool descriptions,
+      and three sample conversations. This is a competition requirement.
 - [ ] Rehearse the 7-minute pitch: capsule → story → quiz downshift → tutor → pass → dashboard flush.
 - [ ] Record a backup screen capture of the full demo.
 - [ ] Submit by 16:30.

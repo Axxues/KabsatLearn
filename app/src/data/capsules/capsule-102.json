@@ -1,0 +1,281 @@
+{
+  "id": "capsule-102",
+  "version": 1,
+  "title": "Unang Hakbang sa Online Trabaho",
+  "subtitle": "Freelancing, virtual assistance, at legit na raket",
+  "persona": "out-of-school youth na naghahanap ng kita",
+  "competency": ["digital_livelihood", "cyber_safety"],
+  "shared_by": "K-0001",
+  "share_count": 0,
+  "cards": [
+    {
+      "id": "c1",
+      "title": "Ano ba ang online job?",
+      "body": "Ang online job ay trabahong ginagawa gamit ang phone o laptop at internet: virtual assistant, transcription, social media manager, o simpleng data entry. Hindi kailangan ng degree para sa unang raket.",
+      "tip": "Isang skill muna. Huwag sabay-sabay lahat."
+    },
+    {
+      "id": "c2",
+      "title": "Bayad para makapasok ay scam",
+      "body": "Walang legit na employer ang hihingi ng registration fee, training fee, o load para makapasok. Kung kailangan mong magbayad para magtrabaho, hindi trabaho iyon.",
+      "tip": "Ikaw ang babayaran, hindi ikaw ang magbabayad."
+    },
+    {
+      "id": "c3",
+      "title": "Isang malinaw na profile",
+      "body": "Isang malinaw na litrato, isang linya tungkol sa skill mo, at isang paraan ng contact. Iyon lang ang kailangan sa simula. Hindi kailangan ng magarang website.",
+      "tip": "Halimbawa: 'Data entry at Google Sheets. 4 hours a day. Available sa weekends.'"
+    },
+    {
+      "id": "c4",
+      "title": "Kilalanin ang pekeng job post",
+      "body": "Ang pekeng job post ay madalas sobrang laki ng kita, walang experience na kailangan, at may bayad. Ang tunay na employer ay nagsasabi ng scope at oras ng trabaho.",
+      "tip": "Kung masyadong maganda para maging totoo, malamang hindi totoo.",
+      "drill": {
+        "prompt": "I-tap ang lahat ng red flag sa job post na ito.",
+        "segments": [
+          { "text": "URGENT HIRING:", "flag": false },
+          { "text": "Earn P5,000/day", "flag": true },
+          { "text": "No experience needed", "flag": true },
+          { "text": "Pay P500 registration fee", "flag": true },
+          { "text": "Start today!", "flag": false }
+        ],
+        "hint": "Tatlo: sobrang laking kita, walang experience pero malaki ang sahod, at bayad para makapasok."
+      }
+    },
+    {
+      "id": "c5",
+      "title": "Proof of work",
+      "body": "Bago ka mag-apply, gumawa ng isang sample: isang spreadsheet, isang transcription sample, o isang simpleng graphic. Ito ang ipapakita mo kapalit ng experience.",
+      "tip": "Ang sample ay hindi kailangang perfect. Kailangan lang totoo."
+    },
+    {
+      "id": "c6",
+      "title": "Unang aplikasyon",
+      "body": "Mag-apply ng tatlo hanggang lima bawat araw at itala kung saan ka nagpasa. Karamihan ay hindi sasagot. Normal iyon. Ang unang oo ay darating sa dami ng tama.",
+      "tip": "Itala: petsa, kumpanya, posisyon, at status."
+    }
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "band": "foundational",
+      "stem": "Hihingan ka ng P500 registration fee bago magsimula ang trabaho. Ano ito?",
+      "options": ["Normal na proseso", "Scam", "Discount kung magbabayad agad", "Training lang"],
+      "answer": 1,
+      "competency": "cyber_safety"
+    },
+    {
+      "id": "q2",
+      "band": "foundational",
+      "stem": "Ano ang pinakauna mong gagawin para makapasok sa online work?",
+      "options": [
+        "Bumili ng bagong phone",
+        "Pumili ng isang skill at gumawa ng simpleng profile",
+        "Mag-apply sa lahat ng nakita",
+        "Magbayad ng training"
+      ],
+      "answer": 1,
+      "competency": "digital_livelihood"
+    },
+    {
+      "id": "q3",
+      "band": "foundational",
+      "stem": "Alin ang tamang pag-uugali kapag may hinihinging bayad ang employer?",
+      "options": ["Magbayad para makapasok", "Tumanggi at maghanap ng iba", "Magpautang", "Ibigay ang OTP"],
+      "answer": 1,
+      "competency": "cyber_safety"
+    },
+    {
+      "id": "q4",
+      "band": "foundational",
+      "stem": "Aling job post ang pinaka-suspicious?",
+      "options": [
+        "Data entry, 4 hours a day, P300/day",
+        "Earn P5,000 a day, no experience, pay a fee",
+        "Transcription, per audio minute",
+        "Social media assistant, part-time"
+      ],
+      "answer": 1,
+      "competency": "cyber_safety"
+    },
+    {
+      "id": "q5",
+      "band": "core",
+      "stem": "Paano mo ipapakita na kaya mo ang trabaho kahit walang experience?",
+      "options": [
+        "Mag-apply ng maraming beses",
+        "Gumawa ng sample na akma sa trabaho",
+        "Magbigay ng mahabang bio",
+        "Mag-claim ng experience"
+      ],
+      "answer": 1,
+      "competency": "digital_livelihood"
+    },
+    {
+      "id": "q6",
+      "band": "core",
+      "stem": "Bago magsimula, ano ang dapat malinaw sa usapan?",
+      "options": [
+        "Kulay ng background",
+        "Scope, oras, at paraan ng bayad",
+        "Bilang ng followers mo",
+        "Brand ng laptop"
+      ],
+      "answer": 1,
+      "competency": "digital_livelihood"
+    },
+    {
+      "id": "q7",
+      "band": "core",
+      "stem": "May nag-apply ka at hinihingi ang OTP mo para sa 'verification'. Ano ang gagawin mo?",
+      "options": ["Ibigay agad", "Ibigay kung may contract", "Tumanggi at i-report", "Ipadala sa email"],
+      "answer": 2,
+      "competency": "cyber_safety"
+    },
+    {
+      "id": "q8",
+      "band": "stretch",
+      "stem": "Pagkatapos ng unang task, dinagdagan ang trabaho nang walang dagdag na bayad. Ano ang tamang gawin?",
+      "options": [
+        "Tanggapin lahat para hindi mawala ang client",
+        "Pag-usapan ang bagong scope at bayad bago ituloy",
+        "I-block agad ang client",
+        "Ipaubaya sa kaibigan"
+      ],
+      "answer": 1,
+      "competency": "digital_livelihood"
+    },
+    {
+      "id": "q9",
+      "band": "stretch",
+      "stem": "Ilang aplikasyon ang makatwirang gawin bawat araw sa simula?",
+      "options": ["Isa lang", "Tatlo hanggang lima at itala", "Lahat ng nakita", "Wala, hintayin ang tawag"],
+      "answer": 1,
+      "competency": "digital_livelihood"
+    },
+    {
+      "id": "q10",
+      "band": "stretch",
+      "stem": "Na-scam ka ng 'employer'. Ano ang pinakamainam na gawin?",
+      "options": [
+        "Magbayad pa para mabawi",
+        "I-report at i-block, at i-screenshot ang ebidensya",
+        "Magpost ng galit at tapusin",
+        "Huwag na lang pansinin"
+      ],
+      "answer": 1,
+      "competency": "cyber_safety"
+    }
+  ],
+  "chunks": [
+    {
+      "id": "k1",
+      "concept": "What online work is",
+      "competency": "digital_livelihood",
+      "difficulty": "foundational",
+      "text": "Ang online job ay trabahong ginagawa gamit ang phone o laptop at internet: virtual assistant, transcription, social media manager, o data entry. Maraming entry-level na raket ang hindi nangangailangan ng degree.",
+      "keywords": ["online job", "trabaho", "freelance", "va", "virtual assistant", "transcription", "data entry"],
+      "source_id": "c1"
+    },
+    {
+      "id": "k2",
+      "concept": "Pay-to-apply scam",
+      "competency": "cyber_safety",
+      "difficulty": "foundational",
+      "text": "Walang legit na employer ang hihingi ng registration fee, training fee, o load. Kung kailangan mong magbayad para magtrabaho, scam iyon.",
+      "keywords": ["fee", "bayad", "registration", "training", "scam", "apply"],
+      "source_id": "c2"
+    },
+    {
+      "id": "k3",
+      "concept": "Simple profile",
+      "competency": "digital_livelihood",
+      "difficulty": "foundational",
+      "text": "Isang malinaw na litrato, isang linya tungkol sa skill, at isang paraan ng contact. Iyon lang ang kailangan sa simula. Hindi kailangan ng website.",
+      "keywords": ["profile", "litrato", "skill", "contact", "bio"],
+      "source_id": "c3"
+    },
+    {
+      "id": "k4",
+      "concept": "Fake job post signs",
+      "competency": "cyber_safety",
+      "difficulty": "core",
+      "text": "Ang pekeng job post ay sobrang laki ng kita, walang experience na kailangan, at may bayad. Ang tunay na employer ay nagsasabi ng scope at oras ng trabaho.",
+      "keywords": ["job post", "hiring", "salary", "experience", "red flag", "scam"],
+      "source_id": "c4"
+    },
+    {
+      "id": "k5",
+      "concept": "Proof of work",
+      "competency": "digital_livelihood",
+      "difficulty": "core",
+      "text": "Bago mag-apply, gumawa ng isang sample na akma sa trabaho: spreadsheet, transcription sample, o simpleng graphic. Ito ang ipapakita mo kapalit ng experience.",
+      "keywords": ["sample", "portfolio", "proof", "experience", "apply"],
+      "source_id": "c5"
+    },
+    {
+      "id": "k6",
+      "concept": "Application cadence",
+      "competency": "digital_livelihood",
+      "difficulty": "core",
+      "text": "Mag-apply ng tatlo hanggang lima bawat araw at itala ang pinasahan. Karamihan ay hindi sasagot, at normal iyon.",
+      "keywords": ["apply", "araw", "track", "aplikasyon", "record"],
+      "source_id": "c6"
+    },
+    {
+      "id": "k7",
+      "concept": "Scope agreement",
+      "competency": "digital_livelihood",
+      "difficulty": "stretch",
+      "text": "Bago magsimula, pag-usapan ang scope, oras, at paraan ng bayad. Kung dinagdagan ang trabaho, pag-usapan ang bagong bayad bago ituloy.",
+      "keywords": ["scope", "oras", "bayad", "usapan", "dagdag", "client"],
+      "source_id": "c6"
+    },
+    {
+      "id": "k8",
+      "concept": "OTP in hiring",
+      "competency": "cyber_safety",
+      "difficulty": "core",
+      "text": "Walang legit na employer ang hihingi ng OTP para sa verification. Tumanggi at i-report ang naghingi.",
+      "keywords": ["otp", "verification", "employer", "hiring", "report"],
+      "source_id": "c2"
+    },
+    {
+      "id": "k9",
+      "concept": "Payment method",
+      "competency": "digital_livelihood",
+      "difficulty": "stretch",
+      "text": "Gumamit ng traceable na paraan ng bayad tulad ng bank transfer o wallet na may record. Iwasan ang pagtanggap ng bayad na walang resibo o trail.",
+      "keywords": ["bayad", "payment", "bank", "wallet", "resibo", "record"],
+      "source_id": "c6"
+    },
+    {
+      "id": "k10",
+      "concept": "Online interview",
+      "competency": "digital_livelihood",
+      "difficulty": "core",
+      "text": "Sa online interview, tanungin ang scope, oras, at paraan ng bayad. Kung ayaw sagutin ang mga ito, mag-ingat.",
+      "keywords": ["interview", "scope", "oras", "bayad", "tanong"],
+      "source_id": "c6"
+    },
+    {
+      "id": "k11",
+      "concept": "Reporting a scam",
+      "competency": "cyber_safety",
+      "difficulty": "stretch",
+      "text": "Kung na-scam ka ng employer, i-report at i-block, at i-screenshot ang ebidensya. Huwag magbayad ng dagdag para mabawi ang nawala.",
+      "keywords": ["scam", "report", "block", "screenshot", "employer"],
+      "source_id": "c2"
+    },
+    {
+      "id": "k12",
+      "concept": "First client",
+      "competency": "digital_livelihood",
+      "difficulty": "stretch",
+      "text": "Para sa unang client, magsimula sa maliit na task at malinaw na deadline. Ang maayos na komunikasyon ay mas mahalaga kaysa sa magarang portfolio.",
+      "keywords": ["client", "first", "deadline", "komunikasyon", "task"],
+      "source_id": "c5"
+    }
+  ]
+}

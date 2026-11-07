@@ -1,0 +1,291 @@
+{
+  "id": "capsule-101",
+  "version": 1,
+  "title": "Ligtas na Digital Wallet",
+  "subtitle": "Anti-scam, GCash at Maya, at OTP safety",
+  "persona": "senior at pamilyang may digital wallet",
+  "competency": ["cyber_safety", "financial_literacy"],
+  "shared_by": "K-0001",
+  "share_count": 0,
+  "cards": [
+    {
+      "id": "c1",
+      "title": "Ang OTP ay susi ng bahay mo",
+      "body": "Ang one-time password (OTP) ay parang susi ng bahay. Kahit sino ang magtext at magsabing taga-GCash sila, walang tunay na kumpanya ang hihingi ng OTP mo.",
+      "tip": "Walang legit na agent ang hihingi ng OTP. Kahit kamag-anak, hindi."
+    },
+    {
+      "id": "c2",
+      "title": "Tingnan ang link bago i-tap",
+      "body": "Ang pekeng link ay madalas may mali sa spelling o kakaibang dulo, tulad ng .help, .xyz, o .top. Ang tunay na GCash ay nasa gcash.com lamang.",
+      "tip": "Kung hindi sigurado, i-type ang address sa browser. Huwag i-tap ang link sa text."
+    },
+    {
+      "id": "c3",
+      "title": "Ayuda na may bayad ay scam",
+      "body": "Ang DSWD ay hindi nagpapabayad para makakuha ng ayuda at hindi nagtatanong ng OTP. Kung may hinihinging P50 o OTP para ma-release ang P5,000, peke iyon.",
+      "tip": "P50 na bayad para sa P5,000 na ayuda ay klasikong scam.",
+      "drill": {
+        "prompt": "I-tap ang lahat ng red flag sa text na ito.",
+        "segments": [
+          { "text": "DSWD:", "flag": false },
+          { "text": "Nanalo ka ng P5,000 ayuda!", "flag": true },
+          { "text": "I-click: dswd-ayuda.help", "flag": true },
+          { "text": "Ibigay ang OTP mo", "flag": true },
+          { "text": "Valid until today.", "flag": false }
+        ],
+        "hint": "Tatlo ang red flag: premyo na hindi inaasahan, pekeng domain, at paghingi ng OTP."
+      }
+    },
+    {
+      "id": "c4",
+      "title": "Refund scam: screenshot lang iyon",
+      "body": "May magsasabing naipadala na ang refund at magpapakita ng screenshot. Ang screenshot ay kayang gawin sa loob ng isang minuto. Buksan ang app at tingnan ang totoong balance.",
+      "tip": "Ang app ang katotohanan, hindi ang screenshot."
+    },
+    {
+      "id": "c5",
+      "title": "Biglang nawalan ng signal?",
+      "body": "Kung biglang nawalan ng signal, hindi makatawag, at hindi dumarating ang OTP, baka may nag-SIM swap. Tumawag agad sa network provider mo gamit ang ibang phone.",
+      "tip": "SIM swap ay nangyayari kapag may nakakuha ng SIM replacement sa pangalan mo."
+    },
+    {
+      "id": "c6",
+      "title": "Kung nabiktima ka na",
+      "body": "Huwag mahiya. Palitan agad ang PIN, i-report sa app, at tumawag sa hotline. I-screenshot ang lahat ng usapan bago i-block ang nagsend.",
+      "tip": "Unang 30 minuto ang pinakamahalaga. Bilis ang mas importante kaysa hiya."
+    }
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "band": "foundational",
+      "stem": "May tumawag na taga-GCash at hiningi ang OTP mo. Ano ang gagawin mo?",
+      "options": [
+        "Ibigay para ma-unblock ang account",
+        "Ibibigay kung may ID siyang ipakita",
+        "Hindi ibibigay at ibablock ang number",
+        "Ipadala sa text para may record"
+      ],
+      "answer": 2,
+      "competency": "cyber_safety"
+    },
+    {
+      "id": "q2",
+      "band": "foundational",
+      "stem": "Ang tunay na DSWD ay humihingi ng bayad para ma-release ang ayuda.",
+      "options": ["Totoo", "Hindi totoo", "Depende sa barangay", "Totoo kapag P50 lang"],
+      "answer": 1,
+      "competency": "cyber_safety"
+    },
+    {
+      "id": "q3",
+      "band": "foundational",
+      "stem": "Alin ang pinakamagandang paraan para malaman kung peke ang link?",
+      "options": [
+        "Tingnan kung maganda ang design",
+        "I-tap at tingnan kung may login page",
+        "Tingnan ang domain name",
+        "Tanungin ang nagsend kung totoo"
+      ],
+      "answer": 2,
+      "competency": "cyber_safety"
+    },
+    {
+      "id": "q4",
+      "band": "foundational",
+      "stem": "Alin ang ligtas na PIN?",
+      "options": ["1234", "Araw ng kaarawan", "Random na 6 digit na hindi mo ipinost", "Pangalan ng anak"],
+      "answer": 2,
+      "competency": "financial_literacy"
+    },
+    {
+      "id": "q5",
+      "band": "core",
+      "stem": "May nagpakita ng screenshot na naipadala na ang refund. Ano ang susunod mong gagawin?",
+      "options": [
+        "Ipadala agad ang pera",
+        "Buksan ang app at tingnan ang balance",
+        "Tanungin ang kaibigan kung kilala niya",
+        "I-screenshot din at ipadala"
+      ],
+      "answer": 1,
+      "competency": "financial_literacy"
+    },
+    {
+      "id": "q6",
+      "band": "core",
+      "stem": "Biglang nawalan ka ng signal at hindi dumarating ang OTP. Ano ang pinakamalamang na nangyayari?",
+      "options": [
+        "Sirang phone lang",
+        "May SIM swap na nangyayari",
+        "Mahina lang ang signal",
+        "Naubos ang load"
+      ],
+      "answer": 1,
+      "competency": "cyber_safety"
+    },
+    {
+      "id": "q7",
+      "band": "core",
+      "stem": "Bago magbayad gamit ang QR, ano ang dapat tingnan?",
+      "options": [
+        "Kulay ng QR code",
+        "Pangalan ng recipient sa app",
+        "Laki ng screen",
+        "Bilang ng likes"
+      ],
+      "answer": 1,
+      "competency": "financial_literacy"
+    },
+    {
+      "id": "q8",
+      "band": "stretch",
+      "stem": "May text na galing sa pangalang 'GCash' pero kakaibang number. Ano ang totoo?",
+      "options": [
+        "Totoo dahil GCash ang pangalan",
+        "Peke, kayang pekeng pangalan ang sender",
+        "Totoo kung may logo",
+        "Totoo kung may link"
+      ],
+      "answer": 1,
+      "competency": "cyber_safety"
+    },
+    {
+      "id": "q9",
+      "band": "stretch",
+      "stem": "Nagpost ka ng litrato ng ID mo para sa isang promo. Ano ang risk?",
+      "options": [
+        "Wala, promo lang iyon",
+        "Kayang gamitin ang ID para mag-open ng account sa pangalan mo",
+        "Mawawala lang ang post",
+        "Mababawasan ang followers"
+      ],
+      "answer": 1,
+      "competency": "cyber_safety"
+    },
+    {
+      "id": "q10",
+      "band": "stretch",
+      "stem": "Nabiktima ka na ng scam. Ano ang tamang unang hakbang?",
+      "options": [
+        "Maghintay ng tawag mula sa scammer",
+        "I-delete ang app at manahimik",
+        "Palitan ang PIN, i-report sa app at hotline, i-screenshot ang ebidensya",
+        "Magpost sa social media lang"
+      ],
+      "answer": 2,
+      "competency": "financial_literacy"
+    }
+  ],
+  "chunks": [
+    {
+      "id": "k1",
+      "concept": "OTP safety",
+      "competency": "cyber_safety",
+      "difficulty": "foundational",
+      "text": "Ang OTP ay one-time password na ipinapadala sa phone mo. Walang tunay na kumpanya, agent, o kamag-anak ang dapat humingi nito. Kung may humingi ng OTP, scam iyon.",
+      "keywords": ["otp", "one time password", "code", "pin", "hiningi", "ibigay"],
+      "source_id": "c1"
+    },
+    {
+      "id": "k2",
+      "concept": "Fake links",
+      "competency": "cyber_safety",
+      "difficulty": "foundational",
+      "text": "Tingnan ang domain bago mag-tap. Ang tunay na GCash ay gcash.com. Ang pekeng link ay may kakaibang dulo tulad ng .help, .xyz, o .top, o mali ang spelling ng pangalan.",
+      "keywords": ["link", "domain", "website", "click", "i-tap", "spelling", "peke"],
+      "source_id": "c2"
+    },
+    {
+      "id": "k3",
+      "concept": "Ayuda scam",
+      "competency": "cyber_safety",
+      "difficulty": "foundational",
+      "text": "Ang DSWD ay hindi nagpapabayad at hindi humihingi ng OTP para sa ayuda. Kung may hinihinging bayad o OTP para ma-release ang tulong, scam iyon.",
+      "keywords": ["dswd", "ayuda", "tulong", "p5,000", "bayad", "release"],
+      "source_id": "c3"
+    },
+    {
+      "id": "k4",
+      "concept": "Refund scam",
+      "competency": "financial_literacy",
+      "difficulty": "core",
+      "text": "Ang screenshot ay hindi ebidensya ng totoong padala. Buksan ang app at tingnan ang balance bago magpadala ng pera pabalik.",
+      "keywords": ["refund", "screenshot", "padala", "balance", "ibalik"],
+      "source_id": "c4"
+    },
+    {
+      "id": "k5",
+      "concept": "SIM swap",
+      "competency": "cyber_safety",
+      "difficulty": "core",
+      "text": "Kung biglang nawalan ng signal, hindi makatawag, at hindi dumarating ang OTP, baka may SIM swap. Tumawag agad sa network provider gamit ang ibang phone.",
+      "keywords": ["sim", "swap", "signal", "otp", "network", "provider"],
+      "source_id": "c5"
+    },
+    {
+      "id": "k6",
+      "concept": "QR payment",
+      "competency": "financial_literacy",
+      "difficulty": "core",
+      "text": "Bago magbayad gamit ang QR, tingnan ang pangalan ng recipient sa app. Kung iba ang pangalan sa inaasahan mo, kanselahin ang bayad.",
+      "keywords": ["qr", "scan", "recipient", "pangalan", "bayad"],
+      "source_id": "c4"
+    },
+    {
+      "id": "k7",
+      "concept": "Safe PIN",
+      "competency": "financial_literacy",
+      "difficulty": "foundational",
+      "text": "Gumamit ng random na PIN na hindi kaarawan, hindi 1234, at hindi nakapost sa social media. Palitan ito kung may hinala kang may nakakaalam.",
+      "keywords": ["pin", "password", "1234", "kaarawan", "random"],
+      "source_id": "c1"
+    },
+    {
+      "id": "k8",
+      "concept": "Reporting fraud",
+      "competency": "financial_literacy",
+      "difficulty": "core",
+      "text": "Kung nabiktima ka, palitan agad ang PIN, i-report sa app, tumawag sa hotline, at i-screenshot ang usapan bago i-block ang scammer. Unahin ang unang 30 minuto.",
+      "keywords": ["report", "hotline", "nabiktima", "scam", "block", "screenshot"],
+      "source_id": "c6"
+    },
+    {
+      "id": "k9",
+      "concept": "Sender spoofing",
+      "competency": "cyber_safety",
+      "difficulty": "stretch",
+      "text": "Kayang pekeng gawin ang pangalan ng sender sa text. Hindi basehan ang pangalang 'GCash' o logo. Tingnan ang number at huwag mag-tap ng link.",
+      "keywords": ["sender", "spoof", "pangalan", "number", "logo", "text"],
+      "source_id": "c2"
+    },
+    {
+      "id": "k10",
+      "concept": "Oversharing IDs",
+      "competency": "cyber_safety",
+      "difficulty": "stretch",
+      "text": "Ang litrato ng ID ay kayang gamitin para mag-open ng account sa pangalan mo. I-blur ang ID number at huwag ipost sa public.",
+      "keywords": ["id", "litrato", "post", "blur", "identity", "account"],
+      "source_id": "c6"
+    },
+    {
+      "id": "k11",
+      "concept": "Legit fees",
+      "competency": "financial_literacy",
+      "difficulty": "core",
+      "text": "Ang legit na wallet ay may nakalistang fee sa app, hindi hinihingi sa text. Kung may nagtext na magbayad ng fee para ma-release ang pera, scam iyon.",
+      "keywords": ["fee", "bayad", "release", "wallet", "gcash", "maya"],
+      "source_id": "c3"
+    },
+    {
+      "id": "k12",
+      "concept": "Account recovery",
+      "competency": "financial_literacy",
+      "difficulty": "stretch",
+      "text": "Kung na-hack ang account, gamitin ang official recovery sa app at hotline. Huwag magbayad sa sinumang nag-aalok ng 'recovery service' sa social media.",
+      "keywords": ["recovery", "hack", "account", "hotline", "service", "social media"],
+      "source_id": "c6"
+    }
+  ]
+}
