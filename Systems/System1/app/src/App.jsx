@@ -1,5 +1,11 @@
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
+import capsule101 from './data/capsules/capsule-101.json'
+import capsule102 from './data/capsules/capsule-102.json'
+import { getCapsule, listCapsules, seedCapsule } from './lib/capsuleStore.js'
+import { useOnline } from './lib/useOnline.js'
+import CourseHub from './ui/CourseHub.jsx'
 import OfflineBanner from './ui/OfflineBanner.jsx'
+import StoryReader from './ui/StoryReader.jsx'
 
 const TABS = [
   { id: 'hub', label: 'Courses' },
@@ -8,28 +14,64 @@ const TABS = [
   { id: 'dashboard', label: 'LGU' },
 ]
 
-const SCREENS = {
-  hub: {
-    title: 'Your courses',
-    body: 'Course capsules you have on this phone. Nothing here needs the internet.',
-  },
-  quiz: {
-    title: 'Quiz arena',
-    body: 'Answer quickly, move up a level. Miss twice and Kabsat slows down for you.',
-  },
-  tutor: {
-    title: 'Ask Kabsat',
-    body: 'Answers come from the courses you downloaded. If it is not covered, Kabsat says so.',
-  },
-  dashboard: {
-    title: 'City insights',
-    body: 'Skill gaps by barangay, and progress waiting to sync when a connection returns.',
-  },
+const CATALOG = [capsule101, capsule102].map((capsule) => ({
+  id: capsule.id,
+  title: capsule.title,
+  subtitle: capsule.subtitle,
+  cards: capsule.cards.length,
+  questions: capsule.questions.length,
+  kb: Math.max(1, Math.round(JSON.stringify(capsule).length / 1024)),
+}))
+
+const EMPTY = {
+  hub: 'Course capsules you have on this phone. Nothing here needs the internet.',
+  quiz: 'Answer fast, climb the bands. Miss twice and Kabsat slows down for you.',
+  tutor: 'Answers come from your downloaded courses. Out of scope, Kabsat says so.',
+  dashboard: 'Skill gaps by barangay, and progress waiting to sync.',
 }
 
 export default function App() {
+  const online = useOnline()
   const [tab, setTab] = useState('hub')
-  const screen = SCREENS[tab]
+  const [readerId, setReaderId] = useState(null)
+  const [capsules, setCapsules] = useState([])
+  const [downloadingId, setDownloadingId] = useState(null)
+
+  const refresh = useCallback(async () => {
+    const installed = await listCapsules()
+    const installedIds = new Set(installed.map((c) => c.id))
+    setCapsules(CATALOG.map((c) => ({ ...c, installed: installedIds.has(c.id) })))
+  }, [])
+
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      if (!(await getCapsule('capsule-101'))) {
+        await seedCapsule(capsule101)
+      }
+      if (!cancelled) await refresh()
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [refresh])
+
+  const download = async (id) => {
+    const capsule = id === 'capsule-102' ? capsule102 : null
+    if (!capsule) return
+    setDownloadingId(id)
+    await new Promise((resolve) => setTimeout(resolve, 1800))
+    await seedCapsule(capsule)
+    await refresh()
+    setDownloadingId(null)
+  }
+
+  const openReader = (id) => setReaderId(id)
+
+  if (readerId) {
+    const capsule = [capsule101, capsule102].find((c) => c.id === readerId)
+    return <StoryReader capsule={capsule} onExit={() => setReaderId(null)} />
+  }
 
   return (
     <div className="mx-auto flex min-h-dvh max-w-[420px] flex-col bg-[var(--color-bg)]">
@@ -38,15 +80,27 @@ export default function App() {
           <p className="text-xs font-semibold tracking-[0.08em] text-[var(--color-accent)] uppercase">
             KabsatLearn
           </p>
-          <h1 className="text-xl font-bold">{screen.title}</h1>
+          <h1 className="text-xl font-bold">
+            {tab === 'hub' ? 'Your courses' : tab === 'quiz' ? 'Quiz arena' : tab === 'tutor' ? 'Ask Kabsat' : 'City insights'}
+          </h1>
         </div>
-        <OfflineBanner />
+        <OfflineBanner online={online} />
       </header>
 
       <main className="flex-1 px-4 py-6">
-        <p className="max-w-[38ch] text-[15px] leading-relaxed text-[var(--color-muted)]">
-          {screen.body}
-        </p>
+        {tab === 'hub' ? (
+          <CourseHub
+            capsules={capsules}
+            onOpen={openReader}
+            onDownload={download}
+            onShare={() => {}}
+            downloadingId={downloadingId}
+          />
+        ) : (
+          <p className="max-w-[38ch] text-[15px] leading-relaxed text-[var(--color-muted)]">
+            {EMPTY[tab]}
+          </p>
+        )}
       </main>
 
       <nav
