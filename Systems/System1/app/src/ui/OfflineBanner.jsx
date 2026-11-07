@@ -1,20 +1,24 @@
 /**
- * Full-width connectivity bar, rendered below the header by App.
- * Nothing is shown while online, so the offline state is unmissable on stage.
+ * Compact connectivity chip, rendered inside the app header.
  *
- * The value comes from App's single subscription. This component must not
- * subscribe again: two Network listeners in the WebView is what produced the
- * teardown error on device.
+ * This is a chip rather than a full-width bar because the header is a
+ * `justify-between` flex row: a block element there overflows and overlaps the
+ * title. Keep it `shrink-0` and `whitespace-nowrap` so it can never wrap into
+ * the theme button.
+ *
+ * The value comes from App's single subscription; this component must not
+ * subscribe again.
  */
 export default function OfflineBanner({ online }) {
   if (online) return null
 
   return (
-    <div
+    <span
       role="status"
-      className="w-full bg-[var(--color-accent)] px-4 py-2 text-center text-sm font-semibold text-[var(--color-on-accent)]"
+      className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full bg-[var(--color-accent)] px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-[var(--color-on-accent)]"
     >
-      ⚡ Offline mode — your courses still work
-    </div>
+      <span aria-hidden="true">⚡</span>
+      Offline
+    </span>
   )
 }
