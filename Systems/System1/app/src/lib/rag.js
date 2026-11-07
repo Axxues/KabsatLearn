@@ -13,18 +13,11 @@ function indexFor(capsule) {
 export const THRESHOLD = 1.2
 
 export function systemPrompt(language) {
-  const replyLanguage =
-    language === 'en'
-      ? 'Reply in simple English, at most 60 words.'
-      : 'Reply in simple Taglish, at most 60 words.'
-
+  const replyLanguage = language === 'en' ? 'English' : 'simple Taglish'
   return (
-    'You are Kabsat, a tutor for out-of-school youth in San Fernando, La Union. ' +
-    'Answer only from CONTEXT. If CONTEXT does not contain the answer, say you do not know ' +
-    'and name a capsule to download. ' +
-    replyLanguage +
-    ' Never give medical, legal, or financial advice beyond the CONTEXT. ' +
-    'Use the CONTEXT wording for key terms instead of translating them.'
+    'You are Kabsat, an offline tutor for out-of-school youth in San Fernando, La Union. ' +
+    'Answer ONLY from CONTEXT. If CONTEXT lacks the answer, say you do not know. ' +
+    `Reply in ${replyLanguage}, at most 45 words. Keep key terms exactly as written.`
   )
 }
 

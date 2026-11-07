@@ -56,8 +56,11 @@ export async function loadEngine(onProgress) {
  * Generate a short, grounded explanation. Returns the text and whether it passed
  * the language guard, so the caller can discard a bad answer.
  */
-export async function explain({ query, chunks, language, onToken }) {
+export async function explain({ query, chunks, language, onToken, signal }) {
   const active = await loadEngine()
+  if (signal?.aborted) {
+    return { text: '', ok: false, aborted: true }
+  }
   const context = chunks.map((chunk) => chunk.text).join('\n---\n')
 
   const stream = await active.chat.completions.create({
@@ -67,11 +70,21 @@ export async function explain({ query, chunks, language, onToken }) {
     ],
     stream: true,
     temperature: 0.2,
-    max_tokens: 60,
+    max_tokens: 50,
   })
 
   let text = ''
   for await (const chunk of stream) {
+    if (signal?.aborted) {
+      if (typeof active.interruptGenerate === 'function') {
+        try {
+          active.interruptGenerate()
+        } catch {
+          // ignore
+        }
+      }
+      break
+    }
     const delta = chunk.choices[0]?.delta?.content ?? ''
     if (delta) {
       text += delta
@@ -79,5 +92,5 @@ export async function explain({ query, chunks, language, onToken }) {
     }
   }
 
-  return { text: text.trim(), ok: guardLanguage(text, language) }
+  return { text: text.trim(), ok: guardLanguage(text, language), aborted: signal?.aborted ?? false }
 }

@@ -1,10 +1,10 @@
 import { useState, useRef, useEffect } from 'react'
-import { answerOffline, contextFor } from '../lib/rag.js'
 // The on-device model runtime is ~6 MB, so it is loaded only when the learner
 // asks for an explanation. Static import would make every launch parse it.
 const llm = () => import('../lib/llm.js')
 import { speak } from '../lib/tts.js'
 import { useI18n } from '../lib/i18n.jsx'
+import { useKabsatAiState } from '../lib/useKabsatAiState.js'
 import {
   ArrowLeft,
   Bot,
@@ -14,6 +14,7 @@ import {
   Send,
   Sparkles,
   Zap,
+  Square,
 } from 'lucide-react'
 
 function Bubble({ message, canExplain, onExplain }) {
@@ -43,7 +44,14 @@ function Bubble({ message, canExplain, onExplain }) {
               : 'rounded-tl-xs border border-[var(--color-line)] bg-[var(--color-surface)] text-[var(--color-ink)]'
           }`}
         >
-          <p className="whitespace-pre-line">{message.text || (message.thinking ? '…' : '')}</p>
+          {message.thinking ? (
+            <div className="flex items-center gap-2 py-1 text-xs font-semibold text-[var(--color-muted)]">
+              <Sparkles className="size-3.5 animate-spin text-[var(--color-accent)] stroke-[2.5]" aria-hidden="true" />
+              <span>{message.text || (lang === 'en' ? 'Kabsat is thinking…' : 'Nag-iisip si Kabsat…')}</span>
+            </div>
+          ) : (
+            <p className="whitespace-pre-line">{message.text}</p>
+          )}
 
           {/* Source Citation for Grounded Replies */}
           {message.source && (
@@ -66,7 +74,7 @@ function Bubble({ message, canExplain, onExplain }) {
             </div>
           )}
 
-          {canExplain && !mine && message.source && (
+          {canExplain && !mine && message.source && message.kind !== 'generated' && (
             <div className="pt-1">
               <button
                 type="button"
@@ -77,6 +85,15 @@ function Bubble({ message, canExplain, onExplain }) {
                 <span>{lang === 'en' ? 'Explain more' : 'Ipaliwanag pa'}</span>
               </button>
             </div>
+          )}
+
+          {/* Fallback notice: the model was unavailable or failed the language guard */}
+          {message.kind === 'fallback' && (
+            <p className="text-[11px] font-semibold text-[var(--color-warn)]">
+              {lang === 'en'
+                ? 'On-device AI unavailable — showing the lesson text.'
+                : 'Walang on-device AI — teksto ng aralin ang ipinapakita.'}
+            </p>
           )}
 
           {/* Speech Playback Button for Assistant with Waveform Animation */}
@@ -109,75 +126,51 @@ function Bubble({ message, canExplain, onExplain }) {
   )
 }
 
-export default function KabsatAI({ capsule, onExit }) {
+export default function KabsatAI({
+  capsule,
+  onExit,
+  messages: propMessages,
+  input: propInput,
+  setInput: propSetInput,
+  isProcessing: propIsProcessing,
+  model: propModel,
+  prepareModel: propPrepareModel,
+  known: propKnown,
+  ask: propAsk,
+  explainAt: propExplainAt,
+  stop: propStop,
+}) {
   const { t, lang, translations } = useI18n()
-  const [messages, setMessages] = useState(() => [
-    {
-      role: 'assistant',
-      text: t('aiWelcome', { title: capsule.title }),
-    },
-  ])
-  const [input, setInput] = useState('')
-  const [model, setModel] = useState({ state: 'idle', progress: 0 })
-  const [known, setKnown] = useState(() => {
-    if (typeof localStorage === 'undefined') return false
-    return localStorage.getItem('kabsat_llm_cached') === '1'
-  })
+  const fallback = useKabsatAiState({ capsule, t, lang })
+
+  const messages = propMessages ?? fallback.messages
+  const input = propInput ?? fallback.input
+  const setInput = propSetInput ?? fallback.setInput
+  const isProcessing = propIsProcessing ?? fallback.isProcessing
+  const model = propModel ?? fallback.model
+  const prepareModel = propPrepareModel ?? fallback.prepareModel
+  const known = propKnown ?? fallback.known
+  const ask = propAsk ?? fallback.ask
+  const explainAt = propExplainAt ?? fallback.explainAt
+  const stop = propStop ?? fallback.stop
   const messagesEndRef = useRef(null)
 
-  const prepareModel = async () => {
-    setModel({ state: 'loading', progress: 0 })
-    try {
-      const { loadEngine } = await llm()
-      await loadEngine((report) => setModel({ state: 'loading', progress: report.progress ?? 0 }))
-      setModel({ state: 'ready', progress: 1 })
-      setKnown(true)
-      localStorage.setItem('kabsat_llm_cached', '1')
-    } catch {
-      setModel({ state: 'error', progress: 0 })
-    }
-  }
-
-  const explainAt = async (index) => {
-    const target = messages[index]
-    const question = [...messages.slice(0, index)].reverse().find((entry) => entry.role === 'user')
-    if (!target || !question) return
-
-    const { language, chunks } = contextFor(question.text, capsule, 1)
-    setMessages((current) => [
-      ...current,
-      {
-        role: 'assistant',
-        text: '',
-        thinking: true,
-        answered: true,
-        source: target.source,
-        confidence: target.confidence,
-      },
-    ])
-
-    const patchLast = (update) =>
-      setMessages((current) =>
-        current.map((entry, position) => (position === current.length - 1 ? { ...entry, ...update } : entry)),
-      )
-
-    try {
-      const { explain } = await llm()
-      const result = await explain({
-        query: question.text,
-        chunks,
-        language,
-        onToken: (text) => patchLast({ text, thinking: false }),
+  // Warm the model when the tab opens if it is already downloaded. Loading it
+  // from cache takes ~20 s, and paying that on the first question made the tutor
+  // feel broken. This is silent: a failure just leaves the button in place.
+  useEffect(() => {
+    if (!known) return
+    let cancelled = false
+    llm()
+      .then(({ loadEngine }) => loadEngine())
+      .then(() => {
+        if (!cancelled) setModel({ state: 'ready', progress: 1 })
       })
-      patchLast({
-        text: result.ok && result.text ? result.text : target.text,
-        thinking: false,
-        guardFailed: !result.ok,
-      })
-    } catch {
-      patchLast({ text: target.text, thinking: false, guardFailed: true })
+      .catch(() => {})
+    return () => {
+      cancelled = true
     }
-  }
+  }, [known])
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -187,33 +180,10 @@ export default function KabsatAI({ capsule, onExit }) {
     scrollToBottom()
   }, [messages])
 
-  const ask = (question) => {
-    const text = question.trim()
-    if (!text) return
-
-    const result = answerOffline(text, capsule)
-    setMessages((current) => [
-      ...current,
-      { role: 'user', text },
-      {
-        role: 'assistant',
-        text: result.reply,
-        source: result.source,
-        confidence: result.confidence,
-        kind: result.kind,
-        answered: true,
-      },
-    ])
-    setInput('')
-  }
-
   const chips = translations.quickChips || []
 
   return (
-    <div
-      className="mx-auto flex flex-1 min-h-0 max-w-[430px] flex-col bg-[var(--color-bg)] text-[var(--color-ink)] shadow-2xl transition-colors duration-200"
-      style={{ paddingTop: 'var(--sat)', paddingBottom: 'var(--sab)' }}
-    >
+    <div className="flex flex-1 min-h-0 flex-col bg-[var(--color-bg)] text-[var(--color-ink)]">
       {/* Top Safe Area Shield: keeps the mobile device status bar/panel area clean when scrolling */}
       <div
         className="fixed top-0 left-0 right-0 z-40 bg-[var(--color-bg)] pointer-events-none"
@@ -295,8 +265,11 @@ export default function KabsatAI({ capsule, onExit }) {
               <button
                 key={chip}
                 type="button"
+                disabled={isProcessing}
                 onClick={() => ask(chip)}
-                className="btn-press rounded-full border border-[var(--color-line)] bg-[var(--color-surface)] px-3 py-1.5 text-xs font-semibold text-[var(--color-muted)] shadow-2xs hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] hover:bg-[var(--color-accent-subtle)]"
+                className={`btn-press rounded-full border border-[var(--color-line)] bg-[var(--color-surface)] px-3 py-1.5 text-xs font-semibold text-[var(--color-muted)] shadow-2xs hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] hover:bg-[var(--color-accent-subtle)] ${
+                  isProcessing ? 'opacity-50 pointer-events-none' : ''
+                }`}
               >
                 {chip}
               </button>
@@ -309,9 +282,11 @@ export default function KabsatAI({ capsule, onExit }) {
       <form
         onSubmit={(event) => {
           event.preventDefault()
-          ask(input)
+          if (isProcessing) return
+          const text = event.target.elements?.ask?.value || input
+          ask(text)
         }}
-        className="sticky bottom-0 z-30 flex gap-2 border-t border-[var(--color-line)] bg-[var(--color-surface)]/95 p-3 backdrop-blur-md"
+        className="shrink-0 flex gap-2 border-t border-[var(--color-line)] bg-[var(--color-surface)]/95 p-3 backdrop-blur-md"
       >
         <label className="sr-only" htmlFor="ask">
           {t('askPlaceholder')}
@@ -320,17 +295,30 @@ export default function KabsatAI({ capsule, onExit }) {
           id="ask"
           value={input}
           onChange={(event) => setInput(event.target.value)}
-          placeholder={t('askPlaceholder')}
-          className="min-h-12 flex-1 rounded-2xl border border-[var(--color-line)] bg-[var(--color-bg)] px-4 text-sm text-[var(--color-ink)] placeholder:text-[var(--color-muted)] focus:border-[var(--color-accent)] focus:outline-hidden"
+          placeholder={isProcessing ? (lang === 'en' ? 'Thinking…' : 'Nag-iisip…') : t('askPlaceholder')}
+          disabled={isProcessing}
+          className="min-h-12 flex-1 rounded-2xl border border-[var(--color-line)] bg-[var(--color-bg)] px-4 text-sm text-[var(--color-ink)] placeholder:text-[var(--color-muted)] focus:border-[var(--color-accent)] focus:outline-hidden disabled:opacity-60"
         />
-        <button
-          type="submit"
-          disabled={!input.trim()}
-          className="btn-press flex min-h-12 items-center justify-center gap-1.5 rounded-2xl bg-[var(--color-accent)] px-4 text-sm font-bold text-[var(--color-on-accent)] shadow-md hover:bg-[var(--color-accent-strong)] disabled:opacity-40 disabled:cursor-not-allowed"
-        >
-          <span>{t('send')}</span>
-          <Send className="size-4 stroke-[2.5]" aria-hidden="true" />
-        </button>
+        {isProcessing ? (
+          <button
+            type="button"
+            onClick={stop}
+            aria-label={t('stop')}
+            className="btn-press flex min-h-12 items-center justify-center gap-1.5 rounded-2xl bg-[var(--color-terracotta)] px-4 text-sm font-bold text-white shadow-md hover:opacity-95"
+          >
+            <span>{t('stop')}</span>
+            <Square className="size-3.5 fill-current stroke-[2]" aria-hidden="true" />
+          </button>
+        ) : (
+          <button
+            type="submit"
+            disabled={!input.trim()}
+            className="btn-press flex min-h-12 items-center justify-center gap-1.5 rounded-2xl bg-[var(--color-accent)] px-4 text-sm font-bold text-[var(--color-on-accent)] shadow-md hover:bg-[var(--color-accent-strong)] disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            <span>{t('send')}</span>
+            <Send className="size-4 stroke-[2.5]" aria-hidden="true" />
+          </button>
+        )}
       </form>
     </div>
   )
