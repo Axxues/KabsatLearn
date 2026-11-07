@@ -7,6 +7,12 @@ db.version(1).stores({
   progress: 'learnerId',
   telemetry: '++id, learnerId, ts, type',
 })
+db.version(2).stores({
+  capsules: 'id',
+  progress: 'learnerId',
+  telemetry: '++id, learnerId, ts, type',
+  profile: 'id',
+})
 
 function toHex(buffer) {
   return [...new Uint8Array(buffer)].map((b) => b.toString(16).padStart(2, '0')).join('')

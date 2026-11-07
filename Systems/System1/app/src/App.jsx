@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import capsule101 from './data/capsules/capsule-101.json'
-import capsule102 from './data/capsules/capsule-102.json'
+import { CAPSULE_BY_ID, CATALOG, SEEDED_IDS } from './data/catalogue.js'
 import { getCapsule, listCapsules, seedCapsule } from './lib/capsuleStore.js'
 import { importCapsuleFile, shareCapsule, downloadCapsule } from './lib/share.js'
 import { useOnline } from './lib/useOnline.js'
@@ -13,6 +12,8 @@ import KabsatAI from './ui/KabsatAI.jsx'
 import Dashboard from './ui/Dashboard.jsx'
 import StoryReader from './ui/StoryReader.jsx'
 import AnimatedSuccessCheck from './ui/AnimatedSuccessCheck.jsx'
+import Profile from './ui/Profile.jsx'
+import { loadProfile, saveProfile } from './lib/profile.js'
 import {
   BookOpen,
   Trophy,
@@ -22,21 +23,10 @@ import {
   Moon,
   X,
   Languages,
+  UserRound,
 } from 'lucide-react'
 
-const CATALOG = [capsule101, capsule102].map((capsule) => ({
-  id: capsule.id,
-  title: capsule.title,
-  subtitle: capsule.subtitle,
-  cards: capsule.cards.length,
-  questions: capsule.questions.length,
-  kb: Math.max(1, Math.round(JSON.stringify(capsule).length / 1024)),
-}))
-
-const CAPSULE_BY_ID = {
-  'capsule-101': capsule101,
-  'capsule-102': capsule102,
-}
+const TUTOR_CAPSULE = CAPSULE_BY_ID['capsule-101']
 
 function BottomNav({ tabs, tab, onSelect, aiProcessing }) {
   return (
@@ -92,7 +82,19 @@ function BottomNav({ tabs, tab, onSelect, aiProcessing }) {
 function MainApp() {
   const { lang, setLang, t } = useI18n()
   const online = useOnline()
-  const kabsatAi = useKabsatAiState({ capsule: capsule101, t, lang })
+  const [profile, setProfile] = useState(null)
+  const [showProfile, setShowProfile] = useState(false)
+
+  useEffect(() => {
+    let cancelled = false
+    loadProfile().then((stored) => {
+      if (!cancelled) setProfile(stored)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+  const kabsatAi = useKabsatAiState({ capsule: TUTOR_CAPSULE, t, lang })
   const [tab, setTab] = useState('hub')
   const [readerId, setReaderId] = useState(null)
   const [capsules, setCapsules] = useState([])
@@ -137,8 +139,12 @@ function MainApp() {
   useEffect(() => {
     let cancelled = false
     ;(async () => {
-      if (!(await getCapsule('capsule-101'))) {
-        await seedCapsule(capsule101)
+      for (const id of SEEDED_IDS) {
+        const capsule = CAPSULE_BY_ID[id]
+        if (!capsule) continue
+        if (!(await getCapsule(id))) {
+          await seedCapsule(capsule)
+        }
       }
       if (!cancelled) await refresh()
     })()
@@ -160,7 +166,7 @@ function MainApp() {
   }
 
   const download = async (id) => {
-    const capsule = id === 'capsule-102' ? capsule102 : null
+    const capsule = CAPSULE_BY_ID[id]
     if (!capsule) return
     setDownloadingId(id)
     await new Promise((resolve) => setTimeout(resolve, 1800))
@@ -194,8 +200,21 @@ function MainApp() {
     await refresh()
   }
 
+  if (showProfile) {
+    return (
+      <Profile
+        profile={profile ?? { id: 'me', nickname: '', sector: '', ageBand: '', municipality: '', language: 'tl', accessibility: {} }}
+        onSaved={(saved) => {
+          setProfile(saved)
+          if (saved.language) setLang(saved.language === 'tl' ? 'fil' : 'en')
+        }}
+        onClose={() => setShowProfile(false)}
+      />
+    )
+  }
+
   if (readerId) {
-    const capsule = [capsule101, capsule102].find((c) => c.id === readerId)
+    const capsule = CAPSULE_BY_ID[readerId]
     return <StoryReader capsule={capsule} onExit={() => setReaderId(null)} />
   }
 
@@ -238,7 +257,7 @@ function MainApp() {
   const quizCourses = (
     capsules.length > 0
       ? capsules
-      : CATALOG.map((course) => ({ ...course, installed: course.id === 'capsule-101' }))
+      : CATALOG.map((course) => ({ ...course, installed: SEEDED_IDS.includes(course.id) }))
   ).map((course) => ({
     id: course.id,
     title: course.title,
@@ -295,7 +314,7 @@ function MainApp() {
           paddingBottom: 'calc(var(--sab) + 4rem)',
         }}
       >
-        <KabsatAI capsule={capsule101} onExit={() => selectTab('hub')} {...kabsatAi} />
+        <KabsatAI capsule={TUTOR_CAPSULE} onExit={() => selectTab('hub')} {...kabsatAi} />
         {navigation}
       </div>
     )
@@ -356,6 +375,16 @@ function MainApp() {
               <Sun className="size-4.5 text-[var(--color-warn)] stroke-[2]" aria-hidden="true" />
             )}
           </button>
+
+          {/* Profile: local-only, opened from the top right */}
+          <button
+            type="button"
+            onClick={() => setShowProfile(true)}
+            aria-label="Profile"
+            className="btn-press flex size-9 items-center justify-center rounded-xl border border-[var(--color-line)] bg-[var(--color-surface)] text-[var(--color-muted)] hover:text-[var(--color-ink)]"
+          >
+            <UserRound className="size-4.5 stroke-[2]" aria-hidden="true" />
+          </button>
         </div>
       </header>
 
@@ -373,7 +402,7 @@ function MainApp() {
             downloadingId={downloadingId}
           />
         )}
-        {tab === 'dashboard' && <Dashboard />}
+        {tab === 'dashboard' && <Dashboard capsules={capsules} />}
 
         {/* Floating Toast Notification with Technique 06: Draw the win */}
         {toast && (
