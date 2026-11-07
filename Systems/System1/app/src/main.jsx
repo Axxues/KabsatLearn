@@ -23,9 +23,17 @@ if (Capacitor.isNativePlatform()) {
       .catch(() => {})
   }
   if (typeof caches !== 'undefined') {
+    // Only clear the service-worker precache. Clearing every cache also deletes
+    // the downloaded on-device model, forcing a 400 MB re-download on each launch.
     caches
       .keys()
-      .then((keys) => Promise.all(keys.map((key) => caches.delete(key))))
+      .then((keys) =>
+        Promise.all(
+          keys
+            .filter((key) => key.startsWith('workbox') || key.includes('precache'))
+            .map((key) => caches.delete(key)),
+        ),
+      )
       .catch(() => {})
   }
 } else {
@@ -39,16 +47,3 @@ createRoot(document.getElementById('root')).render(
     <App />
   </StrictMode>,
 )
-
-// TEMPORARY capability probe: remove after reading logcat.
-if (typeof navigator !== 'undefined' && navigator.gpu) {
-  navigator.gpu
-    .requestAdapter()
-    .then((adapter) => {
-      console.log('WEBGPU_PROBE adapter=' + (adapter ? 'YES' : 'NULL'))
-    })
-    .catch((error) => console.log('WEBGPU_PROBE error=' + error.message))
-} else {
-  console.log('WEBGPU_PROBE navigator.gpu=NONE')
-}
-console.log('WEBGPU_PROBE ua=' + navigator.userAgent)

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import capsule101 from './data/capsules/capsule-101.json'
 import capsule102 from './data/capsules/capsule-102.json'
 import { getCapsule, listCapsules, seedCapsule } from './lib/capsuleStore.js'
-import { importCapsuleFile, shareCapsule } from './lib/share.js'
+import { importCapsuleFile, shareCapsule, downloadCapsule } from './lib/share.js'
 import { useOnline } from './lib/useOnline.js'
 import { I18nProvider, useI18n } from './lib/i18n.jsx'
 import CourseHub from './ui/CourseHub.jsx'
@@ -94,6 +94,10 @@ function MainApp() {
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)
     localStorage.setItem('kabsat_theme', theme)
+    const meta = document.querySelector('meta[name="theme-color"]')
+    if (meta) {
+      meta.setAttribute('content', theme === 'dark' ? '#18191a' : '#1e40af')
+    }
   }, [theme])
 
   const toggleTheme = () => {
@@ -147,11 +151,21 @@ function MainApp() {
 
   const openReader = (id) => setReaderId(id)
 
-  const share = async (id) => {
-    const result = await shareCapsule(id)
-    if (result.method === 'share') setToast(t('shareSuccess'))
-    else if (result.method === 'download') setToast(t('saveSuccess'))
-    else setToast(t('shareCancel'))
+  const share = async (id, mode = 'download') => {
+    try {
+      if (mode === 'download') {
+        const result = await downloadCapsule(id)
+        if (result.ok) setToast(t('saveSuccess'))
+        return result
+      }
+      const result = await shareCapsule(id)
+      if (result.method === 'share') setToast(t('shareSuccess'))
+      else if (result.method === 'download') setToast(t('saveSuccess'))
+      else setToast(t('shareCancel'))
+      return result
+    } catch {
+      setToast(t('shareError'))
+    }
   }
 
   const importFile = async (file) => {

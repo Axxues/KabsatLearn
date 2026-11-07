@@ -67,7 +67,7 @@ export async function explain({ query, chunks, language, onToken }) {
     ],
     stream: true,
     temperature: 0.2,
-    max_tokens: 90,
+    max_tokens: 60,
   })
 
   let text = ''

@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useI18n } from '../lib/i18n.jsx'
 import {
   ShieldCheck,
@@ -12,6 +13,8 @@ import {
   UploadCloud,
   MapPin,
   Loader2,
+  X,
+  ChevronRight,
 } from 'lucide-react'
 
 function CapsuleCard({ capsule, onOpen, onDownload, onShare, downloading }) {
@@ -118,7 +121,7 @@ function CapsuleCard({ capsule, onOpen, onDownload, onShare, downloading }) {
         )}
         <button
           type="button"
-          onClick={() => onShare(capsule.id)}
+          onClick={() => onShare(capsule)}
           disabled={!installed}
           title={t('passTooltip')}
           aria-label={t('passAria', { title: capsule.title })}
@@ -141,6 +144,7 @@ export default function CourseHub({
   downloadingId,
 }) {
   const { t } = useI18n()
+  const [shareTarget, setShareTarget] = useState(null)
 
   if (capsules.length === 0) {
     return (
@@ -227,7 +231,7 @@ export default function CourseHub({
               capsule={capsule}
               onOpen={onOpen}
               onDownload={onDownload}
-              onShare={onShare}
+              onShare={setShareTarget}
               downloading={downloadingId === capsule.id}
             />
           ))}
@@ -255,12 +259,105 @@ export default function CourseHub({
                 capsule={capsule}
                 onOpen={onOpen}
                 onDownload={onDownload}
-                onShare={onShare}
+                onShare={setShareTarget}
                 downloading={downloadingId === capsule.id}
               />
             ))}
           </ul>
         </section>
+      )}
+
+      {/* Share Options Modal / Bottom Sheet */}
+      {shareTarget && (
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 p-0 sm:items-center sm:p-4 backdrop-blur-xs transition-opacity"
+          onClick={() => setShareTarget(null)}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="share-modal-title"
+        >
+          <div
+            className="w-full max-w-[430px] rounded-t-3xl sm:rounded-3xl border border-[var(--color-line)] bg-[var(--color-surface)] p-5 shadow-2xl transition-all animate-pop-in"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Drag Handle on mobile */}
+            <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-[var(--color-line)] sm:hidden" aria-hidden="true" />
+
+            {/* Modal Header */}
+            <div className="flex items-start justify-between gap-3 border-b border-[var(--color-line)] pb-4">
+              <div className="flex items-center gap-3">
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[var(--color-accent-subtle)] text-[var(--color-accent)]">
+                  <Share2 className="size-5 stroke-[2.2]" aria-hidden="true" />
+                </div>
+                <div className="min-w-0">
+                  <h3 id="share-modal-title" className="text-base font-bold text-[var(--color-ink)]">
+                    {t('shareModalTitle')}
+                  </h3>
+                  <p className="truncate text-xs font-medium text-[var(--color-muted)]">
+                    {shareTarget.title}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShareTarget(null)}
+                className="btn-press flex size-8 items-center justify-center rounded-lg text-[var(--color-muted)] hover:bg-[var(--color-surface-sunken)] hover:text-[var(--color-ink)]"
+                aria-label={t('shareModalClose')}
+              >
+                <X className="size-4 stroke-[2.5]" aria-hidden="true" />
+              </button>
+            </div>
+
+            {/* Options List */}
+            <div className="py-4 space-y-2">
+              <p className="text-[11px] font-bold uppercase tracking-wider text-[var(--color-muted)]">
+                {t('shareModalSubtitle')}
+              </p>
+
+              {/* Option: Download .kabsat file */}
+              <button
+                type="button"
+                onClick={() => {
+                  const target = shareTarget
+                  setShareTarget(null)
+                  onShare(target.id, 'download')
+                }}
+                className="btn-press card-tactile flex w-full items-center justify-between gap-3.5 rounded-2xl border-2 border-[var(--color-accent)]/20 bg-[var(--color-surface-hover)] p-4 text-left transition-colors hover:border-[var(--color-accent)] hover:bg-[var(--color-accent-subtle)]/40"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[var(--color-accent)] text-white shadow-xs">
+                    <Download className="size-5 stroke-[2.5]" aria-hidden="true" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-bold text-[var(--color-ink)]">
+                        {t('shareOptionDownloadTitle')}
+                      </p>
+                      <span className="rounded-full bg-[var(--color-accent-subtle)] px-2 py-0.5 text-[10px] font-extrabold text-[var(--color-accent)]">
+                        .kabsat
+                      </span>
+                    </div>
+                    <p className="mt-0.5 text-xs text-[var(--color-muted)]">
+                      {t('shareOptionDownloadSub')}
+                    </p>
+                  </div>
+                </div>
+                <ChevronRight className="size-4 shrink-0 text-[var(--color-accent)] stroke-[2.5]" aria-hidden="true" />
+              </button>
+            </div>
+
+            {/* Modal Cancel Button */}
+            <div className="pt-2">
+              <button
+                type="button"
+                onClick={() => setShareTarget(null)}
+                className="btn-press flex min-h-11 w-full items-center justify-center rounded-xl border border-[var(--color-line)] bg-[var(--color-surface)] text-xs font-bold text-[var(--color-muted)] hover:bg-[var(--color-surface-sunken)] hover:text-[var(--color-ink)]"
+              >
+                {t('shareModalCancel')}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )

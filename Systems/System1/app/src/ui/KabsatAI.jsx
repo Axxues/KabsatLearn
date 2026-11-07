@@ -13,6 +13,7 @@ import {
   Volume2,
   Send,
   Sparkles,
+  Zap,
 } from 'lucide-react'
 
 function Bubble({ message, canExplain, onExplain }) {
@@ -118,6 +119,10 @@ export default function KabsatAI({ capsule, onExit }) {
   ])
   const [input, setInput] = useState('')
   const [model, setModel] = useState({ state: 'idle', progress: 0 })
+  const [known, setKnown] = useState(() => {
+    if (typeof localStorage === 'undefined') return false
+    return localStorage.getItem('kabsat_llm_cached') === '1'
+  })
   const messagesEndRef = useRef(null)
 
   const prepareModel = async () => {
@@ -126,6 +131,8 @@ export default function KabsatAI({ capsule, onExit }) {
       const { loadEngine } = await llm()
       await loadEngine((report) => setModel({ state: 'loading', progress: report.progress ?? 0 }))
       setModel({ state: 'ready', progress: 1 })
+      setKnown(true)
+      localStorage.setItem('kabsat_llm_cached', '1')
     } catch {
       setModel({ state: 'error', progress: 0 })
     }
@@ -136,7 +143,7 @@ export default function KabsatAI({ capsule, onExit }) {
     const question = [...messages.slice(0, index)].reverse().find((entry) => entry.role === 'user')
     if (!target || !question) return
 
-    const { language, chunks } = contextFor(question.text, capsule)
+    const { language, chunks } = contextFor(question.text, capsule, 1)
     setMessages((current) => [
       ...current,
       {
@@ -236,8 +243,9 @@ export default function KabsatAI({ capsule, onExit }) {
       </header>
 
       {model.state === 'ready' ? (
-        <div className="border-b border-[var(--color-line)] bg-[var(--color-accent-subtle)] px-4 py-1.5 text-[11px] font-bold text-[var(--color-accent)]">
-          ⚡ {lang === 'en' ? 'On-device AI ready · works offline' : 'On-device AI handa · gumagana offline'}
+        <div className="inline-flex w-full items-center gap-1.5 border-b border-[var(--color-line)] bg-[var(--color-accent-subtle)] px-4 py-1.5 text-[11px] font-bold text-[var(--color-accent)]">
+          <Zap className="size-3.5 stroke-[2]" aria-hidden="true" />
+          {lang === 'en' ? 'On-device AI ready · works offline' : 'On-device AI handa · gumagana offline'}
         </div>
       ) : (
         <div className="flex items-center gap-2 border-b border-[var(--color-line)] bg-[var(--color-surface)] px-4 py-2">
@@ -249,9 +257,9 @@ export default function KabsatAI({ capsule, onExit }) {
           >
             {model.state === 'loading'
               ? `${lang === 'en' ? 'Downloading' : 'Dina-download'} ${Math.round(model.progress * 100)}%`
-              : lang === 'en'
-                ? 'Download on-device AI (~400 MB)'
-                : 'I-download ang AI (~400 MB)'}
+              : known
+                ? lang === 'en' ? 'Load on-device AI' : 'I-load ang AI'
+                : lang === 'en' ? 'Download on-device AI (~400 MB)' : 'I-download ang AI (~400 MB)'}
           </button>
           {model.state === 'error' && (
             <span className="text-[11px] font-semibold text-[var(--color-warn)]">

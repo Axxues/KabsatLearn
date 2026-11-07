@@ -233,10 +233,6 @@ export default function QuizArena({ capsule, onExit, onRunningChange }) {
             <ArrowLeft className="size-4 stroke-[2.5]" aria-hidden="true" />
             {t('back')}
           </button>
-          <span className="inline-flex items-center gap-1 rounded-full bg-[var(--color-accent-subtle)] px-2.5 py-1 text-xs font-bold text-[var(--color-accent)]">
-            <Zap className="size-3.5 fill-[var(--color-accent)]" aria-hidden="true" />
-            {t('offlineQuizBadge')}
-          </span>
         </header>
 
         <div className="my-auto py-6 text-center space-y-4">

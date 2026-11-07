@@ -43,6 +43,13 @@ export async function shareCapsule(id) {
   return { ok: true, method: 'download' }
 }
 
+/** Directly download the capsule as a .kabsat file. */
+export async function downloadCapsule(id) {
+  const file = await capsuleFile(id)
+  downloadFile(file)
+  return { ok: true, method: 'download', file }
+}
+
 /** Import a `.kabsat` file chosen by the learner. */
 export async function importCapsuleFile(file) {
   return installCapsule(file)

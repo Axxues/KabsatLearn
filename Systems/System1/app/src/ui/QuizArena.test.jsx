@@ -73,6 +73,15 @@ describe('QuizArena two-player header', () => {
     vi.useRealTimers()
   })
 
+  test('intro header renders back button and no Offline Quiz badge', () => {
+    const header = container.querySelector('header')
+    expect(header).not.toBeNull()
+    const backButton = header.querySelector('button')
+    expect(backButton).not.toBeNull()
+    expect(header.textContent).not.toMatch(/Offline Quiz/i)
+    expect(header.querySelector('svg.lucide-zap')).toBeNull()
+  })
+
   test('turn label has a leading Users icon and no emoji', () => {
     const passButton = [...container.querySelectorAll('button')].find((button) =>
       button.textContent.replace(/\s+/g, ' ').trim().startsWith('Pass and Play')
@@ -111,6 +120,7 @@ describe('QuizArena two-player header', () => {
       const correctTile = [...container.querySelectorAll('main button')].find((button) =>
         button.textContent.includes(capsule.questions[question].options[capsule.questions[question].answer])
       )
+      expect(correctTile, `correct tile for question ${question + 1}`).toBeTruthy()
       click(correctTile)
       if (question === 0) {
         act(() => {
