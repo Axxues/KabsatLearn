@@ -391,6 +391,9 @@ export default function CourseHub({
           src="/logo.svg"
           alt=""
           aria-hidden="true"
+          width="96"
+          height="96"
+          style={{ width: '6rem', height: '6rem' }}
           className="pointer-events-none absolute -bottom-2 -right-2 size-24 opacity-25 filter brightness-200"
         />
       </section>
