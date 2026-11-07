@@ -10,7 +10,6 @@ import {
   TrendingUp,
   MapPin,
   ShieldCheck,
-  AlertCircle,
 } from 'lucide-react'
 
 const BARANGAYS = [
