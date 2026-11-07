@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { speak } from '../lib/tts.js'
 import { useI18n } from '../lib/i18n.jsx'
+import { clearCourseProgress, getCoursePage, saveCoursePage } from '../lib/courseProgress.js'
 import AnimatedSuccessCheck from './AnimatedSuccessCheck.jsx'
 import {
   ArrowLeft,
@@ -112,10 +113,22 @@ function Drill({ drill, onComplete }) {
 
 export default function StoryReader({ capsule, onExit }) {
   const { lang, t } = useI18n()
-  const [index, setIndex] = useState(0)
+  const [index, setIndex] = useState(() => getCoursePage(capsule?.id, capsule?.cards?.length || 0))
   const [isPlayingAudio, setIsPlayingAudio] = useState(false)
-  const card = capsule.cards[index]
-  const isLast = index === capsule.cards.length - 1
+  const card = capsule?.cards?.[index] || capsule?.cards?.[0]
+  const totalCards = capsule?.cards?.length || 0
+  const isLast = index === totalCards - 1
+
+  const goToPage = (nextIndex) => {
+    const clamped = Math.max(0, Math.min(nextIndex, totalCards - 1))
+    setIndex(clamped)
+    saveCoursePage(capsule?.id, clamped)
+  }
+
+  const handleFinish = () => {
+    clearCourseProgress(capsule?.id)
+    onExit()
+  }
 
   const handleSpeak = () => {
     setIsPlayingAudio(true)
@@ -237,7 +250,7 @@ export default function StoryReader({ capsule, onExit }) {
           {card.drill && (
             <Drill
               drill={card.drill}
-              onComplete={() => (isLast ? onExit() : setIndex(index + 1))}
+              onComplete={() => (isLast ? handleFinish() : goToPage(index + 1))}
             />
           )}
         </article>
@@ -249,7 +262,7 @@ export default function StoryReader({ capsule, onExit }) {
           <div className="flex gap-2.5">
             <button
               type="button"
-              onClick={() => setIndex(Math.max(0, index - 1))}
+              onClick={() => goToPage(index - 1)}
               disabled={index === 0}
               className="btn-press flex min-h-12 items-center justify-center gap-1.5 rounded-xl border border-[var(--color-line)] bg-[var(--color-surface)] px-4 text-sm font-bold text-[var(--color-muted)] hover:text-[var(--color-ink)] disabled:opacity-30 disabled:cursor-not-allowed"
             >
@@ -258,7 +271,7 @@ export default function StoryReader({ capsule, onExit }) {
             </button>
             <button
               type="button"
-              onClick={() => (isLast ? onExit() : setIndex(index + 1))}
+              onClick={() => (isLast ? handleFinish() : goToPage(index + 1))}
               className="btn-press flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-[var(--color-accent)] px-4 text-sm font-bold text-[var(--color-on-accent)] shadow-md hover:bg-[var(--color-accent-strong)]"
             >
               <span>{isLast ? t('finishCourse') : t('nextLesson')}</span>

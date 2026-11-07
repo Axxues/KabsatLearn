@@ -15,6 +15,7 @@ import {
   Sparkles,
   Zap,
   Square,
+  RotateCcw,
 } from 'lucide-react'
 
 function Bubble({ message, canExplain, onExplain }) {
@@ -139,6 +140,7 @@ export default function KabsatAI({
   ask: propAsk,
   explainAt: propExplainAt,
   stop: propStop,
+  resetSession: propResetSession,
 }) {
   const { t, lang, translations } = useI18n()
   const fallback = useKabsatAiState({ capsule, t, lang })
@@ -153,6 +155,7 @@ export default function KabsatAI({
   const ask = propAsk ?? fallback.ask
   const explainAt = propExplainAt ?? fallback.explainAt
   const stop = propStop ?? fallback.stop
+  const resetSession = propResetSession ?? fallback.resetSession
   const messagesEndRef = useRef(null)
 
   // Warm the model when the tab opens if it is already downloaded. Loading it
@@ -193,14 +196,29 @@ export default function KabsatAI({
 
       {/* Header */}
       <header className="safe-sticky-header z-30 flex items-center justify-between border-b border-[var(--color-line)] bg-[var(--color-surface)]/95 px-4 py-3 backdrop-blur-md">
-        <button
-          type="button"
-          onClick={onExit}
-          className="btn-press flex min-h-10 items-center gap-1.5 rounded-xl border border-[var(--color-line)] bg-[var(--color-surface)] px-3 text-xs font-bold text-[var(--color-accent)] hover:bg-[var(--color-accent-subtle)]"
-        >
-          <ArrowLeft className="size-4 stroke-[2.5]" aria-hidden="true" />
-          {t('back')}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={onExit}
+            className="btn-press flex min-h-10 items-center gap-1.5 rounded-xl border border-[var(--color-line)] bg-[var(--color-surface)] px-3 text-xs font-bold text-[var(--color-accent)] hover:bg-[var(--color-accent-subtle)]"
+          >
+            <ArrowLeft className="size-4 stroke-[2.5]" aria-hidden="true" />
+            <span>{t('back')}</span>
+          </button>
+
+          {messages.length > 1 && (
+            <button
+              type="button"
+              onClick={resetSession}
+              title={t('clearSessionTooltip')}
+              aria-label={t('newChat')}
+              className="btn-press flex min-h-10 items-center gap-1.5 rounded-xl border border-[var(--color-line)] bg-[var(--color-surface)] px-2.5 text-xs font-bold text-[var(--color-muted)] hover:text-[var(--color-ink)] hover:border-[var(--color-accent)] transition-all"
+            >
+              <RotateCcw className="size-3.5 stroke-[2.5]" aria-hidden="true" />
+              <span>{t('newChat')}</span>
+            </button>
+          )}
+        </div>
 
         <div className="text-right">
           <div className="flex items-center justify-end gap-1.5">
