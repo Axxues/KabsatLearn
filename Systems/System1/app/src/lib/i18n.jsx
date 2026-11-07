@@ -31,6 +31,8 @@ const TRANSLATIONS = {
     onThisPhone: 'Nasa teleponong ito',
     readyTag: 'Handa',
     readyCountTag: '{n} handa na',
+    courseCountSingle: '{n} kurso',
+    courseCountPlural: '{n} mga kurso',
     availableHeading: 'Maaaring i-download kapag may Wi-Fi',
     availableCountTag: '{n} available',
     cardsMeta: '{n} aralin',
@@ -81,6 +83,8 @@ const TRANSLATIONS = {
     quizTitle: 'Quiz Arena',
     quizSubtitle:
       '{count} tanong. Mabilis at tamang sagot para sa mas mataas na score at streak multiplier!',
+    chooseCourse: 'Pumili ng kurso',
+    quizCourseLocked: 'I-download sa Aralin',
     stat15s: '15 Segundo',
     stat15sSub: 'Bawat tanong',
     statAdaptive: 'Adaptive',
@@ -122,6 +126,7 @@ const TRANSLATIONS = {
     listenMessage: 'Pakinggan',
     askPlaceholder: 'Itanong kay Kabsat…',
     send: 'Send',
+    stop: 'Itigil',
     quickChips: [
       'Paano kung hinihingi ang OTP ko?',
       'Peke ba ang link na ito?',
@@ -190,6 +195,8 @@ const TRANSLATIONS = {
     onThisPhone: 'On this device',
     readyTag: 'Ready',
     readyCountTag: '{n} ready',
+    courseCountSingle: '{n} course',
+    courseCountPlural: '{n} courses',
     availableHeading: 'Available to download when online',
     availableCountTag: '{n} available',
     cardsMeta: '{n} lessons',
@@ -240,6 +247,8 @@ const TRANSLATIONS = {
     quizTitle: 'Quiz Arena',
     quizSubtitle:
       '{count} questions. Answer fast and accurately to build high score streaks and combo multipliers!',
+    chooseCourse: 'Choose a course',
+    quizCourseLocked: 'Download in Aralin',
     stat15s: '15 Seconds',
     stat15sSub: 'Per question',
     statAdaptive: 'Adaptive',
@@ -281,6 +290,7 @@ const TRANSLATIONS = {
     listenMessage: 'Listen',
     askPlaceholder: 'Ask Kabsat a question…',
     send: 'Send',
+    stop: 'Stop',
     quickChips: [
       'What if someone asks for my OTP?',
       'Is this link fake or a scam?',

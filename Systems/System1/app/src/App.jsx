@@ -5,6 +5,7 @@ import { getCapsule, listCapsules, seedCapsule } from './lib/capsuleStore.js'
 import { importCapsuleFile, shareCapsule, downloadCapsule } from './lib/share.js'
 import { useOnline } from './lib/useOnline.js'
 import { I18nProvider, useI18n } from './lib/i18n.jsx'
+import { useKabsatAiState } from './lib/useKabsatAiState.js'
 import CourseHub from './ui/CourseHub.jsx'
 import OfflineBanner from './ui/OfflineBanner.jsx'
 import QuizArena from './ui/QuizArena.jsx'
@@ -32,7 +33,12 @@ const CATALOG = [capsule101, capsule102].map((capsule) => ({
   kb: Math.max(1, Math.round(JSON.stringify(capsule).length / 1024)),
 }))
 
-function BottomNav({ tabs, tab, onSelect }) {
+const CAPSULE_BY_ID = {
+  'capsule-101': capsule101,
+  'capsule-102': capsule102,
+}
+
+function BottomNav({ tabs, tab, onSelect, aiProcessing }) {
   return (
     <nav
       aria-label="Main Navigation"
@@ -42,6 +48,7 @@ function BottomNav({ tabs, tab, onSelect }) {
       {tabs.map((item) => {
         const active = item.id === tab
         const Icon = item.icon
+        const isTutorProcessing = item.id === 'tutor' && aiProcessing
         return (
           <button
             key={item.id}
@@ -51,17 +58,26 @@ function BottomNav({ tabs, tab, onSelect }) {
             className={`btn-press flex flex-col items-center justify-center gap-1 py-1.5 text-xs font-medium transition-colors ${
               active
                 ? 'text-[var(--color-accent)]'
-                : 'text-[var(--color-muted)] hover:text-[var(--color-ink)]'
+                : isTutorProcessing
+                  ? 'text-[var(--color-accent)]'
+                  : 'text-[var(--color-muted)] hover:text-[var(--color-ink)]'
             }`}
           >
             <div
               className={`flex size-8 items-center justify-center rounded-xl transition-all duration-150 ${
                 active
                   ? 'bg-[var(--color-accent-subtle)] text-[var(--color-accent)] shadow-xs scale-105'
-                  : 'text-[var(--color-muted)]'
+                  : isTutorProcessing
+                    ? 'bg-[var(--color-accent-subtle)]/60 text-[var(--color-accent)] shadow-xs'
+                    : 'text-[var(--color-muted)]'
               }`}
             >
-              <Icon className="size-4.5 stroke-[2]" aria-hidden="true" />
+              <Icon
+                className={`size-4.5 stroke-[2] ${
+                  isTutorProcessing ? 'animate-spin origin-center text-[var(--color-accent)]' : ''
+                }`}
+                aria-hidden="true"
+              />
             </div>
             <span className={`text-[11px] leading-tight ${active ? 'font-bold' : 'font-medium'}`}>
               {item.label}
@@ -76,12 +92,16 @@ function BottomNav({ tabs, tab, onSelect }) {
 function MainApp() {
   const { lang, setLang, t } = useI18n()
   const online = useOnline()
+  const kabsatAi = useKabsatAiState({ capsule: capsule101, t, lang })
   const [tab, setTab] = useState('hub')
   const [readerId, setReaderId] = useState(null)
   const [capsules, setCapsules] = useState([])
   const [downloadingId, setDownloadingId] = useState(null)
   const [toast, setToast] = useState(null)
   const [quizRunning, setQuizRunning] = useState(false)
+  const [quizCourseId, setQuizCourseId] = useState(() =>
+    typeof window === 'undefined' ? null : localStorage.getItem('kabsat_quiz_course')
+  )
   const [theme, setTheme] = useState(() => {
     if (typeof window !== 'undefined') {
       const stored = localStorage.getItem('kabsat_theme')
@@ -206,7 +226,38 @@ function MainApp() {
     },
   ]
 
-  const navigation = <BottomNav tabs={tabs} tab={tab} onSelect={selectTab} />
+  const navigation = (
+    <BottomNav
+      tabs={tabs}
+      tab={tab}
+      onSelect={selectTab}
+      aiProcessing={kabsatAi.isProcessing}
+    />
+  )
+
+  const quizCourses = (
+    capsules.length > 0
+      ? capsules
+      : CATALOG.map((course) => ({ ...course, installed: course.id === 'capsule-101' }))
+  ).map((course) => ({
+    id: course.id,
+    title: course.title,
+    questions: course.questions,
+    installed: course.installed,
+    capsule: CAPSULE_BY_ID[course.id],
+  }))
+
+  const activeQuizCourse =
+    quizCourses.find((course) => course.id === quizCourseId && course.installed) ||
+    quizCourses.find((course) => course.installed) ||
+    quizCourses[0]
+
+  const selectQuizCourse = (id) => {
+    const course = quizCourses.find((candidate) => candidate.id === id && candidate.installed)
+    if (!course) return
+    setQuizCourseId(id)
+    localStorage.setItem('kabsat_quiz_course', id)
+  }
 
   const pageShell =
     'mx-auto flex min-h-dvh max-w-[430px] flex-col bg-[var(--color-bg)] text-[var(--color-ink)] shadow-2xl transition-colors duration-200'
@@ -221,7 +272,12 @@ function MainApp() {
         }}
       >
         <QuizArena
-          capsule={capsule101}
+          key={activeQuizCourse.id}
+          capsule={activeQuizCourse.capsule}
+          courses={quizCourses}
+          selectedCourseId={activeQuizCourse.id}
+          onSelectCourse={selectQuizCourse}
+          onLockedCourse={() => selectTab('hub')}
           onExit={() => selectTab('hub')}
           onRunningChange={setQuizRunning}
         />
@@ -233,13 +289,13 @@ function MainApp() {
   if (tab === 'tutor') {
     return (
       <div
-        className={pageShell}
+        className="mx-auto flex h-dvh max-w-[430px] flex-col bg-[var(--color-bg)] text-[var(--color-ink)] shadow-2xl transition-colors duration-200 overflow-hidden"
         style={{
           paddingTop: 'var(--sat)',
-          paddingBottom: 'calc(var(--sab) + 3.75rem)',
+          paddingBottom: 'calc(var(--sab) + 4rem)',
         }}
       >
-        <KabsatAI capsule={capsule101} onExit={() => selectTab('hub')} />
+        <KabsatAI capsule={capsule101} onExit={() => selectTab('hub')} {...kabsatAi} />
         {navigation}
       </div>
     )

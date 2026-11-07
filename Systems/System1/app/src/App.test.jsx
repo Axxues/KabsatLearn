@@ -124,6 +124,22 @@ describe('bottom navigation', () => {
     expect(container.textContent).toContain('Kabsat AI')
   })
 
+  test('Kabsat AI input is contained and not overlapped by bottom navigation', () => {
+    click(buttonStartingWith('Kabsat AI'))
+
+    const input = container.querySelector('#ask')
+    expect(input).not.toBeNull()
+    const form = input.closest('form')
+    expect(form).not.toBeNull()
+    expect(form.className).not.toContain('sticky bottom-0')
+    expect(form.className).toContain('shrink-0')
+
+    const kabsatAiRoot = form.parentElement
+    expect(kabsatAiRoot.className).toContain('flex-1')
+    expect(kabsatAiRoot.className).toContain('min-h-0')
+    expect(kabsatAiRoot.className).not.toContain('h-dvh')
+  })
+
   test('stays visible on the quiz intro and hides only while the quiz runs', () => {
     click(buttonStartingWith('Quiz'))
     expect(nav()).not.toBeNull()

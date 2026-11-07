@@ -3,7 +3,6 @@ import { useI18n } from '../lib/i18n.jsx'
 import {
   ShieldCheck,
   Briefcase,
-  Check,
   BookOpen,
   HelpCircle,
   Zap,
@@ -53,12 +52,7 @@ function CapsuleCard({ capsule, onOpen, onDownload, onShare, downloading }) {
           </p>
         </div>
 
-        {installed ? (
-          <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-[var(--color-good)]/30 bg-[var(--color-good-subtle)] px-2.5 py-1 text-[11px] font-bold text-[var(--color-good)]">
-            <Check className="size-3 stroke-[3]" aria-hidden="true" />
-            {t('readyTag')}
-          </span>
-        ) : (
+        {!installed && (
           <span className="shrink-0 rounded-full border border-[var(--color-line)] bg-[var(--color-surface-sunken)] px-2.5 py-1 text-[11px] font-semibold tabular-nums text-[var(--color-muted)]">
             {capsule.kb} KB
           </span>
@@ -221,7 +215,9 @@ export default function CourseHub({
             {t('onThisPhone')}
           </h2>
           <span className="rounded-full bg-[var(--color-good-subtle)] px-2 py-0.5 text-[11px] font-bold text-[var(--color-good)]">
-            {t('readyCountTag', { n: installed.length })}
+            {installed.length === 1
+              ? t('courseCountSingle', { n: installed.length })
+              : t('courseCountPlural', { n: installed.length })}
           </span>
         </div>
         <ul className="mt-2 space-y-3">
@@ -267,22 +263,19 @@ export default function CourseHub({
         </section>
       )}
 
-      {/* Share Options Modal / Bottom Sheet */}
+      {/* Share Options Modal - Centered Dialog */}
       {shareTarget && (
         <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 p-0 sm:items-center sm:p-4 backdrop-blur-xs transition-opacity"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs transition-opacity"
           onClick={() => setShareTarget(null)}
           role="dialog"
           aria-modal="true"
           aria-labelledby="share-modal-title"
         >
           <div
-            className="w-full max-w-[430px] rounded-t-3xl sm:rounded-3xl border border-[var(--color-line)] bg-[var(--color-surface)] p-5 shadow-2xl transition-all animate-pop-in"
+            className="relative w-full max-w-[390px] rounded-3xl border border-[var(--color-line)] bg-[var(--color-surface)] p-5 shadow-2xl transition-all animate-pop-in"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Drag Handle on mobile */}
-            <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-[var(--color-line)] sm:hidden" aria-hidden="true" />
-
             {/* Modal Header */}
             <div className="flex items-start justify-between gap-3 border-b border-[var(--color-line)] pb-4">
               <div className="flex items-center gap-3">

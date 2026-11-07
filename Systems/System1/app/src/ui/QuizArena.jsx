@@ -25,10 +25,19 @@ import {
   Flame,
   X,
   TrendingUp,
+  ShieldCheck,
+  Briefcase,
+  Lock,
 } from 'lucide-react'
 
 const LIMIT_MS = 15000
 const REVEAL_MS = 1600
+
+const COURSE_ICONS = {
+  'capsule-101': ShieldCheck,
+  'capsule-102': Briefcase,
+}
+
 
 const TILES = [
   {
@@ -105,7 +114,15 @@ function Tile({ tile, index, text, state, disabled, onPick }) {
   )
 }
 
-export default function QuizArena({ capsule, onExit, onRunningChange }) {
+export default function QuizArena({
+  capsule,
+  onExit,
+  onRunningChange,
+  courses = [],
+  selectedCourseId,
+  onSelectCourse,
+  onLockedCourse,
+}) {
   const { t } = useI18n()
   const bank = capsule.questions
   const [players, setPlayers] = useState(1)
@@ -236,6 +253,61 @@ export default function QuizArena({ capsule, onExit, onRunningChange }) {
         </header>
 
         <div className="my-auto py-6 text-center space-y-4">
+          {courses.length > 0 && (
+            <section className="space-y-1.5 text-left">
+              <p className="text-[10px] font-extrabold uppercase tracking-widest text-[var(--color-muted)]">
+                {t('chooseCourse')}
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                {courses.map((course) => {
+                  const Icon = COURSE_ICONS[course.id] || ShieldCheck
+                  const selected = course.id === selectedCourseId
+                  return (
+                    <button
+                      key={course.id}
+                      type="button"
+                      aria-pressed={course.installed ? selected : undefined}
+                      onClick={() =>
+                        course.installed
+                          ? onSelectCourse?.(course.id)
+                          : (onLockedCourse ?? onExit)?.()
+                      }
+                      className={`btn-press flex flex-col items-start gap-1 rounded-xl border-2 p-2.5 text-left transition-colors ${
+                        !course.installed
+                          ? 'border-dashed border-[var(--color-line)] bg-[var(--color-surface-sunken)] hover:border-[var(--color-accent)]'
+                          : selected
+                            ? 'border-[var(--color-accent)] bg-[var(--color-accent-subtle)]'
+                            : 'border-[var(--color-line)] bg-[var(--color-surface)] hover:border-[var(--color-accent)]'
+                      }`}
+                    >
+                      <span
+                        className={
+                          course.installed && selected
+                            ? 'text-[var(--color-accent)]'
+                            : 'text-[var(--color-muted)]'
+                        }
+                      >
+                        {course.installed ? (
+                          <Icon className="size-3.5 stroke-[2.5]" aria-hidden="true" />
+                        ) : (
+                          <Lock className="size-3.5 stroke-[2.5]" aria-hidden="true" />
+                        )}
+                      </span>
+                      <span className="text-[11px] font-bold leading-snug text-[var(--color-ink)]">
+                        {course.title}
+                      </span>
+                      <span className="text-[10px] text-[var(--color-muted)]">
+                        {course.installed
+                          ? t('questionsMeta', { n: course.questions })
+                          : t('quizCourseLocked')}
+                      </span>
+                    </button>
+                  )
+                })}
+              </div>
+            </section>
+          )}
+
           <div className="mx-auto flex size-18 items-center justify-center rounded-3xl bg-gradient-to-tr from-[var(--color-accent)] to-[var(--color-terracotta)] text-white shadow-lg shadow-[var(--color-accent)]/20 animate-bounce">
             <Trophy className="size-9 stroke-[2.2]" aria-hidden="true" />
           </div>
