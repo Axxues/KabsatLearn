@@ -9,6 +9,8 @@ import {
 } from '../lib/adaptive.js'
 import { playCorrect, playLevelUp, playTick, playWrong } from '../lib/audio.js'
 import { queueEvent } from '../lib/telemetry.js'
+import RollingNumber from './RollingNumber.jsx'
+import AnimatedSuccessCheck from './AnimatedSuccessCheck.jsx'
 import {
   ArrowLeft,
   Trophy,
@@ -18,7 +20,6 @@ import {
   Users,
   RotateCcw,
   Check,
-  Sparkles,
   Lightbulb,
   Flame,
   X,
@@ -354,7 +355,7 @@ export default function QuizArena({ capsule, onExit }) {
                 </div>
                 <div className="text-right">
                   <span className="text-2xl font-black tabular-nums text-[var(--color-ink)]">
-                    {score}
+                    <RollingNumber value={score} />
                   </span>
                   <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-muted)]">
                     puntos
@@ -437,7 +438,7 @@ export default function QuizArena({ capsule, onExit }) {
               {BAND_LABELS[state.band] || state.band}
             </span>
             <span className="rounded-lg bg-[var(--color-surface-sunken)] px-2 py-0.5 font-black tabular-nums text-[var(--color-ink)]">
-              {scores[current]} pts
+              <RollingNumber value={scores[current]} /> pts
             </span>
           </div>
         </div>
@@ -481,8 +482,8 @@ export default function QuizArena({ capsule, onExit }) {
         </div>
       </header>
 
-      {/* Main Question & Kahoot Tiles Area */}
-      <main className="flex flex-1 flex-col justify-between px-4 py-4 space-y-4">
+      {/* Main Question & Kahoot Tiles Area with Technique 05: Fast, then slow */}
+      <main key={question.id} className="flex flex-1 flex-col justify-between px-4 py-4 space-y-4 page-enter">
         {/* Question Prompt Card */}
         <div className="flex min-h-[90px] items-center justify-center rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface)] p-4 text-center shadow-sm">
           <h1 className="text-lg font-extrabold leading-snug text-[var(--color-ink)]">
@@ -513,7 +514,7 @@ export default function QuizArena({ capsule, onExit }) {
           })}
         </div>
 
-        {/* Reveal Feedback Banner */}
+        {/* Reveal Feedback Banner with Technique 06: Draw the win */}
         {phase === 'reveal' && (
           <div
             className={`rounded-2xl border p-3.5 text-center shadow-md animate-pop-in ${
@@ -525,7 +526,7 @@ export default function QuizArena({ capsule, onExit }) {
           >
             {result?.isCorrect ? (
               <div className="flex items-center justify-center gap-2">
-                <Sparkles className="size-4 stroke-[2.5]" aria-hidden="true" />
+                <AnimatedSuccessCheck className="size-5" circleColor="var(--color-good)" tickColor="var(--color-good)" />
                 <p className="text-sm font-extrabold">
                   Tama! +{lastPoints} points!
                 </p>

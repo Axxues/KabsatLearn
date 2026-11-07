@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
 import { masteryByCompetency, proposedRemediations } from '../lib/mastery.js'
 import { flush, listQueue, queueEvent, queueSize } from '../lib/telemetry.js'
+import RollingNumber from './RollingNumber.jsx'
+import AnimatedSuccessCheck from './AnimatedSuccessCheck.jsx'
 import {
   BarChart3,
   Package,
@@ -146,7 +148,7 @@ export default function Dashboard() {
           </div>
           <div className="mt-1 flex items-baseline gap-1.5">
             <span className="text-2xl font-black tabular-nums text-[var(--color-ink)]">
-              {queued}
+              <RollingNumber value={queued} />
             </span>
             <span className="text-xs font-semibold text-[var(--color-muted)]">events</span>
           </div>
@@ -161,7 +163,7 @@ export default function Dashboard() {
           </div>
           <div className="mt-1 flex items-baseline gap-1.5">
             <span className="text-2xl font-black tabular-nums text-[var(--color-accent)]">
-              {avgMastery === null ? '—' : `${avgMastery}%`}
+              {avgMastery === null ? '—' : <><RollingNumber value={avgMastery} />%</>}
             </span>
             <span className="text-xs font-semibold text-[var(--color-muted)]">overall</span>
           </div>
@@ -229,7 +231,7 @@ export default function Dashboard() {
 
         {status && (
           <div className="mt-2.5 flex items-center gap-2 rounded-xl border border-[var(--color-good)]/30 bg-[var(--color-good-subtle)] p-2.5 text-xs font-semibold text-[var(--color-good)] animate-pop-in">
-            <Check className="size-4 stroke-[2.5]" aria-hidden="true" />
+            <AnimatedSuccessCheck className="size-4" circleColor="var(--color-good)" tickColor="var(--color-good)" />
             <span>{status}</span>
           </div>
         )}
@@ -290,8 +292,8 @@ export default function Dashboard() {
         )}
 
         {approved.length > 0 && (
-          <p className="mt-2 flex items-center gap-1 text-xs font-semibold text-[var(--color-good)] animate-pop-in">
-            <Check className="size-3.5 stroke-[3]" aria-hidden="true" />
+          <p className="mt-2 flex items-center gap-1.5 text-xs font-semibold text-[var(--color-good)] animate-pop-in">
+            <AnimatedSuccessCheck className="size-4" circleColor="var(--color-good)" tickColor="var(--color-good)" />
             <span>Naaprubahan na ang {approved.length} remediation action ng facilitator.</span>
           </p>
         )}

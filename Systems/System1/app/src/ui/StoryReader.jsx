@@ -1,12 +1,12 @@
 import { useMemo, useState } from 'react'
 import { speak } from '../lib/tts.js'
+import AnimatedSuccessCheck from './AnimatedSuccessCheck.jsx'
 import {
   ArrowLeft,
   ArrowRight,
   Volume2,
   ShieldAlert,
   Lightbulb,
-  Check,
 } from 'lucide-react'
 
 function Drill({ drill, onComplete }) {
@@ -73,11 +73,11 @@ function Drill({ drill, onComplete }) {
           })}
         </div>
 
-        {/* Status Feedback */}
+        {/* Status Feedback with Technique 06: Draw the win */}
         {foundAll ? (
           <div className="flex items-start gap-2.5 rounded-xl border border-[var(--color-good)]/30 bg-[var(--color-good-subtle)] p-3 text-xs font-semibold text-[var(--color-good)] animate-pop-in">
-            <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-[var(--color-good)] text-white text-[10px]">
-              <Check className="size-3.5 stroke-[3]" aria-hidden="true" />
+            <span className="flex size-5 shrink-0 items-center justify-center">
+              <AnimatedSuccessCheck className="size-5" circleColor="var(--color-good)" tickColor="var(--color-good)" />
             </span>
             <p>
               Mahusay! Nakita mo ang lahat ng kahina-hinalang detalye. {drill.hint}
@@ -163,8 +163,8 @@ export default function StoryReader({ capsule, onExit }) {
           ))}
         </div>
 
-        {/* Content Card Presentation */}
-        <article className="mt-5 space-y-4">
+        {/* Content Card Presentation with Technique 05: Fast, then slow */}
+        <article key={card.id} className="mt-5 space-y-4 page-enter">
           <div className="inline-flex items-center gap-1.5 rounded-md bg-[var(--color-accent-subtle)] px-2 py-0.5 text-[11px] font-bold text-[var(--color-accent)]">
             <span>Kurso: {capsule.title}</span>
           </div>

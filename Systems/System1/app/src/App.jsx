@@ -10,6 +10,7 @@ import QuizArena from './ui/QuizArena.jsx'
 import KabsatAI from './ui/KabsatAI.jsx'
 import Dashboard from './ui/Dashboard.jsx'
 import StoryReader from './ui/StoryReader.jsx'
+import AnimatedSuccessCheck from './ui/AnimatedSuccessCheck.jsx'
 import {
   BookOpen,
   Trophy,
@@ -17,7 +18,6 @@ import {
   BarChart3,
   Sun,
   Moon,
-  CheckCircle2,
   X,
   GraduationCap,
 } from 'lucide-react'
@@ -189,8 +189,8 @@ export default function App() {
         </div>
       </header>
 
-      {/* Main Content Area */}
-      <main className="flex-1 px-4 py-5">
+      {/* Main Content Area with Technique 05: Fast, then slow (page-enter) */}
+      <main key={tab} className="flex-1 px-4 py-5 page-enter">
         {tab === 'hub' && (
           <CourseHub
             capsules={capsules}
@@ -203,7 +203,7 @@ export default function App() {
         )}
         {tab === 'dashboard' && <Dashboard />}
 
-        {/* Floating Toast Notification */}
+        {/* Floating Toast Notification with Technique 06: Draw the win */}
         {toast && (
           <div
             role="status"
@@ -211,7 +211,7 @@ export default function App() {
           >
             <div className="flex items-center gap-2.5 min-w-0">
               <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-[var(--color-accent-subtle)] text-[var(--color-accent)]">
-                <CheckCircle2 className="size-4 stroke-[2.5]" aria-hidden="true" />
+                <AnimatedSuccessCheck className="size-4.5" circleColor="var(--color-accent)" tickColor="var(--color-accent)" />
               </span>
               <p className="truncate text-xs font-semibold text-[var(--color-ink)]">{toast}</p>
             </div>
