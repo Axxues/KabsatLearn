@@ -219,10 +219,15 @@ function CapsuleCard({
           onDownload(capsule)
         }
       }}
-      className={`card-tactile group relative overflow-hidden rounded-2xl cursor-pointer p-4 sm:p-5 text-white shadow-md transition-all hover:shadow-xl hover:scale-[1.01] ${gradient}`}
+      className={`card-tactile group relative rounded-2xl cursor-pointer p-4 sm:p-5 text-white shadow-md transition-all hover:shadow-xl hover:scale-[1.01] ${menuOpen ? 'z-30' : ''} ${gradient}`}
     >
       {/* Thematic Vector Illustration */}
-      <Art />
+      <div
+        className="pointer-events-none absolute inset-0 overflow-hidden rounded-2xl"
+        aria-hidden="true"
+      >
+        <Art />
+      </div>
 
       <div className="relative z-10 flex flex-col justify-between min-h-[96px]">
         {/* Top Line: Category / Code Tag + Available KB Badge */}
