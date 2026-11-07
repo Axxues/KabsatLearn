@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import {
   BAND_LABELS,
   createState,
@@ -31,9 +32,11 @@ import {
   Package,
   Sparkles,
   ChevronDown,
+  Clock,
+  AlertTriangle,
 } from 'lucide-react'
 
-const LIMIT_MS = 15000
+const DEFAULT_LIMIT_MS = 15000
 const REVEAL_MS = 1600
 
 const COURSE_ICONS = {
@@ -83,40 +86,48 @@ function Tile({ tile, index, text, state, disabled, onPick }) {
       type="button"
       onClick={() => onPick(index)}
       disabled={disabled}
-      className={`group relative flex min-h-[105px] flex-col justify-between overflow-hidden rounded-2xl border-b-4 bg-gradient-to-br p-3.5 text-left text-white shadow-sm transition-all duration-100 ${
+      className={`group relative flex min-h-[58px] w-full items-center justify-between gap-3 overflow-hidden rounded-2xl border-b-[3px] bg-gradient-to-br p-3 sm:px-4 text-left text-white shadow-sm transition-all duration-150 ${
         tile.bgClass
       } ${
         disabled
           ? 'cursor-default'
-          : 'active:translate-y-1 active:border-b-0 active:brightness-95'
+          : 'hover:brightness-105 active:translate-y-[2px] active:border-b-0 active:brightness-95 cursor-pointer'
       } ${
         isCorrect
           ? 'ring-4 ring-white ring-offset-2 ring-offset-[var(--color-bg)] scale-[1.02] z-10 shadow-lg'
           : ''
       } ${
         isWrong
-          ? 'opacity-40 grayscale-[40%]'
+          ? 'opacity-40 grayscale-[40%] scale-[0.98]'
           : isDimmed
-            ? 'opacity-35'
+            ? 'opacity-35 grayscale-[20%] scale-[0.98]'
             : 'opacity-100'
       }`}
     >
-      <div className="flex items-center justify-between w-full">
+      <div className="flex items-center gap-3 min-w-0 flex-1">
         <span
           aria-hidden="true"
-          className="flex size-7 items-center justify-center rounded-lg bg-black/25 text-base font-black shadow-inner"
+          className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-black/25 text-sm font-black shadow-inner ring-1 ring-white/20"
         >
           {tile.shape}
         </span>
+        <span className="text-sm sm:text-base font-bold leading-snug drop-shadow-xs line-clamp-2">
+          {text}
+        </span>
+      </div>
+
+      <div className="shrink-0 pl-1">
         {isCorrect && (
-          <span className="flex size-6 items-center justify-center rounded-full bg-white text-[var(--color-good)] shadow-md">
+          <span className="flex size-7 items-center justify-center rounded-full bg-white text-[var(--color-good)] shadow-md animate-pop-in">
             <Check className="size-4 stroke-[3]" aria-hidden="true" />
           </span>
         )}
+        {isWrong && (
+          <span className="flex size-7 items-center justify-center rounded-full bg-white/95 text-[var(--color-danger)] shadow-md animate-pop-in">
+            <X className="size-4 stroke-[3]" aria-hidden="true" />
+          </span>
+        )}
       </div>
-      <span className="mt-2 text-sm font-bold leading-snug line-clamp-3 drop-shadow-xs">
-        {text}
-      </span>
     </button>
   )
 }
@@ -133,6 +144,9 @@ export default function QuizArena({
   const { t } = useI18n()
   const bank = capsule.questions
   const [players, setPlayers] = useState(1)
+  const [selectedPlayers, setSelectedPlayers] = useState(1)
+  const [timePerQuestion, setTimePerQuestion] = useState(15)
+  const [timeLimitMs, setTimeLimitMs] = useState(DEFAULT_LIMIT_MS)
   const [phase, setPhase] = useState('intro')
   const [index, setIndex] = useState(0)
   const [states, setStates] = useState(() => [createState(), createState()])
@@ -168,11 +182,34 @@ export default function QuizArena({
     }
   }, [coursePickerOpen])
 
-  const current = index % players
-  const state = states[current]
-  const { question } = useMemo(() => nextQuestion(bank, state), [bank, state])
+  const [activeQuestion, setActiveQuestion] = useState(null)
+  const statesRef = useRef(states)
+  const timerRef = useRef(null)
 
-  const remaining = phase === 'question' ? Math.max(0, deadline - now) : 0
+  useEffect(() => {
+    statesRef.current = states
+  }, [states])
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current)
+    }
+  }, [])
+
+  const current = index % players
+  const state = states[current] || states[0]
+  // Keep the question stable during the round; activeQuestion is held through the reveal phase
+  const question = activeQuestion || nextQuestion(bank, state).question
+
+  const [confirmExitOpen, setConfirmExitOpen] = useState(false)
+  const [pausedRemaining, setPausedRemaining] = useState(null)
+
+  const remaining =
+    phase === 'question'
+      ? confirmExitOpen && pausedRemaining !== null
+        ? pausedRemaining
+        : Math.max(0, deadline - now)
+      : 0
 
   useEffect(() => {
     const timer = setInterval(() => setNow(Date.now()), 100)
@@ -184,20 +221,28 @@ export default function QuizArena({
   }, [phase, onRunningChange])
 
   useEffect(() => {
+    if (confirmExitOpen) return
     if (phase === 'question' && remaining <= 0) {
       settle(-1)
     }
   })
 
-  const start = (playerCount) => {
+  const start = (playerCount = selectedPlayers, timeSec = timePerQuestion) => {
+    if (timerRef.current) clearTimeout(timerRef.current)
+    const limitMs = timeSec * 1000
+    setTimeLimitMs(limitMs)
+    const initialStates = Array.from({ length: playerCount }, () => createState())
     setPlayers(playerCount)
-    setStates([createState(), createState()])
-    setScores([0, 0])
-    setCorrectCount([0, 0])
+    setStates(initialStates)
+    statesRef.current = initialStates
+    setScores(Array.from({ length: playerCount }, () => 0))
+    setCorrectCount(Array.from({ length: playerCount }, () => 0))
     setIndex(0)
     setChosen(null)
     setResult(null)
-    setDeadline(Date.now() + LIMIT_MS)
+    const { question: firstQ } = nextQuestion(bank, initialStates[0])
+    setActiveQuestion(firstQ)
+    setDeadline(Date.now() + limitMs)
     setNow(Date.now())
     setPhase('question')
     revealedFor.current = null
@@ -210,7 +255,7 @@ export default function QuizArena({
     const points = computeScore({
       correct: isCorrect,
       msRemaining,
-      msTotal: LIMIT_MS,
+      msTotal: timeLimitMs,
       streak: state.correctStreak,
     })
 
@@ -222,9 +267,11 @@ export default function QuizArena({
 
     const nextState = recordAnswer(markAnswered(state, question.id), {
       correct: isCorrect,
-      ms: LIMIT_MS - msRemaining,
+      ms: timeLimitMs - msRemaining,
     })
-    setStates((prev) => prev.map((value, i) => (i === current ? nextState : value)))
+    const updatedStates = states.map((value, i) => (i === current ? nextState : value))
+    setStates(updatedStates)
+    statesRef.current = updatedStates
 
     if (isCorrect) playCorrect()
     else playWrong()
@@ -246,25 +293,70 @@ export default function QuizArena({
     setPhase('reveal')
     revealedFor.current = question.id
 
-    setTimeout(() => advance(), REVEAL_MS)
+    if (timerRef.current) clearTimeout(timerRef.current)
+    timerRef.current = setTimeout(() => advance(), REVEAL_MS)
   }
 
   function advance() {
-    if (revealedFor.current !== question?.id) return
+    if (revealedFor.current !== (activeQuestion?.id || question?.id)) return
+    revealedFor.current = null
     const next = index + 1
     if (next >= bank.length) {
       setPhase('done')
       return
     }
+    const currentStates = statesRef.current || states
+    const nextCurrent = next % players
+    const { question: nextQ } = nextQuestion(bank, currentStates[nextCurrent])
+    if (!nextQ) {
+      setPhase('done')
+      return
+    }
+    setActiveQuestion(nextQ)
     setIndex(next)
     setChosen(null)
     setResult(null)
     setBadge(null)
-    setDeadline(Date.now() + LIMIT_MS)
+    setDeadline(Date.now() + timeLimitMs)
     setNow(Date.now())
     setPhase('question')
     playTick()
   }
+
+  const handleExit = () => {
+    if (timerRef.current) clearTimeout(timerRef.current)
+    onExit?.()
+  }
+
+  const requestExit = () => {
+    const ms = Math.max(0, deadline - Date.now())
+    setPausedRemaining(ms)
+    setConfirmExitOpen(true)
+  }
+
+  const cancelExit = useCallback(() => {
+    if (pausedRemaining !== null) {
+      setDeadline(Date.now() + pausedRemaining)
+      setNow(Date.now())
+      setPausedRemaining(null)
+    }
+    setConfirmExitOpen(false)
+  }, [pausedRemaining])
+
+  const confirmExit = () => {
+    setConfirmExitOpen(false)
+    setPausedRemaining(null)
+    handleExit()
+  }
+
+  useEffect(() => {
+    if (!confirmExitOpen) return
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') cancelExit()
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [confirmExitOpen, cancelExit])
 
   // --- Intro View ---
   if (phase === 'intro') {
@@ -410,40 +502,104 @@ export default function QuizArena({
           </div>
         </div>
 
-        {/* Mode Select Buttons */}
-        <div className="space-y-2.5 pb-2">
+        {/* Customizable Game Settings Card */}
+        <div className="my-auto rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface)] p-3.5 shadow-sm space-y-3.5">
+          {/* Time per Question Setting */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <span className="flex items-center gap-1.5 text-xs font-bold text-[var(--color-ink)]">
+                <Clock className="size-3.5 text-[var(--color-accent)] stroke-[2.5]" aria-hidden="true" />
+                <span>{t('timePerQuestion')}</span>
+              </span>
+              <span className="rounded-full bg-[var(--color-accent-subtle)] border border-[var(--color-accent)]/20 px-2 py-0.5 text-[10px] font-black text-[var(--color-accent-strong)] tabular-nums">
+                {timePerQuestion}s
+              </span>
+            </div>
+            <div className="grid grid-cols-4 gap-1.5">
+              {[10, 15, 20, 30].map((sec) => {
+                const isSelected = timePerQuestion === sec
+                return (
+                  <button
+                    key={sec}
+                    type="button"
+                    onClick={() => setTimePerQuestion(sec)}
+                    aria-pressed={isSelected}
+                    className={`btn-press flex h-8 items-center justify-center rounded-xl text-xs font-black transition-all ${
+                      isSelected
+                        ? 'bg-[var(--color-accent)] text-white shadow-xs ring-2 ring-[var(--color-accent)]/20'
+                        : 'border border-[var(--color-line)] bg-[var(--color-surface-sunken)] text-[var(--color-muted)] hover:text-[var(--color-ink)] hover:border-[var(--color-accent)]/40'
+                    }`}
+                  >
+                    {sec}s
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* Amount of Players Setting */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <span className="flex items-center gap-1.5 text-xs font-bold text-[var(--color-ink)]">
+                <Users className="size-3.5 text-[var(--color-accent)] stroke-[2.5]" aria-hidden="true" />
+                <span>{t('playersLabel')}</span>
+              </span>
+              <span className="rounded-full bg-[var(--color-accent-subtle)] border border-[var(--color-accent)]/20 px-2 py-0.5 text-[10px] font-black text-[var(--color-accent-strong)]">
+                {selectedPlayers === 1 ? t('playSoloShort') : t('playerCountOption', { n: selectedPlayers })}
+              </span>
+            </div>
+            <div className="grid grid-cols-4 gap-1.5">
+              {[1, 2, 3, 4].map((count) => {
+                const isSelected = selectedPlayers === count
+                return (
+                  <button
+                    key={count}
+                    type="button"
+                    onClick={() => setSelectedPlayers(count)}
+                    aria-pressed={isSelected}
+                    className={`btn-press flex h-8 items-center justify-center rounded-xl text-xs font-black transition-all ${
+                      isSelected
+                        ? 'bg-[var(--color-accent)] text-white shadow-xs ring-2 ring-[var(--color-accent)]/20'
+                        : 'border border-[var(--color-line)] bg-[var(--color-surface-sunken)] text-[var(--color-muted)] hover:text-[var(--color-ink)] hover:border-[var(--color-accent)]/40'
+                    }`}
+                  >
+                    {count === 1 ? t('soloOption') : `${count}P`}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        </div>
+
+        {/* Single Launch Action Button */}
+        <div className="pb-2">
           <button
             type="button"
-            onClick={() => start(1)}
-            className="btn-press flex min-h-12 w-full items-center justify-between rounded-xl bg-[var(--color-accent)] px-4 py-2 text-left font-bold text-[var(--color-on-accent)] shadow-md hover:bg-[var(--color-accent-strong)] transition-all"
+            onClick={() => start(selectedPlayers, timePerQuestion)}
+            className="btn-press flex min-h-12 w-full items-center justify-between rounded-xl bg-[var(--color-accent)] px-4 py-2.5 text-left font-bold text-[var(--color-on-accent)] shadow-md hover:bg-[var(--color-accent-strong)] transition-all"
           >
             <div className="flex items-center gap-2.5 min-w-0">
               <div className="flex size-8 items-center justify-center rounded-lg bg-white/20 text-white shrink-0">
-                <User className="size-4 stroke-[2.5]" aria-hidden="true" />
+                {selectedPlayers === 1 ? (
+                  <User className="size-4 stroke-[2.5]" aria-hidden="true" />
+                ) : (
+                  <Users className="size-4 stroke-[2.5]" aria-hidden="true" />
+                )}
               </div>
               <div className="min-w-0">
-                <p className="text-sm font-extrabold leading-tight">{t('playSolo')}</p>
-                <p className="text-[11px] font-medium text-blue-100 leading-tight mt-0.5 truncate">{t('playSoloSub')}</p>
+                <p className="text-sm font-extrabold leading-tight">
+                  {selectedPlayers === 1
+                    ? t('playSolo')
+                    : t('playPassCustom', { n: selectedPlayers })}
+                </p>
+                <p className="text-[11px] font-medium text-blue-100 leading-tight mt-0.5 truncate">
+                  {selectedPlayers === 1 ? t('playSoloSub') : t('playPassSub')} · {timePerQuestion}s
+                </p>
               </div>
             </div>
-            <span className="text-xs font-bold shrink-0 pl-2">{t('startQuizCta')}</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => start(2)}
-            className="btn-press flex min-h-12 w-full items-center justify-between rounded-xl border border-[var(--color-line)] bg-[var(--color-surface)] px-4 py-2 text-left font-bold text-[var(--color-ink)] shadow-2xs hover:border-[var(--color-accent)] transition-all"
-          >
-            <div className="flex items-center gap-2.5 min-w-0">
-              <div className="flex size-8 items-center justify-center rounded-lg bg-[var(--color-accent-subtle)] text-[var(--color-accent)] shrink-0">
-                <Users className="size-4 text-[var(--color-accent)] stroke-[2.5]" aria-hidden="true" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-sm font-extrabold leading-tight">{t('playPass')}</p>
-                <p className="text-[11px] font-medium text-[var(--color-muted)] leading-tight mt-0.5 truncate">{t('playPassSub')}</p>
-              </div>
-            </div>
-            <span className="text-xs font-bold text-[var(--color-accent)] shrink-0 pl-2">{t('startQuizCta')}</span>
+            <span className="text-xs font-bold shrink-0 pl-2">
+              {t('startQuizCta')}
+            </span>
           </button>
         </div>
       </div>
@@ -452,7 +608,20 @@ export default function QuizArena({
 
   // --- Podium / Game Over View ---
   if (phase === 'done') {
-    const winner = scores[0] === scores[1] ? null : scores[0] > scores[1] ? 0 : 1
+    const maxScore = Math.max(...scores)
+    const topPlayers = scores
+      .map((score, i) => ({ player: i, score }))
+      .filter((p) => p.score === maxScore)
+    const winner = topPlayers.length === 1 ? topPlayers[0].player : null
+
+    const rankedPlayers = scores
+      .map((score, i) => ({
+        index: i,
+        score,
+        correct: correctCount[i] || 0,
+      }))
+      .sort((a, b) => b.score - a.score)
+
     return (
       <div className="mx-auto flex flex-1 min-h-0 max-w-[430px] flex-col justify-between bg-[var(--color-bg)] p-5 text-[var(--color-ink)] shadow-2xl transition-colors duration-200">
         <div className="pt-6 text-center space-y-2">
@@ -472,11 +641,11 @@ export default function QuizArena({
         </div>
 
         <ol className="my-auto space-y-3 py-4">
-          {scores.map((score, i) => {
-            const isTop = players === 2 && i === winner
+          {rankedPlayers.map((entry, rank) => {
+            const isTop = players > 1 && entry.score === maxScore && winner !== null
             return (
               <li
-                key={i}
+                key={entry.index}
                 className={`flex items-center justify-between rounded-2xl border p-4 shadow-sm transition-all ${
                   isTop
                     ? 'border-[var(--color-terracotta)] bg-[var(--color-terracotta-subtle)]/40 ring-2 ring-[var(--color-terracotta)]/30'
@@ -491,15 +660,15 @@ export default function QuizArena({
                         : 'bg-[var(--color-accent-subtle)] text-[var(--color-accent)]'
                     }`}
                   >
-                    #{i + 1}
+                    #{rank + 1}
                   </span>
                   <div>
                     <p className="text-sm font-extrabold text-[var(--color-ink)]">
-                      {players === 1 ? t('yourScore') : t('playerLabel', { n: i + 1 })}
+                      {players === 1 ? t('yourScore') : t('playerLabel', { n: entry.index + 1 })}
                     </p>
                     <p className="text-xs text-[var(--color-muted)]">
                       {t('correctTally', {
-                        correct: correctCount[i],
+                        correct: entry.correct,
                         total: Math.ceil(bank.length / players),
                       })}
                     </p>
@@ -507,7 +676,7 @@ export default function QuizArena({
                 </div>
                 <div className="text-right">
                   <span className="text-2xl font-black tabular-nums text-[var(--color-ink)]">
-                    <RollingNumber value={score} />
+                    <RollingNumber value={entry.score} />
                   </span>
                   <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-muted)]">
                     {t('pointsLabel')}
@@ -521,7 +690,7 @@ export default function QuizArena({
         <div className="space-y-3 pb-4">
           <button
             type="button"
-            onClick={() => start(players)}
+            onClick={() => start(players, timePerQuestion)}
             className="btn-press flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl bg-[var(--color-accent)] text-base font-bold text-[var(--color-on-accent)] shadow-md hover:bg-[var(--color-accent-strong)]"
           >
             <RotateCcw className="size-5 stroke-[2.5]" aria-hidden="true" />
@@ -529,7 +698,7 @@ export default function QuizArena({
           </button>
           <button
             type="button"
-            onClick={onExit}
+            onClick={handleExit}
             className="btn-press flex min-h-12 w-full items-center justify-center rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface)] text-sm font-bold text-[var(--color-muted)] hover:text-[var(--color-ink)]"
           >
             {t('backToCourses')}
@@ -548,7 +717,7 @@ export default function QuizArena({
         </p>
         <button
           type="button"
-          onClick={onExit}
+          onClick={handleExit}
           className="btn-press mt-4 min-h-11 rounded-xl bg-[var(--color-accent)] px-4 text-sm font-bold text-white"
         >
           {t('backToCourses')}
@@ -558,7 +727,7 @@ export default function QuizArena({
   }
 
   // Calculate timer percent and color
-  const timerPercent = Math.max(0, (remaining / LIMIT_MS) * 100)
+  const timerPercent = Math.max(0, (remaining / timeLimitMs) * 100)
   const timerColor =
     timerPercent > 45
       ? 'bg-[var(--color-good)]'
@@ -569,63 +738,63 @@ export default function QuizArena({
   return (
     <div className="mx-auto flex flex-1 min-h-0 max-w-[430px] flex-col bg-[var(--color-bg)] text-[var(--color-ink)] shadow-2xl transition-colors duration-200">
       {/* Quiz HUD Header */}
-      <header className="border-b border-[var(--color-line)] bg-[var(--color-surface)]/95 px-4 pt-3.5 pb-3 backdrop-blur-md">
+      <header className="border-b border-[var(--color-line)] bg-[var(--color-surface)]/95 px-4 pt-3.5 pb-2.5 backdrop-blur-md">
         <div className="flex items-center justify-between text-xs">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5">
             <button
               type="button"
-              onClick={onExit}
-              className="btn-press flex size-8 items-center justify-center rounded-lg border border-[var(--color-line)] text-xs font-bold text-[var(--color-muted)] hover:text-[var(--color-ink)]"
+              onClick={requestExit}
+              className="btn-press flex size-8 items-center justify-center rounded-xl border border-[var(--color-line)] bg-[var(--color-surface)] text-[var(--color-muted)] hover:text-[var(--color-ink)] shadow-2xs active:scale-95 transition-all"
               aria-label="Lumabas sa Quiz"
             >
               <X className="size-4 stroke-[2.5]" aria-hidden="true" />
             </button>
-            <span className="font-bold tabular-nums text-[var(--color-ink)]">
+            <span className="font-extrabold tabular-nums text-xs tracking-tight text-[var(--color-ink)]">
               {t('questionProgress', { current: index + 1, total: bank.length })}
             </span>
           </div>
 
-          <div className="flex items-center gap-2">
-            <span className="rounded-full bg-[var(--color-accent-subtle)] px-2.5 py-0.5 text-[11px] font-bold text-[var(--color-accent)]">
+          <div className="flex items-center gap-1.5">
+            <span className="rounded-full bg-[var(--color-accent-subtle)] border border-[var(--color-accent)]/20 px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-[var(--color-accent-strong)]">
               {BAND_LABELS[state.band] || state.band}
             </span>
-            <span className="rounded-lg bg-[var(--color-surface-sunken)] px-2 py-0.5 font-black tabular-nums text-[var(--color-ink)]">
-              <RollingNumber value={scores[current]} /> {t('pts')}
+            <span className="inline-flex items-center gap-1 rounded-lg bg-[var(--color-surface-sunken)] px-2 py-0.5 font-black tabular-nums text-xs text-[var(--color-ink)] border border-[var(--color-line)]">
+              <RollingNumber value={scores[current]} /> <span className="text-[10px] text-[var(--color-muted)] font-bold">{t('pts')}</span>
             </span>
           </div>
         </div>
 
-        {/* 15s Countdown Progress Bar */}
-        <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-[var(--color-line)]" aria-hidden="true">
+        {/* Dynamic Countdown Progress Bar */}
+        <div className="mt-2.5 h-2 w-full overflow-hidden rounded-full bg-[var(--color-surface-sunken)] border border-[var(--color-line)]/50 p-0.5" aria-hidden="true">
           <div
-            className={`h-full rounded-full transition-all duration-100 ease-linear ${timerColor}`}
+            className={`h-full rounded-full transition-all duration-100 ease-linear shadow-xs ${timerColor}`}
             style={{ width: `${timerPercent}%` }}
           />
         </div>
 
         {/* Multi-Player Indicator or Streak info */}
-        <div className="mt-2 flex items-center justify-between text-[11px]">
-          {players === 2 ? (
-            <span className="inline-flex items-center gap-1 font-bold text-[var(--color-accent)]">
+        <div className="mt-2 flex items-center justify-between text-[11px] min-h-[22px]">
+          {players > 1 ? (
+            <span className="inline-flex items-center gap-1.5 font-bold text-[var(--color-accent)] bg-[var(--color-accent-subtle)] px-2 py-0.5 rounded-md border border-[var(--color-accent)]/20">
               <Users className="size-3.5 text-[var(--color-accent)] stroke-[2]" aria-hidden="true" />
               {t('turnIndicator', { n: current + 1 })}
             </span>
           ) : (
-            <span className="flex items-center gap-1 text-[var(--color-muted)]">
+            <span className="flex items-center gap-1.5 text-[var(--color-muted)]">
               {state.correctStreak > 1 ? (
-                <>
+                <span className="inline-flex items-center gap-1 rounded-md bg-[var(--color-terracotta-subtle)] px-2 py-0.5 border border-[var(--color-terracotta)]/25">
                   <Flame className="size-3.5 text-[var(--color-terracotta)] fill-[var(--color-terracotta)] animate-bounce" aria-hidden="true" />
-                  <span className="font-bold text-[var(--color-terracotta)]">{t('streakIndicator', { n: state.correctStreak })}</span>
-                </>
+                  <span className="font-extrabold text-[var(--color-terracotta)]">{t('streakIndicator', { n: state.correctStreak })}</span>
+                </span>
               ) : (
-                t('speedPrompt')
+                <span className="font-medium text-[var(--color-muted)]">{t('speedPrompt')}</span>
               )}
             </span>
           )}
 
           {badge && (
             <span
-              className="animate-bounce flex items-center gap-1 font-extrabold text-[var(--color-terracotta)]"
+              className="animate-bounce flex items-center gap-1 font-extrabold text-[var(--color-terracotta)] bg-[var(--color-terracotta-subtle)] px-2 py-0.5 rounded-md border border-[var(--color-terracotta)]/20"
               role="status"
             >
               <Zap className="size-3 fill-[var(--color-terracotta)]" aria-hidden="true" />
@@ -636,16 +805,26 @@ export default function QuizArena({
       </header>
 
       {/* Main Question & Kahoot Tiles Area with Technique 05: Fast, then slow */}
-      <main key={question.id} className="flex flex-1 flex-col justify-between px-4 py-4 space-y-4 page-enter">
+      <main key={question.id} className="flex flex-1 flex-col justify-between px-4 py-3.5 space-y-3.5 page-enter">
         {/* Question Prompt Card */}
-        <div className="flex min-h-[90px] items-center justify-center rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface)] p-4 text-center shadow-sm">
-          <h1 className="text-lg font-extrabold leading-snug text-[var(--color-ink)]">
+        <div className="relative flex min-h-[100px] flex-col justify-between overflow-hidden rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface)] p-4 sm:p-5 shadow-sm">
+          <div className="mb-2 flex items-center justify-between">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-surface-sunken)] border border-[var(--color-line)] px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-[var(--color-muted)]">
+              <Sparkles className="size-3 text-[var(--color-accent)]" aria-hidden="true" />
+              <span>{question.competency ? question.competency.replace(/-/g, ' ') : `Question ${index + 1}`}</span>
+            </span>
+            <span className="text-[11px] font-black tabular-nums text-[var(--color-muted)]">
+              {Math.ceil(remaining / 1000)}s
+            </span>
+          </div>
+
+          <h1 className="text-base sm:text-lg font-black leading-snug tracking-tight text-[var(--color-ink)] text-center my-auto">
             {question.stem}
           </h1>
         </div>
 
-        {/* 4 Color Tiles */}
-        <div className="grid flex-1 grid-cols-2 gap-2.5">
+        {/* Stacked Option Buttons */}
+        <div className="flex flex-col gap-2.5 my-auto">
           {question.options.map((option, i) => {
             let tileState = 'idle'
             if (phase === 'reveal') {
@@ -667,34 +846,109 @@ export default function QuizArena({
           })}
         </div>
 
-        {/* Reveal Feedback Banner with Technique 06: Draw the win */}
-        {phase === 'reveal' && (
-          <div
-            className={`rounded-2xl border p-3.5 text-center shadow-md animate-pop-in ${
-              result?.isCorrect
-                ? 'border-[var(--color-good)]/30 bg-[var(--color-good-subtle)] text-[var(--color-good)]'
-                : 'border-[var(--color-warn)]/30 bg-[var(--color-warn-subtle)] text-[var(--color-warn)]'
-            }`}
-            role="status"
-          >
-            {result?.isCorrect ? (
-              <div className="flex items-center justify-center gap-2">
-                <AnimatedSuccessCheck className="size-5" circleColor="var(--color-good)" tickColor="var(--color-good)" />
-                <p className="text-sm font-extrabold">
-                  {t('correctAnswer', { points: lastPoints })}
-                </p>
-              </div>
-            ) : (
-              <div className="flex items-center justify-center gap-2">
-                <Lightbulb className="size-4 stroke-[2.5]" aria-hidden="true" />
-                <p className="text-sm font-extrabold">
-                  {t('wrongAnswer')}
-                </p>
-              </div>
-            )}
-          </div>
-        )}
+        {/* Reveal Feedback Banner or subtle hint with no layout shift */}
+        <div className="min-h-[56px] flex items-center justify-center">
+          {phase === 'reveal' ? (
+            <div
+              className={`w-full rounded-2xl border p-3 text-center shadow-md animate-pop-in ${
+                result?.isCorrect
+                  ? 'border-[var(--color-good)]/30 bg-[var(--color-good-subtle)] text-[var(--color-good)]'
+                  : 'border-[var(--color-warn)]/30 bg-[var(--color-warn-subtle)] text-[var(--color-warn)]'
+              }`}
+              role="status"
+            >
+              {result?.isCorrect ? (
+                <div className="flex items-center justify-center gap-2">
+                  <AnimatedSuccessCheck className="size-5" circleColor="var(--color-good)" tickColor="var(--color-good)" />
+                  <p className="text-sm font-extrabold">
+                    {t('correctAnswer', { points: lastPoints })}
+                  </p>
+                </div>
+              ) : (
+                <div className="flex items-center justify-center gap-2">
+                  <Lightbulb className="size-4 stroke-[2.5]" aria-hidden="true" />
+                  <p className="text-sm font-extrabold">
+                    {t('wrongAnswer')}
+                  </p>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="w-full text-center py-1">
+              <span className="text-[11px] font-semibold text-[var(--color-muted)] tracking-wide">
+                {t('speedPrompt')}
+              </span>
+            </div>
+          )}
+        </div>
       </main>
+
+      {/* Exit Confirmation Modal */}
+      {confirmExitOpen &&
+        typeof document !== 'undefined' &&
+        createPortal(
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs transition-opacity"
+            onClick={cancelExit}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="confirm-exit-quiz-title"
+          >
+            <div
+              className="relative m-auto w-full max-w-[360px] rounded-3xl border border-[var(--color-line)] bg-[var(--color-surface)] p-5 shadow-2xl transition-all animate-pop-in"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Modal Header */}
+              <div className="flex items-start justify-between gap-3 border-b border-[var(--color-line)] pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[var(--color-danger-subtle)] text-[var(--color-danger)]">
+                    <AlertTriangle className="size-5 stroke-[2.2]" aria-hidden="true" />
+                  </div>
+                  <div className="min-w-0">
+                    <h3 id="confirm-exit-quiz-title" className="text-base font-bold text-[var(--color-ink)]">
+                      {t('exitQuizTitle')}
+                    </h3>
+                    <p className="truncate text-xs font-medium text-[var(--color-muted)]">
+                      {capsule.title}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={cancelExit}
+                  className="btn-press flex size-8 items-center justify-center rounded-lg text-[var(--color-muted)] hover:bg-[var(--color-surface-sunken)] hover:text-[var(--color-ink)]"
+                  aria-label={t('exitQuizCancel')}
+                >
+                  <X className="size-4 stroke-[2.5]" aria-hidden="true" />
+                </button>
+              </div>
+
+              {/* Explanation Prompt */}
+              <p className="mt-4 text-xs leading-relaxed text-[var(--color-muted)]">
+                {t('exitQuizPrompt')}
+              </p>
+
+              {/* Action Buttons: Keep Playing and Leave Quiz */}
+              <div className="mt-5 flex items-center gap-2.5">
+                <button
+                  type="button"
+                  onClick={cancelExit}
+                  className="btn-press flex-1 rounded-xl border border-[var(--color-line)] bg-[var(--color-surface)] py-2.5 text-xs font-bold text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)]"
+                >
+                  {t('exitQuizCancel')}
+                </button>
+                <button
+                  type="button"
+                  onClick={confirmExit}
+                  className="btn-press flex-1 rounded-xl bg-[var(--color-danger)] py-2.5 text-xs font-bold text-white shadow-xs hover:opacity-95"
+                >
+                  {t('exitQuizConfirm')}
+                </button>
+              </div>
+            </div>
+          </div>,
+          document.body,
+        )}
     </div>
   )
 }

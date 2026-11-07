@@ -81,7 +81,7 @@ describe('CourseHub capsule cards and counters', () => {
     localStorage.setItem('kabsat_lang', lang)
     await act(async () => {
       root.render(
-        <I18nProvider>
+        <I18nProvider key={lang} initialLang={lang}>
           <CourseHub
             capsules={capsules}
             onOpen={() => {}}
@@ -123,37 +123,42 @@ describe('CourseHub capsule cards and counters', () => {
     expect(availableCard.textContent).toContain('128 KB')
   })
 
-  test('available section is collapsed by default', async () => {
+  test('available section is collapsed by default with accordion closed', async () => {
     await renderComponent(oneInstalledOneAvailable, 'en')
 
     const section = container.querySelector('section[aria-labelledby="available-heading"]')
     const toggle = section.querySelector('h2 button')
     const list = section.querySelector('#available-course-list')
+    const accordion = section.querySelector('.accordion-grid')
 
     expect(toggle.getAttribute('aria-expanded')).toBe('false')
     expect(list.hidden).toBe(true)
+    expect(accordion.className).not.toContain('is-expanded')
     expect(toggle.textContent).toContain('Available to download when online')
     expect(toggle.textContent).toContain('1 available')
   })
 
-  test('available section expands and collapses on header click', async () => {
+  test('available section expands and collapses on header click with accordion animation classes', async () => {
     await renderComponent(oneInstalledOneAvailable, 'en')
 
     const section = container.querySelector('section[aria-labelledby="available-heading"]')
     const toggle = section.querySelector('h2 button')
     const list = section.querySelector('#available-course-list')
+    const accordion = section.querySelector('.accordion-grid')
 
     await act(async () => {
       toggle.dispatchEvent(new MouseEvent('click', { bubbles: true }))
     })
     expect(toggle.getAttribute('aria-expanded')).toBe('true')
     expect(list.hidden).toBe(false)
+    expect(accordion.className).toContain('is-expanded')
 
     await act(async () => {
       toggle.dispatchEvent(new MouseEvent('click', { bubbles: true }))
     })
     expect(toggle.getAttribute('aria-expanded')).toBe('false')
     expect(list.hidden).toBe(true)
+    expect(accordion.className).not.toContain('is-expanded')
   })
 
   test('installed counter displays "1 course" in English when 1 capsule is installed', async () => {
@@ -274,7 +279,7 @@ describe('CourseHub capsule cards and counters', () => {
     })
 
     // Confirmation modal should be open
-    const modal = container.querySelector('[aria-labelledby="confirm-download-modal-title"]')
+    const modal = document.body.querySelector('[aria-labelledby="confirm-download-modal-title"]')
     expect(modal).not.toBeNull()
     expect(modal.textContent).toContain('Download Course')
     expect(modal.textContent).toContain('Hanapbuhay Skills')
@@ -291,7 +296,7 @@ describe('CourseHub capsule cards and counters', () => {
     })
 
     // Modal is dismissed, onDownload was not called
-    expect(container.querySelector('[aria-labelledby="confirm-download-modal-title"]')).toBeNull()
+    expect(document.body.querySelector('[aria-labelledby="confirm-download-modal-title"]')).toBeNull()
     expect(downloadedId).toBeNull()
   })
 
@@ -321,7 +326,7 @@ describe('CourseHub capsule cards and counters', () => {
       downloadButton.dispatchEvent(new MouseEvent('click', { bubbles: true }))
     })
 
-    const modal = container.querySelector('[aria-labelledby="confirm-download-modal-title"]')
+    const modal = document.body.querySelector('[aria-labelledby="confirm-download-modal-title"]')
     expect(modal).not.toBeNull()
 
     const confirmBtn = [...modal.querySelectorAll('button')].find((b) =>
@@ -334,6 +339,44 @@ describe('CourseHub capsule cards and counters', () => {
     })
 
     expect(downloadedId).toBe('capsule-201')
-    expect(container.querySelector('[aria-labelledby="confirm-download-modal-title"]')).toBeNull()
+    expect(document.body.querySelector('[aria-labelledby="confirm-download-modal-title"]')).toBeNull()
+  })
+
+  test('installed course card displays "Share" on the share button in English and "Ibahagi" in Filipino', async () => {
+    await renderComponent(oneInstalledOneAvailable, 'en')
+    const installedSectionEn = container.querySelector('section[aria-labelledby="installed-heading"]')
+    const shareBtnEn = installedSectionEn.querySelector('li button')
+    expect(shareBtnEn.textContent).toContain('Share')
+    expect(shareBtnEn.textContent).not.toContain('Pass')
+
+    await renderComponent(oneInstalledOneAvailable, 'fil')
+    const installedSectionFil = container.querySelector('section[aria-labelledby="installed-heading"]')
+    const shareBtnFil = installedSectionFil.querySelector('li button')
+    expect(shareBtnFil.textContent).toContain('Ibahagi')
+  })
+
+  test('clicking share button on installed course card opens share modal via portal, cancel dismisses it', async () => {
+    await renderComponent(oneInstalledOneAvailable, 'en')
+    const installedSection = container.querySelector('section[aria-labelledby="installed-heading"]')
+    const shareBtn = installedSection.querySelector('li button')
+
+    await act(async () => {
+      shareBtn.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    })
+
+    const modal = document.body.querySelector('[aria-labelledby="share-modal-title"]')
+    expect(modal).not.toBeNull()
+    expect(modal.textContent).toContain('Share Course')
+    expect(modal.textContent).toContain('Digital Safety')
+
+    const cancelBtn = [...modal.querySelectorAll('button')].find(
+      (b) => b.textContent.trim() === 'Cancel'
+    )
+    expect(cancelBtn).toBeTruthy()
+    await act(async () => {
+      cancelBtn.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    })
+
+    expect(document.body.querySelector('[aria-labelledby="share-modal-title"]')).toBeNull()
   })
 })

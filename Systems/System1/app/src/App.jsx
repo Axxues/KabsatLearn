@@ -13,7 +13,7 @@ import Dashboard from './ui/Dashboard.jsx'
 import StoryReader from './ui/StoryReader.jsx'
 import AnimatedSuccessCheck from './ui/AnimatedSuccessCheck.jsx'
 import Profile from './ui/Profile.jsx'
-import { loadProfile } from './lib/profile.js'
+import { emptyProfile, loadProfile } from './lib/profile.js'
 import {
   BookOpen,
   Trophy,
@@ -100,6 +100,7 @@ function MainApp() {
   const [capsules, setCapsules] = useState([])
   const [downloadingId, setDownloadingId] = useState(null)
   const [toast, setToast] = useState(null)
+  const [isToastExiting, setIsToastExiting] = useState(false)
   const [quizRunning, setQuizRunning] = useState(false)
   const [quizCourseId, setQuizCourseId] = useState(() =>
     typeof window === 'undefined' ? null : localStorage.getItem('kabsat_quiz_course')
@@ -153,12 +154,26 @@ function MainApp() {
     }
   }, [refresh])
 
+  const dismissToast = useCallback(() => {
+    setIsToastExiting(true)
+    const exitDelay = typeof process !== 'undefined' && process.env?.NODE_ENV === 'test' ? 120 : 250
+    setTimeout(() => {
+      setToast(null)
+      setIsToastExiting(false)
+    }, exitDelay)
+  }, [])
+
+  const triggerToast = useCallback((msg) => {
+    setIsToastExiting(false)
+    setToast(msg)
+  }, [])
+
   useEffect(() => {
-    if (toast) {
-      const timer = setTimeout(() => setToast(null), 4000)
+    if (toast && !isToastExiting) {
+      const timer = setTimeout(() => dismissToast(), 4000)
       return () => clearTimeout(timer)
     }
-  }, [toast])
+  }, [toast, isToastExiting, dismissToast])
 
   const selectTab = (nextTab) => {
     if (nextTab !== 'quiz') setQuizRunning(false)
@@ -181,29 +196,29 @@ function MainApp() {
     try {
       if (mode === 'download') {
         const result = await downloadCapsule(id)
-        if (result.ok) setToast(t('saveSuccess'))
+        if (result.ok) triggerToast(t('saveSuccess'))
         return result
       }
       const result = await shareCapsule(id)
-      if (result.method === 'share') setToast(t('shareSuccess'))
-      else if (result.method === 'download') setToast(t('saveSuccess'))
-      else setToast(t('shareCancel'))
+      if (result.method === 'share') triggerToast(t('shareSuccess'))
+      else if (result.method === 'download') triggerToast(t('saveSuccess'))
+      else triggerToast(t('shareCancel'))
       return result
     } catch {
-      setToast(t('shareError'))
+      triggerToast(t('shareError'))
     }
   }
 
   const importFile = async (file) => {
     const result = await importCapsuleFile(file)
-    setToast(result.ok ? t('importSuccess') : t('importRefused', { error: result.error }))
+    triggerToast(result.ok ? t('importSuccess') : t('importRefused', { error: result.error }))
     await refresh()
   }
 
   if (showProfile) {
     return (
       <Profile
-        profile={profile ?? { id: 'me', nickname: '', sector: '', ageBand: '', municipality: '', language: 'tl', accessibility: {} }}
+        profile={profile ?? emptyProfile()}
         onSaved={(saved) => {
           setProfile(saved)
           if (saved.language) setLang(saved.language === 'tl' ? 'fil' : 'en')
@@ -403,29 +418,34 @@ function MainApp() {
           />
         )}
         {tab === 'dashboard' && <Dashboard capsules={capsules} />}
-
-        {/* Floating Toast Notification with Technique 06: Draw the win */}
-        {toast && (
-          <div
-            role="status"
-            className="animate-toast fixed bottom-20 left-1/2 z-50 flex w-[90%] max-w-[390px] items-center justify-between gap-3 rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface)] p-3.5 shadow-xl transition-all"
-          >
-            <div className="flex items-center gap-2.5 min-w-0">
-              <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-[var(--color-accent-subtle)] text-[var(--color-accent)]">
-                <AnimatedSuccessCheck className="size-4.5" circleColor="var(--color-accent)" tickColor="var(--color-accent)" />
-              </span>
-              <p className="truncate text-xs font-semibold text-[var(--color-ink)]">{toast}</p>
-            </div>
-            <button
-              type="button"
-              onClick={() => setToast(null)}
-              className="btn-press flex size-6 items-center justify-center rounded-lg text-[var(--color-muted)] hover:text-[var(--color-ink)]"
-            >
-              <X className="size-3.5 stroke-[2.5]" aria-hidden="true" />
-            </button>
-          </div>
-        )}
       </main>
+
+      {/* Floating Top Popup Notification with In and Out Animations */}
+      {toast && (
+        <div
+          role="status"
+          aria-live="polite"
+          className={`${
+            isToastExiting ? 'animate-toast-down-out' : 'animate-toast-down'
+          } fixed left-1/2 z-50 flex w-[90%] max-w-[390px] items-center justify-between gap-3 rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface)]/95 p-3.5 shadow-2xl backdrop-blur-md transition-all`}
+          style={{ top: 'calc(var(--sat) + 1rem)' }}
+        >
+          <div className="flex items-center gap-2.5 min-w-0">
+            <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-[var(--color-accent-subtle)] text-[var(--color-accent)]">
+              <AnimatedSuccessCheck className="size-4.5" circleColor="var(--color-accent)" tickColor="var(--color-accent)" />
+            </span>
+            <p className="truncate text-xs font-semibold text-[var(--color-ink)]">{toast}</p>
+          </div>
+          <button
+            type="button"
+            onClick={dismissToast}
+            className="btn-press flex size-7 shrink-0 items-center justify-center rounded-lg text-[var(--color-muted)] hover:bg-[var(--color-surface-sunken)] hover:text-[var(--color-ink)]"
+            aria-label="Close notification"
+          >
+            <X className="size-4 stroke-[2.5]" aria-hidden="true" />
+          </button>
+        </div>
+      )}
 
       {navigation}
     </div>

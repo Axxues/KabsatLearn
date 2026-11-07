@@ -100,4 +100,27 @@ describe('Dashboard Mastery by Competency', () => {
     const masterySection = container.querySelector('section[aria-labelledby="mastery-heading"]')
     expect(masterySection.textContent).toContain('50%')
   })
+
+  test('displays course reading progress alone in Mastery by Competency even with 0 quiz attempts', async () => {
+    localStorage.setItem('kabsat_course_completed_capsule-101', 'true')
+    await seedCapsule(capsule101)
+    await renderDashboard([{ id: 'capsule-101', installed: true }])
+
+    const masterySection = container.querySelector('section[aria-labelledby="mastery-heading"]')
+    expect(masterySection.textContent).toContain('100%')
+    expect(masterySection.textContent).toContain('Kurso: 100%')
+  })
+
+  test('combines course progress and quiz answers properly (100% course + 0% quiz -> 50% mastery)', async () => {
+    localStorage.setItem('kabsat_course_completed_capsule-101', 'true')
+    await seedCapsule(capsule101)
+    await queueEvent({ type: 'answer', competency: 'cyber_safety', correct: false })
+    await queueEvent({ type: 'answer', competency: 'cyber_safety', correct: false })
+
+    await renderDashboard([{ id: 'capsule-101', installed: true }])
+
+    const masterySection = container.querySelector('section[aria-labelledby="mastery-heading"]')
+    expect(masterySection.textContent).toContain('50%')
+    expect(masterySection.textContent).toContain('Kurso: 100% · Pagsusulit: 0%')
+  })
 })

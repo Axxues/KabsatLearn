@@ -178,3 +178,83 @@ describe('bottom navigation', () => {
     expect(nav()).not.toBeNull()
   })
 })
+
+describe('popup notifications', () => {
+  let container
+  let root
+
+  beforeEach(async () => {
+    localStorage.clear()
+    if (!globalThis.URL.createObjectURL) {
+      globalThis.URL.createObjectURL = () => 'blob:mock-url'
+      globalThis.URL.revokeObjectURL = () => {}
+    }
+    HTMLAnchorElement.prototype.click = () => {}
+    container = document.createElement('div')
+    document.body.appendChild(container)
+    root = createRoot(container)
+    await act(async () => {
+      root.render(<App />)
+    })
+    // Wait for initial seed and course list to load
+    for (let attempt = 0; attempt < 50; attempt += 1) {
+      if (container.textContent.includes('Ibahagi')) break
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 20))
+      })
+    }
+  })
+
+  afterEach(() => {
+    act(() => {
+      root.unmount()
+    })
+    container.remove()
+    vi.useRealTimers()
+  })
+
+  test('floating toast notification appears at the top with in and out animation', async () => {
+    const shareBtn = [...container.querySelectorAll('button')].find((b) =>
+      b.textContent.includes('Ibahagi')
+    )
+    expect(shareBtn).not.toBeNull()
+
+    await act(async () => {
+      shareBtn.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    })
+
+    const downloadKabsatBtn = [...document.body.querySelectorAll('button')].find((b) =>
+      b.textContent.includes('.kabsat')
+    )
+    expect(downloadKabsatBtn).not.toBeNull()
+
+    await act(async () => {
+      downloadKabsatBtn.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    })
+
+    // Wait for async downloadCapsule to resolve and set toast
+    for (let attempt = 0; attempt < 50; attempt += 1) {
+      if (container.querySelector('[role="status"].animate-toast-down')) break
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 20))
+      })
+    }
+
+    const toast = container.querySelector('[role="status"].animate-toast-down')
+    expect(toast).not.toBeNull()
+    expect(toast.getAttribute('style')).toContain('top: calc(var(--sat) + 1rem)')
+
+    const closeBtn = toast.querySelector('button[aria-label="Close notification"]')
+    expect(closeBtn).not.toBeNull()
+
+    await act(async () => {
+      closeBtn.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    })
+
+    expect(container.querySelector('.animate-toast-down-out')).not.toBeNull()
+
+    await vi.waitFor(() => {
+      expect(container.querySelector('[role="status"]')).toBeNull()
+    })
+  })
+})

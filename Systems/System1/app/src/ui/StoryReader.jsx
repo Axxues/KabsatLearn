@@ -1,7 +1,8 @@
-import { useMemo, useState } from 'react'
-import { speak } from '../lib/tts.js'
+import { useMemo, useState, useEffect, useCallback } from 'react'
+import { speak, stopSpeaking } from '../lib/tts.js'
 import { useI18n } from '../lib/i18n.jsx'
-import { clearCourseProgress, getCoursePage, saveCoursePage } from '../lib/courseProgress.js'
+import { getCoursePage, getCourseProgress, markCourseCompleted, saveCoursePage } from '../lib/courseProgress.js'
+import { queueEvent } from '../lib/telemetry.js'
 import AnimatedSuccessCheck from './AnimatedSuccessCheck.jsx'
 import {
   ArrowLeft,
@@ -9,6 +10,8 @@ import {
   Volume2,
   ShieldAlert,
   Lightbulb,
+  Lock,
+  X,
 } from 'lucide-react'
 
 function Drill({ drill, onComplete }) {
@@ -113,27 +116,83 @@ function Drill({ drill, onComplete }) {
 
 export default function StoryReader({ capsule, onExit }) {
   const { lang, t } = useI18n()
-  const [index, setIndex] = useState(() => getCoursePage(capsule?.id, capsule?.cards?.length || 0))
-  const [isPlayingAudio, setIsPlayingAudio] = useState(false)
-  const card = capsule?.cards?.[index] || capsule?.cards?.[0]
   const totalCards = capsule?.cards?.length || 0
+  const [index, setIndex] = useState(() => getCoursePage(capsule?.id, totalCards))
+  const [maxUnlocked, setMaxUnlocked] = useState(() => {
+    const prog = getCourseProgress(capsule?.id, totalCards)
+    if (prog.completed) return totalCards > 0 ? totalCards - 1 : 0
+    const storedPage = getCoursePage(capsule?.id, totalCards)
+    return Math.max(storedPage, prog.maxPage ?? 0)
+  })
+  const [isPlayingAudio, setIsPlayingAudio] = useState(false)
+  const [notice, setNotice] = useState(null)
+  const [isNoticeExiting, setIsNoticeExiting] = useState(false)
+
+  const card = capsule?.cards?.[index] || capsule?.cards?.[0]
   const isLast = index === totalCards - 1
+
+  const dismissNotice = useCallback(() => {
+    setIsNoticeExiting(true)
+    const exitDelay = typeof process !== 'undefined' && process.env?.NODE_ENV === 'test' ? 20 : 250
+    setTimeout(() => {
+      setNotice(null)
+      setIsNoticeExiting(false)
+    }, exitDelay)
+  }, [])
+
+  const triggerNotice = (msg) => {
+    setIsNoticeExiting(false)
+    setNotice(msg)
+  }
+
+  useEffect(() => {
+    if (notice && !isNoticeExiting) {
+      const timer = setTimeout(() => {
+        dismissNotice()
+      }, 3500)
+      return () => clearTimeout(timer)
+    }
+  }, [notice, isNoticeExiting, dismissNotice])
 
   const goToPage = (nextIndex) => {
     const clamped = Math.max(0, Math.min(nextIndex, totalCards - 1))
     setIndex(clamped)
-    saveCoursePage(capsule?.id, clamped)
+    setMaxUnlocked((current) => Math.max(current, clamped))
+    saveCoursePage(capsule?.id, clamped, totalCards)
+  }
+
+  const handleSegmentClick = (targetIndex) => {
+    if (targetIndex <= maxUnlocked) {
+      goToPage(targetIndex)
+    } else {
+      triggerNotice(t('pageNotCompleted'))
+    }
   }
 
   const handleFinish = () => {
-    clearCourseProgress(capsule?.id)
+    markCourseCompleted(capsule?.id)
+    setMaxUnlocked(totalCards > 0 ? totalCards - 1 : 0)
+    queueEvent({ type: 'course_completed', capsuleId: capsule?.id, competency: capsule?.competency })
     onExit()
   }
 
+  useEffect(() => {
+    return () => {
+      stopSpeaking()
+    }
+  }, [])
+
   const handleSpeak = () => {
-    setIsPlayingAudio(true)
-    speak(`${card.title}. ${card.body}`, { lang: lang === 'en' ? 'en-US' : 'fil-PH' })
-    setTimeout(() => setIsPlayingAudio(false), 5000)
+    if (isPlayingAudio) {
+      stopSpeaking()
+      setIsPlayingAudio(false)
+    } else {
+      setIsPlayingAudio(true)
+      speak(`${card.title}. ${card.body}`, {
+        lang: lang === 'en' ? 'en-US' : 'fil-PH',
+        onEnd: () => setIsPlayingAudio(false),
+      })
+    }
   }
 
   return (
@@ -148,6 +207,33 @@ export default function StoryReader({ capsule, onExit }) {
         aria-hidden="true"
       />
 
+      {/* Floating Top Popup Notification with In and Out Animations */}
+      {notice && (
+        <div
+          role="status"
+          aria-live="polite"
+          className={`${
+            isNoticeExiting ? 'animate-toast-down-out' : 'animate-toast-down'
+          } fixed left-1/2 z-50 flex w-[90%] max-w-[390px] items-center justify-between gap-3 rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface)]/95 p-3.5 shadow-2xl backdrop-blur-md transition-all`}
+          style={{ top: 'calc(var(--sat) + 1rem)' }}
+        >
+          <div className="flex items-center gap-2.5 min-w-0">
+            <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-[var(--color-warn-subtle)] text-[var(--color-warn)]">
+              <Lock className="size-4 stroke-[2.5]" aria-hidden="true" />
+            </span>
+            <p className="truncate text-xs font-bold text-[var(--color-ink)]">{notice}</p>
+          </div>
+          <button
+            type="button"
+            onClick={dismissNotice}
+            className="btn-press flex size-7 shrink-0 items-center justify-center rounded-lg text-[var(--color-muted)] hover:bg-[var(--color-surface-sunken)] hover:text-[var(--color-ink)]"
+            aria-label="Close notification"
+          >
+            <X className="size-4 stroke-[2.5]" aria-hidden="true" />
+          </button>
+        </div>
+      )}
+
       {/* Reader Header */}
       <header className="safe-sticky-header z-30 flex items-center justify-between border-b border-[var(--color-line)] bg-[var(--color-surface)]/95 px-4 py-3 backdrop-blur-md">
         <button
@@ -161,32 +247,44 @@ export default function StoryReader({ capsule, onExit }) {
 
         <div className="flex items-center gap-2">
           <span className="rounded-full bg-[var(--color-accent-subtle)] px-2.5 py-1 text-xs font-bold tabular-nums text-[var(--color-accent)]">
-            {t('cardProgress', { current: index + 1, total: capsule.cards.length })}
+            {t('cardProgress', { current: index + 1, total: totalCards })}
           </span>
         </div>
       </header>
 
       {/* Main Reading Canvas */}
       <main className="flex-1 px-4 py-5">
-        {/* Segmented Progress Track with smooth animation */}
+        {/* Segmented Progress Track with Interactive Navigation & Feedback */}
         <div
-          className="flex gap-1.5"
-          role="progressbar"
-          aria-valuenow={index + 1}
-          aria-valuemin={1}
-          aria-valuemax={capsule.cards.length}
+          className="flex items-center gap-1.5"
+          role="tablist"
           aria-label="Progreso sa kurso"
         >
-          {capsule.cards.map((c, i) => (
-            <div
-              key={c.id}
-              className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${
-                i <= index
-                  ? 'bg-[var(--color-accent)] shadow-xs scale-y-110'
-                  : 'bg-[var(--color-line)]'
-              }`}
-            />
-          ))}
+          {capsule.cards.map((c, i) => {
+            const isCompleted = i <= maxUnlocked
+            const isActive = i === index
+            return (
+              <button
+                key={c.id}
+                type="button"
+                onClick={() => handleSegmentClick(i)}
+                aria-label={t('cardProgress', { current: i + 1, total: totalCards })}
+                data-progress-segment={i}
+                data-unlocked={isCompleted ? 'true' : 'false'}
+                className="group relative flex-1 py-2 cursor-pointer focus:outline-hidden"
+              >
+                <span
+                  className={`block h-1.5 w-full rounded-full transition-all duration-300 ${
+                    isCompleted
+                      ? isActive
+                        ? 'bg-[var(--color-accent)] shadow-xs scale-y-125'
+                        : 'bg-[var(--color-accent)] opacity-85 hover:opacity-100'
+                      : 'bg-[var(--color-line)] hover:bg-[var(--color-line)]/80'
+                  }`}
+                />
+              </button>
+            )
+          })}
         </div>
 
         {/* Content Card Presentation with Technique 05: Fast, then slow */}

@@ -14,7 +14,6 @@ import {
   X,
   ChevronRight,
   ChevronDown,
-  Sparkles,
 } from 'lucide-react'
 
 function DigitalSafetyArt() {
@@ -389,192 +388,214 @@ export default function CourseHub({
       {/* Available for Download Section */}
       {available.length > 0 && (
         <section aria-labelledby="available-heading">
-          <div className="flex items-center justify-between pb-2">
-            <h2
-              id="available-heading"
-              className="text-xs font-bold uppercase tracking-wider text-[var(--color-muted)]"
+          <h2
+            id="available-heading"
+            className="text-xs font-bold uppercase tracking-wider text-[var(--color-muted)]"
+          >
+            <button
+              type="button"
+              aria-expanded={availableOpen}
+              aria-controls="available-course-list"
+              onClick={() => setAvailableOpen((open) => !open)}
+              className="btn-press flex min-h-11 w-full items-center justify-between gap-2 rounded-xl px-1 text-left hover:text-[var(--color-ink)]"
             >
-              {t('availableHeading')}
-            </h2>
-            <span className="rounded-full bg-[var(--color-surface-sunken)] px-2 py-0.5 text-[11px] font-medium text-[var(--color-muted)]">
-              {t('availableCountTag', { n: available.length })}
-            </span>
+              <span>{t('availableHeading')}</span>
+              <span className="flex shrink-0 items-center gap-2">
+                <span className="rounded-full bg-[var(--color-surface-sunken)] px-2 py-0.5 text-[11px] font-medium normal-case tracking-normal text-[var(--color-muted)]">
+                  {t('availableCountTag', { n: available.length })}
+                </span>
+                <ChevronDown
+                  className={`size-4 stroke-[2.5] transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                    availableOpen ? 'rotate-180' : ''
+                  }`}
+                  aria-hidden="true"
+                />
+              </span>
+            </button>
+          </h2>
+          <div className={`accordion-grid ${availableOpen ? 'is-expanded' : ''}`}>
+            <div className="accordion-inner">
+              <ul id="available-course-list" hidden={!availableOpen} className="mt-2 space-y-3 p-1">
+                {available.map((capsule) => (
+                  <CapsuleCard
+                    key={capsule.id}
+                    capsule={capsule}
+                    onOpen={onOpen}
+                    onDownload={setConfirmDownloadTarget}
+                    onShare={setShareTarget}
+                    downloading={downloadingId === capsule.id}
+                  />
+                ))}
+              </ul>
+            </div>
           </div>
-          <ul className="mt-2 space-y-3">
-            {available.map((capsule) => (
-              <CapsuleCard
-                key={capsule.id}
-                capsule={capsule}
-                onOpen={onOpen}
-                onDownload={setConfirmDownloadTarget}
-                onShare={setShareTarget}
-                downloading={downloadingId === capsule.id}
-              />
-            ))}
-          </ul>
         </section>
       )}
 
-      {/* Share Options Modal - Centered Dialog */}
-      {shareTarget && typeof document !== 'undefined' && createPortal(
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs transition-opacity"
-          onClick={() => setShareTarget(null)}
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="share-modal-title"
-        >
+      {/* Share Options Modal - Centered Dialog via Portal */}
+      {shareTarget &&
+        typeof document !== 'undefined' &&
+        createPortal(
           <div
-            className="relative m-auto w-full max-w-[360px] rounded-3xl border border-[var(--color-line)] bg-[var(--color-surface)] p-5 shadow-2xl transition-all animate-pop-in"
-            onClick={(e) => e.stopPropagation()}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs transition-opacity"
+            onClick={() => setShareTarget(null)}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="share-modal-title"
           >
-            {/* Modal Header */}
-            <div className="flex items-start justify-between gap-3 border-b border-[var(--color-line)] pb-4">
-              <div className="flex items-center gap-3">
-                <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[var(--color-accent-subtle)] text-[var(--color-accent)]">
-                  <Share2 className="size-5 stroke-[2.2]" aria-hidden="true" />
-                </div>
-                <div className="min-w-0">
-                  <h3 id="share-modal-title" className="text-base font-bold text-[var(--color-ink)]">
-                    {t('shareModalTitle')}
-                  </h3>
-                  <p className="truncate text-xs font-medium text-[var(--color-muted)]">
-                    {shareTarget.title}
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShareTarget(null)}
-                className="btn-press flex size-8 items-center justify-center rounded-lg text-[var(--color-muted)] hover:bg-[var(--color-surface-sunken)] hover:text-[var(--color-ink)]"
-                aria-label={t('shareModalClose')}
-              >
-                <X className="size-4 stroke-[2.5]" aria-hidden="true" />
-              </button>
-            </div>
-
-            {/* Options List */}
-            <div className="py-4 space-y-2">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-[var(--color-muted)]">
-                {t('shareModalSubtitle')}
-              </p>
-
-              {/* Option: Download .kabsat file */}
-              <button
-                type="button"
-                onClick={() => {
-                  const target = shareTarget
-                  setShareTarget(null)
-                  onShare(target.id, 'download')
-                }}
-                className="btn-press card-tactile flex w-full items-center justify-between gap-3.5 rounded-2xl border-2 border-[var(--color-accent)]/20 bg-[var(--color-surface-hover)] p-4 text-left transition-colors hover:border-[var(--color-accent)] hover:bg-[var(--color-accent-subtle)]/40"
-              >
+            <div
+              className="relative m-auto w-full max-w-[360px] rounded-3xl border border-[var(--color-line)] bg-[var(--color-surface)] p-5 shadow-2xl transition-all animate-pop-in"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Modal Header */}
+              <div className="flex items-start justify-between gap-3 border-b border-[var(--color-line)] pb-4">
                 <div className="flex items-center gap-3">
-                  <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[var(--color-accent)] text-white shadow-xs">
-                    <Download className="size-5 stroke-[2.5]" aria-hidden="true" />
+                  <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[var(--color-accent-subtle)] text-[var(--color-accent)]">
+                    <Share2 className="size-5 stroke-[2.2]" aria-hidden="true" />
                   </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <p className="text-sm font-bold text-[var(--color-ink)]">
-                        {t('shareOptionDownloadTitle')}
-                      </p>
-                      <span className="rounded-full bg-[var(--color-accent-subtle)] px-2 py-0.5 text-[10px] font-extrabold text-[var(--color-accent)]">
-                        .kabsat
-                      </span>
-                    </div>
-                    <p className="mt-0.5 text-xs text-[var(--color-muted)]">
-                      {t('shareOptionDownloadSub')}
+                  <div className="min-w-0">
+                    <h3 id="share-modal-title" className="text-base font-bold text-[var(--color-ink)]">
+                      {t('shareModalTitle')}
+                    </h3>
+                    <p className="truncate text-xs font-medium text-[var(--color-muted)]">
+                      {shareTarget.title}
                     </p>
                   </div>
                 </div>
-                <ChevronRight className="size-4 shrink-0 text-[var(--color-accent)] stroke-[2.5]" aria-hidden="true" />
-              </button>
-            </div>
-
-            {/* Modal Cancel Button */}
-            <div className="pt-2">
-              <button
-                type="button"
-                onClick={() => setShareTarget(null)}
-                className="btn-press flex min-h-11 w-full items-center justify-center rounded-xl border border-[var(--color-line)] bg-[var(--color-surface)] text-xs font-bold text-[var(--color-muted)] hover:bg-[var(--color-surface-sunken)] hover:text-[var(--color-ink)]"
-              >
-                {t('shareModalCancel')}
-              </button>
-            </div>
-          </div>
-        </div>,
-        document.body
-      )}
-
-      {/* Download Confirmation Modal - Centered Dialog */}
-      {confirmDownloadTarget && typeof document !== 'undefined' && createPortal(
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs transition-opacity"
-          onClick={() => setConfirmDownloadTarget(null)}
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="confirm-download-modal-title"
-        >
-          <div
-            className="relative m-auto w-full max-w-[360px] rounded-3xl border border-[var(--color-line)] bg-[var(--color-surface)] p-5 shadow-2xl transition-all animate-pop-in"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Modal Header */}
-            <div className="flex items-start justify-between gap-3 border-b border-[var(--color-line)] pb-4">
-              <div className="flex items-center gap-3">
-                <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[var(--color-accent-subtle)] text-[var(--color-accent)]">
-                  <Download className="size-5 stroke-[2.2]" aria-hidden="true" />
-                </div>
-                <div className="min-w-0">
-                  <h3 id="confirm-download-modal-title" className="text-base font-bold text-[var(--color-ink)]">
-                    {t('confirmDownloadTitle')}
-                  </h3>
-                  <p className="truncate text-xs font-medium text-[var(--color-muted)]">
-                    {confirmDownloadTarget.title} · {confirmDownloadTarget.kb} KB
-                  </p>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => setShareTarget(null)}
+                  className="btn-press flex size-8 items-center justify-center rounded-lg text-[var(--color-muted)] hover:bg-[var(--color-surface-sunken)] hover:text-[var(--color-ink)]"
+                  aria-label={t('shareModalClose')}
+                >
+                  <X className="size-4 stroke-[2.5]" aria-hidden="true" />
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={() => setConfirmDownloadTarget(null)}
-                className="btn-press flex size-8 items-center justify-center rounded-lg text-[var(--color-muted)] hover:bg-[var(--color-surface-sunken)] hover:text-[var(--color-ink)]"
-                aria-label={t('shareModalClose')}
-              >
-                <X className="size-4 stroke-[2.5]" aria-hidden="true" />
-              </button>
-            </div>
 
-            {/* Explanation Prompt */}
-            <p className="mt-4 text-xs leading-relaxed text-[var(--color-muted)]">
-              {t('confirmDownloadPrompt')}
-            </p>
+              {/* Options List */}
+              <div className="py-4 space-y-2">
+                <p className="text-[11px] font-bold uppercase tracking-wider text-[var(--color-muted)]">
+                  {t('shareModalSubtitle')}
+                </p>
 
-            {/* Action Buttons: Cancel and Download Now */}
-            <div className="mt-5 flex items-center gap-2.5">
-              <button
-                type="button"
-                onClick={() => setConfirmDownloadTarget(null)}
-                className="btn-press flex-1 rounded-xl border border-[var(--color-line)] bg-[var(--color-surface)] py-2.5 text-xs font-bold text-[var(--color-muted)] hover:bg-[var(--color-surface-sunken)] hover:text-[var(--color-ink)]"
-              >
-                {t('confirmDownloadCancel')}
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  const targetId = confirmDownloadTarget.id
-                  setConfirmDownloadTarget(null)
-                  onDownload(targetId)
-                }}
-                className="btn-press flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-[var(--color-accent)] py-2.5 text-xs font-bold text-[var(--color-on-accent)] shadow-md hover:bg-[var(--color-accent-strong)]"
-              >
-                <Download className="size-3.5 stroke-[2.5]" aria-hidden="true" />
-                <span>{t('confirmDownloadAction')}</span>
-              </button>
+                {/* Option: Download .kabsat file */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    const target = shareTarget
+                    setShareTarget(null)
+                    onShare(target.id, 'download')
+                  }}
+                  className="btn-press card-tactile flex w-full items-center justify-between gap-3.5 rounded-2xl border-2 border-[var(--color-accent)]/20 bg-[var(--color-surface-hover)] p-4 text-left transition-colors hover:border-[var(--color-accent)] hover:bg-[var(--color-accent-subtle)]/40"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[var(--color-accent)] text-white shadow-xs">
+                      <Download className="size-5 stroke-[2.5]" aria-hidden="true" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-bold text-[var(--color-ink)]">
+                          {t('shareOptionDownloadTitle')}
+                        </p>
+                        <span className="rounded-full bg-[var(--color-accent-subtle)] px-2 py-0.5 text-[10px] font-extrabold text-[var(--color-accent)]">
+                          .kabsat
+                        </span>
+                      </div>
+                      <p className="mt-0.5 text-xs text-[var(--color-muted)]">
+                        {t('shareOptionDownloadSub')}
+                      </p>
+                    </div>
+                  </div>
+                  <ChevronRight className="size-4 shrink-0 text-[var(--color-accent)] stroke-[2.5]" aria-hidden="true" />
+                </button>
+              </div>
+
+              {/* Modal Cancel Button */}
+              <div className="pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShareTarget(null)}
+                  className="btn-press flex min-h-11 w-full items-center justify-center rounded-xl border border-[var(--color-line)] bg-[var(--color-surface)] text-xs font-bold text-[var(--color-muted)] hover:bg-[var(--color-surface-sunken)] hover:text-[var(--color-ink)]"
+                >
+                  {t('shareModalCancel')}
+                </button>
+              </div>
             </div>
-          </div>
-        </div>,
-        document.body
-      )}
+          </div>,
+          document.body
+        )}
+
+      {/* Download Confirmation Modal - Centered Dialog via Portal */}
+      {confirmDownloadTarget &&
+        typeof document !== 'undefined' &&
+        createPortal(
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs transition-opacity"
+            onClick={() => setConfirmDownloadTarget(null)}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="confirm-download-modal-title"
+          >
+            <div
+              className="relative m-auto w-full max-w-[360px] rounded-3xl border border-[var(--color-line)] bg-[var(--color-surface)] p-5 shadow-2xl transition-all animate-pop-in"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Modal Header */}
+              <div className="flex items-start justify-between gap-3 border-b border-[var(--color-line)] pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[var(--color-accent-subtle)] text-[var(--color-accent)]">
+                    <Download className="size-5 stroke-[2.2]" aria-hidden="true" />
+                  </div>
+                  <div className="min-w-0">
+                    <h3 id="confirm-download-modal-title" className="text-base font-bold text-[var(--color-ink)]">
+                      {t('confirmDownloadTitle')}
+                    </h3>
+                    <p className="truncate text-xs font-medium text-[var(--color-muted)]">
+                      {confirmDownloadTarget.title} · {confirmDownloadTarget.kb} KB
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setConfirmDownloadTarget(null)}
+                  className="btn-press flex size-8 items-center justify-center rounded-lg text-[var(--color-muted)] hover:bg-[var(--color-surface-sunken)] hover:text-[var(--color-ink)]"
+                  aria-label={t('shareModalClose')}
+                >
+                  <X className="size-4 stroke-[2.5]" aria-hidden="true" />
+                </button>
+              </div>
+
+              {/* Explanation Prompt */}
+              <p className="mt-4 text-xs leading-relaxed text-[var(--color-muted)]">
+                {t('confirmDownloadPrompt')}
+              </p>
+
+              {/* Action Buttons: Cancel and Download Now */}
+              <div className="mt-5 flex items-center gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => setConfirmDownloadTarget(null)}
+                  className="btn-press flex-1 rounded-xl border border-[var(--color-line)] bg-[var(--color-surface)] py-2.5 text-xs font-bold text-[var(--color-muted)] hover:bg-[var(--color-surface-sunken)] hover:text-[var(--color-ink)]"
+                >
+                  {t('confirmDownloadCancel')}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const targetId = confirmDownloadTarget.id
+                    setConfirmDownloadTarget(null)
+                    onDownload(targetId)
+                  }}
+                  className="btn-press flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-[var(--color-accent)] py-2.5 text-xs font-bold text-[var(--color-on-accent)] shadow-md hover:bg-[var(--color-accent-strong)]"
+                >
+                  <Download className="size-3.5 stroke-[2.5]" aria-hidden="true" />
+                  <span>{t('confirmDownloadAction')}</span>
+                </button>
+              </div>
+            </div>
+          </div>,
+          document.body
+        )}
     </div>
   )
 }

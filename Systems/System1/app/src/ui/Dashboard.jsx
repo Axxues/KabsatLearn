@@ -24,7 +24,7 @@ const BARANGAYS = [
   { name: 'Sevilla', mastery: 64 },
 ]
 
-function Bar({ label, value }) {
+function Bar({ label, value, courseProgress = null, quizMastery = null }) {
   const { t } = useI18n()
   const width = value === null ? 0 : Math.max(4, value)
   const isHigh = value !== null && value >= 70
@@ -36,10 +36,26 @@ function Bar({ label, value }) {
       ? 'bg-[var(--color-warn)]'
       : 'bg-[var(--color-terracotta)]'
 
+  let subtitle = null
+  if (courseProgress !== null && quizMastery !== null) {
+    subtitle = `${t('courseProgressLabel')}: ${courseProgress}% · ${t('quizScoreLabel')}: ${quizMastery}%`
+  } else if (courseProgress !== null) {
+    subtitle = `${t('courseProgressLabel')}: ${courseProgress}%`
+  } else if (quizMastery !== null) {
+    subtitle = `${t('quizScoreLabel')}: ${quizMastery}%`
+  }
+
   return (
     <li className="rounded-xl border border-[var(--color-line)] bg-[var(--color-surface)] p-3 shadow-2xs">
       <div className="flex items-baseline justify-between text-xs">
-        <span className="font-bold text-[var(--color-ink)]">{label}</span>
+        <div>
+          <span className="font-bold text-[var(--color-ink)]">{label}</span>
+          {subtitle && (
+            <p className="text-[10px] text-[var(--color-muted)] font-medium mt-0.5">
+              {subtitle}
+            </p>
+          )}
+        </div>
         <div className="flex items-center gap-1.5">
           <span className="tabular-nums font-black text-[var(--color-ink)]">
             {value === null ? '—' : `${value}%`}
@@ -123,12 +139,14 @@ export default function Dashboard({ capsules: propCapsules } = {}) {
 
   const mastery = masteryByCompetency(
     events,
-    activeCompetencies
+    activeCompetencies,
+    installedList
   )
   const remediations = proposedRemediations(
     events,
     60,
-    activeCompetencies
+    activeCompetencies,
+    installedList
   ).filter((row) => !approved.includes(row.competency))
 
   const validScores = mastery.map((m) => m.mastery).filter((v) => v !== null)
@@ -231,7 +249,13 @@ export default function Dashboard({ capsules: propCapsules } = {}) {
             </li>
           ) : (
             mastery.map((row) => (
-              <Bar key={row.competency} label={row.label} value={row.mastery} />
+              <Bar
+                key={row.competency}
+                label={row.label}
+                value={row.mastery}
+                courseProgress={row.courseProgress}
+                quizMastery={row.quizMastery}
+              />
             ))
           )}
         </ul>

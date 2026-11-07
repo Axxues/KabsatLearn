@@ -3,13 +3,78 @@ import { answerOffline, contextFor } from './rag.js'
 
 const llm = () => import('./llm.js')
 
+export const AI_SESSION_STORAGE_KEY = 'kabsat_ai_session'
+
+export function loadSavedAiSession() {
+  if (typeof localStorage === 'undefined') return null
+  try {
+    const raw = localStorage.getItem(AI_SESSION_STORAGE_KEY)
+    if (!raw) return null
+    const parsed = JSON.parse(raw)
+    if (Array.isArray(parsed?.messages) && parsed.messages.length > 1) {
+      return parsed.messages.map((msg) =>
+        msg.thinking
+          ? {
+              ...msg,
+              thinking: false,
+              answered: true,
+              text: msg.text || '',
+            }
+          : msg,
+      )
+    }
+  } catch {
+    // Ignore parse error
+  }
+  return null
+}
+
+export function saveAiSession(messages) {
+  if (typeof localStorage === 'undefined') return
+  try {
+    if (messages.length <= 1) {
+      clearAiSession()
+      return
+    }
+    const cleanMessages = messages.map((msg) =>
+      msg.thinking
+        ? { ...msg, thinking: false, answered: true, text: msg.text || '' }
+        : msg,
+    )
+    localStorage.setItem(
+      AI_SESSION_STORAGE_KEY,
+      JSON.stringify({
+        updatedAt: Date.now(),
+        messages: cleanMessages,
+      }),
+    )
+  } catch {
+    // Ignore storage quota errors
+  }
+}
+
+export function clearAiSession() {
+  if (typeof localStorage === 'undefined') return
+  try {
+    localStorage.removeItem(AI_SESSION_STORAGE_KEY)
+  } catch {
+    // Ignore
+  }
+}
+
 export function useKabsatAiState({ capsule, t, lang }) {
-  const [messages, setMessages] = useState(() => [
-    {
-      role: 'assistant',
-      text: t('aiWelcome', { title: capsule.title }),
-    },
-  ])
+  const [messages, setMessages] = useState(() => {
+    const saved = loadSavedAiSession()
+    if (saved && saved.length > 0) {
+      return saved
+    }
+    return [
+      {
+        role: 'assistant',
+        text: t('aiWelcome', { title: capsule.title }),
+      },
+    ]
+  })
   const [input, setInput] = useState('')
   const [isProcessing, setIsProcessing] = useState(false)
   const [model, setModel] = useState({ state: 'idle', progress: 0 })
@@ -21,7 +86,23 @@ export function useKabsatAiState({ capsule, t, lang }) {
   const messagesRef = useRef(messages)
   useEffect(() => {
     messagesRef.current = messages
+    if (messages.length > 0) {
+      saveAiSession(messages)
+    }
   }, [messages])
+
+  // Sync welcome greeting when only the initial welcome message exists and language flips
+  useEffect(() => {
+    setMessages((current) => {
+      if (current.length === 1 && current[0].role === 'assistant') {
+        const welcome = t('aiWelcome', { title: capsule.title })
+        if (current[0].text !== welcome) {
+          return [{ role: 'assistant', text: welcome }]
+        }
+      }
+      return current
+    })
+  }, [capsule.title, lang, t])
 
   const abortControllerRef = useRef(null)
 
@@ -44,6 +125,22 @@ export function useKabsatAiState({ capsule, t, lang }) {
       ),
     )
   }, [lang])
+
+  const resetSession = useCallback(() => {
+    clearAiSession()
+    setInput('')
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort()
+      abortControllerRef.current = null
+    }
+    setIsProcessing(false)
+    setMessages([
+      {
+        role: 'assistant',
+        text: t('aiWelcome', { title: capsule.title }),
+      },
+    ])
+  }, [capsule.title, t])
 
   const prepareModel = async () => {
     setModel({ state: 'loading', progress: 0 })
@@ -284,5 +381,6 @@ export function useKabsatAiState({ capsule, t, lang }) {
     ask,
     explainAt,
     known,
+    resetSession,
   }
 }

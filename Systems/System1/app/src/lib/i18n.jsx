@@ -42,9 +42,9 @@ const TRANSLATIONS = {
     downloadCourse: 'I-download ({kb} KB)',
     downloading: 'Kinukuha…',
     downloadingMsg: 'Kinukuha ang aralin…',
-    passCourse: 'Ipasa',
-    passTooltip: 'Ipasa sa kaklase via Bluetooth o Nearby Share',
-    passAria: 'Ipasa ang {title} sa kaklase',
+    passCourse: 'Ibahagi',
+    passTooltip: 'Ibahagi sa kaklase via Bluetooth o Nearby Share',
+    passAria: 'Ibahagi ang {title} sa kaklase',
     loadingCourses: 'Kinukuha ang iyong mga kurso…',
     shareSuccess: 'Naibahagi ang aralin via Nearby/Share.',
     saveSuccess: 'Na-save bilang .kabsat file.',
@@ -74,6 +74,7 @@ const TRANSLATIONS = {
     previous: 'Nakaraan',
     nextLesson: 'Susunod na Aralin',
     finishCourse: 'Tapusin ang Kurso',
+    pageNotCompleted: 'Hindi pa nakumpleto ang araling ito.',
 
     // Red-Flag Drill
     drillBadge: 'Subukan ang Galing',
@@ -99,6 +100,12 @@ const TRANSLATIONS = {
     playSoloSub: 'Sanayin ang sariling talas',
     playPass: 'Pass and Play (2 Manlalaro)',
     playPassSub: 'Salitan sa iisang telepono',
+    timePerQuestion: 'Oras bawat tanong',
+    playersLabel: 'Bilang ng manlalaro',
+    soloOption: '1 Solo',
+    playSoloShort: 'Isahan',
+    playerCountOption: '{n} Manlalaro',
+    playPassCustom: 'Pass and Play ({n} Manlalaro)',
     startQuizCta: 'Magsimula →',
     questionProgress: 'Tanong {current} / {total}',
     pts: 'pts',
@@ -120,6 +127,11 @@ const TRANSLATIONS = {
     playAgain: 'Maglaro Muli',
     backToCourses: 'Bumalik sa Mga Kurso',
     noQuestions: 'Wala nang natitirang tanong sa kursong ito.',
+    exitQuizAria: 'Lumabas sa Quiz',
+    exitQuizTitle: 'Lumabas sa Quiz?',
+    exitQuizPrompt: 'Mawawala ang iyong kasalukuyang score at streak kung aalis ka ngayon sa laban na ito.',
+    exitQuizConfirm: 'Lumabas',
+    exitQuizCancel: 'Magpatuloy',
 
     // Kabsat AI
     aiTitle: 'Kabsat AI',
@@ -133,6 +145,8 @@ const TRANSLATIONS = {
     askPlaceholder: 'Itanong kay Kabsat…',
     send: 'Send',
     stop: 'Itigil',
+    newChat: 'Bagong Chat',
+    clearSessionTooltip: 'Simulan ang bagong usapan',
     quickChips: [
       'Sino ka?',
     ],
@@ -145,6 +159,8 @@ const TRANSLATIONS = {
     avgMastery: 'Average Mastery',
     overall: 'overall',
     masteryHeading: 'Mastery ng Kakayahan (Competency)',
+    courseProgressLabel: 'Kurso',
+    quizScoreLabel: 'Pagsusulit',
     noDownloadedCourses: 'Walang naka-download na kurso',
     masteryHigh: 'Matatag',
     masteryMid: 'Katamtaman',
@@ -210,9 +226,9 @@ const TRANSLATIONS = {
     downloadCourse: 'Download ({kb} KB)',
     downloading: 'Downloading…',
     downloadingMsg: 'Downloading lesson capsule…',
-    passCourse: 'Pass',
-    passTooltip: 'Pass to classmate via Bluetooth or Nearby Share',
-    passAria: 'Pass {title} to classmate',
+    passCourse: 'Share',
+    passTooltip: 'Share with classmate via Bluetooth or Nearby Share',
+    passAria: 'Share {title} with classmate',
     loadingCourses: 'Loading your courses…',
     shareSuccess: 'Course shared via Nearby / Share Sheet.',
     saveSuccess: 'Saved as a .kabsat file.',
@@ -242,6 +258,7 @@ const TRANSLATIONS = {
     previous: 'Previous',
     nextLesson: 'Next Lesson',
     finishCourse: 'Finish Course',
+    pageNotCompleted: 'This page is still not completed.',
 
     // Red-Flag Drill
     drillBadge: 'Test Your Skills',
@@ -267,6 +284,12 @@ const TRANSLATIONS = {
     playSoloSub: 'Sharpen your memory & speed',
     playPass: 'Pass and Play (2 Players)',
     playPassSub: 'Take turns on one phone',
+    timePerQuestion: 'Time per question',
+    playersLabel: 'Amount of players',
+    soloOption: '1 Solo',
+    playSoloShort: 'Solo',
+    playerCountOption: '{n} Players',
+    playPassCustom: 'Pass and Play ({n} Players)',
     startQuizCta: 'Start Game →',
     questionProgress: 'Question {current} / {total}',
     pts: 'pts',
@@ -288,6 +311,11 @@ const TRANSLATIONS = {
     playAgain: 'Play Again',
     backToCourses: 'Back to Courses',
     noQuestions: 'No questions left in this course.',
+    exitQuizAria: 'Exit Quiz',
+    exitQuizTitle: 'Leave Quiz?',
+    exitQuizPrompt: 'Your current score and streak in this round will be lost if you leave now.',
+    exitQuizConfirm: 'Leave Quiz',
+    exitQuizCancel: 'Keep Playing',
 
     // Kabsat AI
     aiTitle: 'Kabsat AI',
@@ -301,6 +329,8 @@ const TRANSLATIONS = {
     askPlaceholder: 'Ask Kabsat a question…',
     send: 'Send',
     stop: 'Stop',
+    newChat: 'New Chat',
+    clearSessionTooltip: 'Start a new conversation',
     quickChips: [
       'Who are you?',
     ],
@@ -313,6 +343,8 @@ const TRANSLATIONS = {
     avgMastery: 'Average Mastery',
     overall: 'overall',
     masteryHeading: 'Mastery by Competency',
+    courseProgressLabel: 'Course',
+    quizScoreLabel: 'Quiz',
     noDownloadedCourses: 'No downloaded courses yet',
     masteryHigh: 'Strong',
     masteryMid: 'Moderate',
@@ -340,8 +372,9 @@ const TRANSLATIONS = {
 
 const I18nContext = createContext(null)
 
-export function I18nProvider({ children }) {
+export function I18nProvider({ children, initialLang }) {
   const [lang, setLangState] = useState(() => {
+    if (initialLang) return initialLang
     if (typeof window !== 'undefined') {
       const stored = localStorage.getItem('kabsat_lang')
       if (stored === 'en' || stored === 'fil') return stored

@@ -27,6 +27,8 @@ function nativePlugin() {
   return pluginPromise
 }
 
+let currentSession = null
+
 /** Map 'en', 'en-US', 'fil-PH', 'tl' to the two voices we support. */
 export function normaliseVoice(value) {
   const tag = String(value ?? '').toLowerCase()
@@ -34,50 +36,16 @@ export function normaliseVoice(value) {
   return 'fil-PH'
 }
 
-export async function speak(text, { lang = 'fil-PH' } = {}) {
-  const voice = normaliseVoice(lang)
-  const content = String(text ?? '').trim()
-  if (!content) return { ok: false, reason: 'empty' }
-
-  const native = await nativePlugin()
-  const plugin = native?.tts ?? null
-  if (plugin) {
+export async function stopSpeaking() {
+  if (currentSession) {
+    const session = currentSession
+    currentSession = null
     try {
-      await plugin.stop()
-      await plugin.speak({
-        text: content,
-        lang: voice,
-        rate: 0.95,
-        pitch: 1.0,
-        volume: 1.0,
-      })
-      return { ok: true, engine: 'native', lang: voice }
-    } catch (error) {
-      return { ok: false, engine: 'native', lang: voice, error: error?.message ?? 'speak failed' }
+      session.onEnd?.()
+    } catch {
+      // ignore handler errors
     }
   }
-
-  if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
-    return { ok: false, reason: 'unsupported', lang: voice }
-  }
-
-  const utterance = new SpeechSynthesisUtterance(content)
-  utterance.lang = voice
-  utterance.rate = 0.95
-
-  const voices = window.speechSynthesis.getVoices()
-  const exact = voices.find((candidate) => candidate.lang?.toLowerCase() === voice.toLowerCase())
-  const prefix = voices.find((candidate) => candidate.lang?.toLowerCase().startsWith(voice.slice(0, 2).toLowerCase()))
-  const chosen = exact ?? prefix
-  if (chosen) utterance.voice = chosen
-
-  window.speechSynthesis.cancel()
-  window.speechSynthesis.speak(utterance)
-
-  return { ok: true, engine: 'web', lang: voice, matched: Boolean(chosen) }
-}
-
-export async function stopSpeaking() {
   const native = await nativePlugin()
   const plugin = native?.tts ?? null
   if (plugin) {
@@ -91,6 +59,86 @@ export async function stopSpeaking() {
   if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
     window.speechSynthesis.cancel()
   }
+}
+
+export async function speak(text, { lang = 'fil-PH', onStart, onEnd, onError } = {}) {
+  // If there's an active speech session, stop it first
+  if (currentSession) {
+    await stopSpeaking()
+  }
+
+  const voice = normaliseVoice(lang)
+  const content = String(text ?? '').trim()
+  if (!content) {
+    onEnd?.()
+    return { ok: false, reason: 'empty' }
+  }
+
+  const session = {
+    cancelled: false,
+    onEnd: () => {
+      if (session.cancelled) return
+      session.cancelled = true
+      if (currentSession === session) {
+        currentSession = null
+      }
+      onEnd?.()
+    },
+  }
+  currentSession = session
+
+  const native = await nativePlugin()
+  const plugin = native?.tts ?? null
+  if (plugin) {
+    try {
+      await plugin.stop()
+      if (!session.cancelled) onStart?.()
+      await plugin.speak({
+        text: content,
+        lang: voice,
+        rate: 0.95,
+        pitch: 1.0,
+        volume: 1.0,
+      })
+      session.onEnd()
+      return { ok: true, engine: 'native', lang: voice }
+    } catch (error) {
+      onError?.(error)
+      session.onEnd()
+      return { ok: false, engine: 'native', lang: voice, error: error?.message ?? 'speak failed' }
+    }
+  }
+
+  if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
+    session.onEnd()
+    return { ok: false, reason: 'unsupported', lang: voice }
+  }
+
+  const utterance = new SpeechSynthesisUtterance(content)
+  utterance.lang = voice
+  utterance.rate = 0.95
+
+  const voices = window.speechSynthesis.getVoices()
+  const exact = voices.find((candidate) => candidate.lang?.toLowerCase() === voice.toLowerCase())
+  const prefix = voices.find((candidate) => candidate.lang?.toLowerCase().startsWith(voice.slice(0, 2).toLowerCase()))
+  const chosen = exact ?? prefix
+  if (chosen) utterance.voice = chosen
+
+  utterance.onstart = () => {
+    if (!session.cancelled) onStart?.()
+  }
+  utterance.onend = () => {
+    session.onEnd()
+  }
+  utterance.onerror = (e) => {
+    onError?.(e)
+    session.onEnd()
+  }
+
+  window.speechSynthesis.cancel()
+  window.speechSynthesis.speak(utterance)
+
+  return { ok: true, engine: 'web', lang: voice, matched: Boolean(chosen) }
 }
 
 /** Voices the OS actually offers, used to tell the user when Filipino is missing. */

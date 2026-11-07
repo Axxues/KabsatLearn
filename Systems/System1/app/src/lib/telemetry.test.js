@@ -2,8 +2,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { db } from './capsuleStore.js'
 import { masteryByCompetency, proposedRemediations } from './mastery.js'
 import { clearQueue, flush, queueEvent, queueSize } from './telemetry.js'
+import { markCourseCompleted, saveCoursePage } from './courseProgress.js'
 
 beforeEach(async () => {
+  localStorage.clear()
   await db.telemetry.clear()
 })
 
@@ -68,5 +70,44 @@ describe('mastery', () => {
   it('proposes remediation only below the threshold, weakest first', () => {
     const proposed = proposedRemediations(events)
     expect(proposed.map((row) => row.competency)).toEqual(['digital_livelihood'])
+  })
+
+  it('combines 50% course progress and 50% quiz score', () => {
+    // 2/3 correct quiz = 67%
+    // Course completed = 100%
+    markCourseCompleted('capsule-101')
+    const installed = [{ id: 'capsule-101', installed: true }]
+    const rows = masteryByCompetency(events, null, installed)
+    const safety = rows.find((row) => row.competency === 'cyber_safety')
+
+    // 100 * 0.5 + 67 * 0.5 = 50 + 33.5 = 84 (Math.round(83.5) = 84)
+    expect(safety.courseProgress).toBe(100)
+    expect(safety.quizMastery).toBe(67)
+    expect(safety.mastery).toBe(84)
+  })
+
+  it('uses course progress alone when there are no quiz attempts', () => {
+    // Capsule 101 also teaches financial_literacy, with 0 quiz attempts in events
+    markCourseCompleted('capsule-101')
+    const installed = [{ id: 'capsule-101', installed: true }]
+    const rows = masteryByCompetency(events, null, installed)
+    const fin = rows.find((row) => row.competency === 'financial_literacy')
+
+    expect(fin.attempts).toBe(0)
+    expect(fin.quizMastery).toBeNull()
+    expect(fin.courseProgress).toBe(100)
+    expect(fin.mastery).toBe(100)
+  })
+
+  it('formats remediation reason for course progress when attempts are 0', () => {
+    // Navigated to page 1 out of 6 -> cardsSeen 2/6 = 33%
+    saveCoursePage('capsule-101', 1, 6)
+    const installed = [{ id: 'capsule-101', installed: true }]
+    const proposed = proposedRemediations(events, 60, null, installed)
+    const fin = proposed.find((row) => row.competency === 'financial_literacy')
+
+    expect(fin).toBeDefined()
+    expect(fin.mastery).toBe(33)
+    expect(fin.reason).toBe('Financial literacy course progress at 33%')
   })
 })

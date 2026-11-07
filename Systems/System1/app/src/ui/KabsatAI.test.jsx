@@ -147,4 +147,122 @@ describe('Kabsat AI send and stop button', () => {
     expect(getStopButton()).toBeUndefined()
     expect(getSendButton()).not.toBeNull()
   })
+
+  test('saves session on the device and restores it upon remount', async () => {
+    const input = container.querySelector('#ask')
+    setInputValue(input, 'Ano ang OTP?')
+
+    await act(async () => {
+      const form = input.closest('form')
+      form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }))
+    })
+
+    await act(async () => {
+      if (explainResolve) {
+        explainResolve({ text: 'Ang OTP ay one-time password.', ok: true })
+      }
+      await vi.advanceTimersByTimeAsync(1500)
+    })
+
+    // Check localStorage has saved session
+    const savedRaw = localStorage.getItem('kabsat_ai_session')
+    expect(savedRaw).not.toBeNull()
+    const parsed = JSON.parse(savedRaw)
+    expect(parsed.messages.length).toBeGreaterThanOrEqual(2)
+    expect(parsed.messages.some((m) => m.text.includes('Ano ang OTP?'))).toBe(true)
+
+    // Unmount and remount a fresh KabsatAI instance
+    await act(async () => {
+      root.unmount()
+    })
+
+    root = createRoot(container)
+    await act(async () => {
+      root.render(
+        <I18nProvider>
+          <KabsatAI capsule={capsule101} onExit={() => {}} />
+        </I18nProvider>,
+      )
+    })
+
+    // Restored session renders previous conversation
+    expect(container.textContent).toContain('Ano ang OTP?')
+
+    // New Chat button is rendered
+    const newChatBtn = container.querySelector('button[aria-label="Bagong Chat"], button[aria-label="New Chat"]')
+    expect(newChatBtn).not.toBeNull()
+
+    // Clicking New Chat resets the session and clears device storage
+    await act(async () => {
+      newChatBtn.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    })
+
+    expect(localStorage.getItem('kabsat_ai_session')).toBeNull()
+    expect(container.textContent).not.toContain('Ano ang OTP?')
+  })
+
+  test('toggles Listen button to Speaking... until speech ends, and clicking Speaking stops it', async () => {
+    let activeUtterance = null
+    const speakMock = vi.fn((utt) => {
+      activeUtterance = utt
+      utt.onstart?.()
+    })
+    const cancelMock = vi.fn(() => {
+      if (activeUtterance) {
+        activeUtterance.onerror?.({ error: 'canceled' })
+        activeUtterance = null
+      }
+    })
+
+    window.speechSynthesis = {
+      speak: speakMock,
+      cancel: cancelMock,
+      getVoices: vi.fn(() => []),
+    }
+    window.SpeechSynthesisUtterance = function (text) {
+      this.text = text
+      this.lang = 'fil-PH'
+    }
+
+    // Initial assistant greeting has a Listen / Pakinggan button
+    const listenBtn = [...container.querySelectorAll('main button')].find((b) =>
+      b.textContent.includes('Pakinggan') || b.textContent.includes('Listen'),
+    )
+    expect(listenBtn).toBeTruthy()
+
+    // 1. Click "Listen"
+    await act(async () => {
+      listenBtn.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    })
+
+    // Button should now be changed to "Speaking..." with soundwave
+    expect(listenBtn.textContent).toMatch(/Speaking\.\.\.|Nagsasalita…/)
+    expect(listenBtn.querySelector('.animate-soundwave-1')).not.toBeNull()
+    expect(speakMock).toHaveBeenCalled()
+
+    // 2. Simulate speech finishing naturally
+    await act(async () => {
+      activeUtterance?.onend?.()
+    })
+
+    // Button should change back to Listen
+    expect(listenBtn.textContent).toMatch(/Pakinggan|Listen/)
+    expect(listenBtn.querySelector('.animate-soundwave-1')).toBeNull()
+
+    // 3. Click "Listen" again
+    await act(async () => {
+      listenBtn.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    })
+    expect(listenBtn.textContent).toMatch(/Speaking\.\.\.|Nagsasalita…/)
+
+    // 4. Click the "Speaking..." button while speaking to stop it
+    await act(async () => {
+      listenBtn.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    })
+
+    // Should stop text to speech and change back to Listen button
+    expect(cancelMock).toHaveBeenCalled()
+    expect(listenBtn.textContent).toMatch(/Pakinggan|Listen/)
+    expect(listenBtn.querySelector('.animate-soundwave-1')).toBeNull()
+  })
 })

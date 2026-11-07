@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 // The on-device model runtime is ~6 MB, so it is loaded only when the learner
 // asks for an explanation. Static import would make every launch parse it.
 const llm = () => import('../lib/llm.js')
-import { speak } from '../lib/tts.js'
+import { speak, stopSpeaking } from '../lib/tts.js'
 import { useI18n } from '../lib/i18n.jsx'
 import { useKabsatAiState } from '../lib/useKabsatAiState.js'
 import {
@@ -18,15 +18,34 @@ import {
   RotateCcw,
 } from 'lucide-react'
 
-function Bubble({ message, canExplain, onExplain }) {
+function Bubble({
+  message,
+  canExplain,
+  onExplain,
+  isSpeaking = false,
+  onToggleSpeak,
+}) {
   const { lang, t } = useI18n()
   const mine = message.role === 'user'
-  const [speaking, setSpeaking] = useState(false)
+  const [localSpeaking, setLocalSpeaking] = useState(false)
 
-  const handleSpeak = () => {
-    setSpeaking(true)
-    speak(message.text, { lang: lang === 'en' ? 'en-US' : 'fil-PH' })
-    setTimeout(() => setSpeaking(false), 4500)
+  const activeSpeaking = onToggleSpeak ? isSpeaking : localSpeaking
+
+  const handleSpeakClick = () => {
+    if (onToggleSpeak) {
+      onToggleSpeak()
+      return
+    }
+    if (localSpeaking) {
+      stopSpeaking()
+      setLocalSpeaking(false)
+    } else {
+      setLocalSpeaking(true)
+      speak(message.text, {
+        lang: lang === 'en' ? 'en-US' : 'fil-PH',
+        onEnd: () => setLocalSpeaking(false),
+      })
+    }
   }
 
   return (
@@ -102,16 +121,21 @@ function Bubble({ message, canExplain, onExplain }) {
             <div className="pt-1">
               <button
                 type="button"
-                onClick={handleSpeak}
+                onClick={handleSpeakClick}
+                aria-label={
+                  activeSpeaking
+                    ? (lang === 'en' ? 'Stop speaking' : 'Itigil ang pagsasalita')
+                    : (lang === 'en' ? 'Listen to message' : 'Pakinggan ang mensahe')
+                }
                 className={`btn-press inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-bold transition-colors ${
-                  speaking
+                  activeSpeaking
                     ? 'border-transparent bg-[var(--color-accent)] text-white shadow-xs'
                     : 'border-[var(--color-line)] bg-[var(--color-surface)] text-[var(--color-muted)] hover:text-[var(--color-ink)]'
                 }`}
               >
-                <Volume2 className={`size-3 stroke-[2.5] ${speaking ? 'animate-pulse' : ''}`} aria-hidden="true" />
-                <span>{speaking ? t('speakingState') : t('listenMessage')}</span>
-                {speaking && (
+                <Volume2 className={`size-3 stroke-[2.5] ${activeSpeaking ? 'animate-pulse' : ''}`} aria-hidden="true" />
+                <span>{activeSpeaking ? (lang === 'en' ? 'Speaking...' : 'Nagsasalita…') : t('listenMessage')}</span>
+                {activeSpeaking && (
                   <span className="flex items-center gap-0.5 ml-0.5" aria-hidden="true">
                     <span className="w-0.5 h-2 rounded-full bg-white animate-soundwave-1" />
                     <span className="w-0.5 h-3 rounded-full bg-white animate-soundwave-2" />
@@ -157,6 +181,28 @@ export default function KabsatAI({
   const stop = propStop ?? fallback.stop
   const resetSession = propResetSession ?? fallback.resetSession
   const messagesEndRef = useRef(null)
+  const [speakingIndex, setSpeakingIndex] = useState(null)
+
+  useEffect(() => {
+    return () => {
+      stopSpeaking()
+    }
+  }, [])
+
+  const handleToggleSpeak = (idx, text) => {
+    if (speakingIndex === idx) {
+      stopSpeaking()
+      setSpeakingIndex(null)
+    } else {
+      setSpeakingIndex(idx)
+      speak(text, {
+        lang: lang === 'en' ? 'en-US' : 'fil-PH',
+        onEnd: () => {
+          setSpeakingIndex((prev) => (prev === idx ? null : prev))
+        },
+      })
+    }
+  }
 
   // Warm the model when the tab opens if it is already downloaded. Loading it
   // from cache takes ~20 s, and paying that on the first question made the tutor
@@ -199,7 +245,10 @@ export default function KabsatAI({
         <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={onExit}
+            onClick={() => {
+              stopSpeaking()
+              onExit?.()
+            }}
             className="btn-press flex min-h-10 items-center gap-1.5 rounded-xl border border-[var(--color-line)] bg-[var(--color-surface)] px-3 text-xs font-bold text-[var(--color-accent)] hover:bg-[var(--color-accent-subtle)]"
           >
             <ArrowLeft className="size-4 stroke-[2.5]" aria-hidden="true" />
@@ -209,7 +258,11 @@ export default function KabsatAI({
           {messages.length > 1 && (
             <button
               type="button"
-              onClick={resetSession}
+              onClick={() => {
+                stopSpeaking()
+                setSpeakingIndex(null)
+                resetSession()
+              }}
               title={t('clearSessionTooltip')}
               aria-label={t('newChat')}
               className="btn-press flex min-h-10 items-center gap-1.5 rounded-xl border border-[var(--color-line)] bg-[var(--color-surface)] px-2.5 text-xs font-bold text-[var(--color-muted)] hover:text-[var(--color-ink)] hover:border-[var(--color-accent)] transition-all"
@@ -267,6 +320,8 @@ export default function KabsatAI({
               message={message}
               canExplain={model.state === 'ready'}
               onExplain={() => explainAt(index)}
+              isSpeaking={speakingIndex === index}
+              onToggleSpeak={() => handleToggleSpeak(index, message.text)}
             />
           ))}
           <div ref={messagesEndRef} />

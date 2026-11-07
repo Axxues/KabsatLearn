@@ -15,6 +15,149 @@ export const SECTORS = [
 
 export const AGE_BANDS = ['13-17', '18-24', '25-39', '40-59', '60+']
 
+export const REGION_1_PROVINCES = [
+  'Ilocos Norte',
+  'Ilocos Sur',
+  'La Union',
+  'Pangasinan',
+]
+
+export const REGION_1_MUNICIPALITIES = {
+  'Ilocos Norte': [
+    'Adams',
+    'Bacarra',
+    'Badoc',
+    'Bangui',
+    'Banna',
+    'Batac City',
+    'Burgos',
+    'Carasi',
+    'Currimao',
+    'Dingras',
+    'Dumalneg',
+    'Laoag City',
+    'Marcos',
+    'Nueva Era',
+    'Pagudpud',
+    'Paoay',
+    'Pasuquin',
+    'Piddig',
+    'Pinili',
+    'San Nicolas',
+    'Sarrat',
+    'Solsona',
+    'Vintar',
+  ],
+  'Ilocos Sur': [
+    'Alilem',
+    'Banayoyo',
+    'Bantay',
+    'Burgos',
+    'Cabugao',
+    'Candon City',
+    'Caoayan',
+    'Cervantes',
+    'Galimuyod',
+    'Gregorio del Pilar',
+    'Lidlidda',
+    'Magsingal',
+    'Nagbukel',
+    'Narvacan',
+    'Quirino',
+    'Salcedo',
+    'San Emilio',
+    'San Esteban',
+    'San Ildefonso',
+    'San Juan',
+    'San Vicente',
+    'Santa',
+    'Santa Catalina',
+    'Santa Cruz',
+    'Santa Lucia',
+    'Santa Maria',
+    'Santiago',
+    'Santo Domingo',
+    'Sigay',
+    'Sinait',
+    'Sugpon',
+    'Suyo',
+    'Tagudin',
+    'Vigan City',
+  ],
+  'La Union': [
+    'Agoo',
+    'Aringay',
+    'Bacnotan',
+    'Bagulin',
+    'Balaoan',
+    'Bangar',
+    'Bauang',
+    'Burgos',
+    'Caba',
+    'Luna',
+    'Naguilian',
+    'Pugo',
+    'Rosario',
+    'San Fernando City',
+    'San Gabriel',
+    'San Juan',
+    'Santo Tomas',
+    'Santol',
+    'Sudipen',
+    'Tubao',
+  ],
+  'Pangasinan': [
+    'Agno',
+    'Aguilar',
+    'Alaminos City',
+    'Alcala',
+    'Anda',
+    'Asingan',
+    'Balungao',
+    'Bani',
+    'Basista',
+    'Bautista',
+    'Bayambang',
+    'Binalonan',
+    'Binmaley',
+    'Bolinao',
+    'Bugallon',
+    'Burgos',
+    'Calasiao',
+    'Dagupan City',
+    'Dasol',
+    'Infanta',
+    'Labrador',
+    'Laoac',
+    'Lingayen',
+    'Mabini',
+    'Malasiqui',
+    'Manaoag',
+    'Mangaldan',
+    'Mangatarem',
+    'Mapandan',
+    'Natividad',
+    'Pozorrubio',
+    'Rosales',
+    'San Carlos City',
+    'San Fabian',
+    'San Jacinto',
+    'San Manuel',
+    'San Nicolas',
+    'San Quintin',
+    'Santa Barbara',
+    'Santa Maria',
+    'Santo Tomas',
+    'Sison',
+    'Sual',
+    'Tayug',
+    'Umingan',
+    'Urbiztondo',
+    'Urdaneta City',
+    'Villasis',
+  ],
+}
+
 export const MUNICIPALITIES = [
   'San Fernando City, La Union',
   'Dagupan City, Pangasinan',
@@ -34,11 +177,26 @@ export function emptyProfile() {
     nickname: '',
     sector: '',
     ageBand: '',
+    province: '',
     municipality: '',
     language: '',
     accessibility: { voice: false, largeText: false, highContrast: false },
     updatedAt: null,
   }
+}
+
+export function normalizeProfile(stored) {
+  const merged = { ...emptyProfile(), ...stored }
+  if (!merged.province && merged.municipality) {
+    for (const prov of REGION_1_PROVINCES) {
+      if (merged.municipality.includes(prov)) {
+        merged.province = prov
+        merged.municipality = merged.municipality.replace(new RegExp(`,\\s*${prov}$`), '').trim()
+        break
+      }
+    }
+  }
+  return merged
 }
 
 /**
@@ -49,7 +207,7 @@ export function emptyProfile() {
 export async function loadProfile() {
   try {
     const stored = await db.profile.get('me')
-    if (stored) return { ...emptyProfile(), ...stored }
+    if (stored) return normalizeProfile(stored)
   } catch {
     // IndexedDB unavailable: fall back to the localStorage mirror
   }
@@ -57,7 +215,7 @@ export async function loadProfile() {
     const raw = localStorage.getItem(KEY)
     if (raw) {
       try {
-        return { ...emptyProfile(), ...JSON.parse(raw) }
+        return normalizeProfile(JSON.parse(raw))
       } catch {
         return emptyProfile()
       }
@@ -88,5 +246,5 @@ export async function clearProfile() {
 }
 
 export function isComplete(profile) {
-  return Boolean(profile?.sector && profile?.ageBand && profile?.municipality)
+  return Boolean(profile?.sector && profile?.ageBand && (profile?.province || profile?.municipality))
 }

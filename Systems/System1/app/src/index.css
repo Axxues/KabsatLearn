@@ -215,6 +215,77 @@ body {
   animation: toast-slide 280ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+@keyframes toast-slide-down {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -16px) translateZ(0);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0) translateZ(0);
+  }
+}
+.animate-toast-down {
+  animation: toast-slide-down 280ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes toast-slide-up-out {
+  from {
+    opacity: 1;
+    transform: translate(-50%, 0) translateZ(0);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -16px) translateZ(0);
+  }
+}
+.animate-toast-down-out {
+  animation: toast-slide-up-out 250ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes toast-slide-out {
+  from {
+    opacity: 1;
+    transform: translate(-50%, 0) translateZ(0);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, 16px) translateZ(0);
+  }
+}
+.animate-toast-out {
+  animation: toast-slide-out 250ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* 07. Accordion / Dropdown collapse & expand animation */
+.accordion-grid {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  visibility: hidden;
+  transition: grid-template-rows 300ms cubic-bezier(0.16, 1, 0.3, 1),
+              opacity 250ms ease,
+              visibility 300ms;
+}
+
+.accordion-grid.is-expanded {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  visibility: visible;
+  transition: grid-template-rows 300ms cubic-bezier(0.16, 1, 0.3, 1),
+              opacity 250ms ease,
+              visibility 0ms;
+}
+
+.accordion-inner {
+  min-height: 0;
+  overflow: hidden;
+}
+
+#available-course-list[hidden] {
+  display: block;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
