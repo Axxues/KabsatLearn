@@ -31,6 +31,9 @@ City Education / ALS coordinator, who needs to know which competency to reteach.
 - Adapt question difficulty to the individual learner in real time.
 - Answer learner questions offline, grounded in downloaded course content, with
   a visible source and an honest refusal when out of scope.
+- Answer social questions directly, generate content answers on the device, and
+  fall back to the written lesson text whenever generation is unavailable or
+  fails the language check.
 - Surface competency gaps to a facilitator, and require a human to approve any
   follow-up before it is recorded.
 - Queue learner telemetry offline and flush it on reconnection.
@@ -43,7 +46,8 @@ City Education / ALS coordinator, who needs to know which competency to reteach.
   says so plainly.
 - Accounts, login, or real authentication.
 - Ilocano text-to-speech. Android ships Filipino, not Ilocano.
-- On-device neural embeddings or a local generative LLM.
+- On-device neural embeddings. Retrieval stays lexical (BM25); the only model on
+  the device is the small generative LLM described below.
 - Real LGU system integration. The dashboard is a local prototype.
 - More than two capsules.
 - A custom Bluetooth stack, Web Bluetooth GATT transfer, or Wi-Fi Direct.
@@ -74,14 +78,18 @@ UI: React + Tailwind
   Course Hub · Story Reader · Quiz Arena · Kabsat AI · LGU Dashboard
 Offline: Service Worker (app shell) + IndexedDB (capsules, XP, telemetry queue)
 Intelligence:
+  Persona    — predefined answers for social questions (sino ka, hello, thanks)
   Retriever  — BM25 + synonym expansion over capsule chunks
-  Generator  — offline grounded composer | online LLM over the same chunks
+  Generator  — on-device Qwen2.5-0.5B via WebLLM/WebGPU
+               | extractive fallback | optional online LLM over the same chunks
+  Language   — answers mirror the question: Tagalog or English
   Adaptive   — per-learner mastery estimate driving question difficulty
 Telemetry  — <1 KB JSON logs, queue, flush on simulated reconnect
 Transport  — Web Share API, file import, SHA-256 integrity check
              (WebRTC over a hotspot is a timeboxed stretch goal)
 Packaging  — Capacitor wraps dist/ into an APK; assets are bundled, so the
-             service worker is an optimisation rather than a requirement
+             service worker is an optimisation rather than a requirement.
+             The model runs as a lazy 6 MB chunk, so app startup never parses it.
 ```
 
 ### Offline capsule sharing (Kabsat Pass)
@@ -101,39 +109,65 @@ server and no protocol of our own:
 The app owns the capsule format, the integrity check, and the import. The OS owns
 the transport. Say that plainly if a judge asks whether this is peer-to-peer.
 
-### Single RAG pipeline
+### Answer pipeline
 
-One retriever, two generators. The retriever never changes; only the generator
-depends on connectivity.
+Every question goes through the same stages. Only the generator varies.
 
-**Corpus (build time).** Each capsule's content is split into ~120-word chunks
-with metadata `{capsule, concept, competency, difficulty, source_id}`. The
-capsule ships its chunks, a BM25 index, and a Taglish/Ilocano/English synonym
-map. Budget: ~5 KB of index per capsule.
+**0. Persona — the only predefined answers.** Social questions ("sino ka?",
+"who are you?", "kumusta", "salamat", capability, creator, language, offline)
+are answered from a small bilingual intent table before retrieval runs. Matching
+is whole-word, because substring matching made "hi" fire inside "hinihingi" and
+"philippines" and turned real questions into greetings.
 
-**Retrieve (runtime, both modes).** Normalise the query, expand synonyms, score
-with BM25, take the top 3. Deterministic, under 10 ms, no model weights.
+**1. Retrieve.** Normalise, expand synonyms, score with BM25 over capsule chunks,
+take the top one or two. Deterministic, no model weights.
 
-**Generate offline.** Use the top chunk's answer, wrap it in a grounded template
-with the learner's name and weakest competency, and cite `source_id`. If the top
-score is below threshold, refuse honestly and suggest a relevant capsule. Never
-invent content.
+**2. Generate.**
+- *On-device (default).* Qwen2.5-0.5B-Instruct q4f16 through WebLLM on WebGPU,
+  grounded on the retrieved chunk, 50 tokens maximum, temperature 0.2.
+- *Extractive fallback.* The corpus text wrapped with its source citation, used
+  when the model is not downloaded, fails, or fails the language guard.
 
-**Generate online.** Send the same top-3 chunks to an LLM with the system prompt
-below, then cache the answer in IndexedDB keyed by the normalised query, so the
-next identical question is answerable offline.
+**3. Language guard.** The answer must be in the language of the question. A
+mismatch discards the generation and keeps the corpus answer. This exists because
+the 0.5B model sometimes answers a Tagalog question in Spanish.
 
-**Why not embeddings.** Embedding a query requires a model on the device (~23 MB
-quantized plus a WASM runtime). That breaks the size and RAM budget. BM25 is the
-retrieval method that survives the target hardware. Say so plainly if asked.
+**Language mirroring.** English questions are answered from an English
+translation layer (`data/translations/en.json`) so generation is composition, not
+translation. Tagalog questions use the Tagalog corpus. Detection treats Taglish
+as Tagalog, since mixing English nouns into Tagalog is normal.
+
+**Online (optional).** The same chunks can go to a remote LLM; the response is
+cached for later offline reuse.
+
+**Why not embeddings.** Embedding a query needs a separate model on the device.
+BM25 is the retriever that survives the target hardware. Say so plainly if asked.
+
+### Measured on device
+
+TECNO LJ6 · MediaTek mt6789 (Helio G99) · Mali-G57 · Android 16 · 8 GB RAM ·
+WebView 157 with WebGPU.
+
+| Metric | Measured |
+|---|---|
+| Model | Qwen2.5-0.5B-Instruct q4f16, ~400 MB |
+| First download | ~90 s over Wi-Fi, then cached |
+| Cache survives restart | yes |
+| Generation speed | ~2.6 tokens/second |
+| Time to first tokens (warm) | ~34 s |
+| Full generated answer | ~70–100 s |
+| Extractive fallback | instant |
+| APK | ~6.8 MB |
+
+These numbers are the honest limit of a 0.5B model in a WebView. State them in
+the pitch rather than claiming a fast assistant.
 
 ### Online agent (disclosable)
 
-System prompt: *"You are Kabsat, a tutor for out-of-school youth in San
-Fernando, La Union. Answer only from CONTEXT. If CONTEXT does not contain the
-answer, say you do not know and name a capsule to download. Reply in simple
-Taglish, at most 60 words. Never give medical, legal, or financial advice beyond
-the CONTEXT."*
+System prompt (as implemented): *"You are Kabsat, an offline tutor for
+out-of-school youth in San Fernando, La Union. Answer ONLY from CONTEXT. If
+CONTEXT lacks the answer, say you do not know. Reply in simple Taglish or
+English, at most 45 words. Keep key terms exactly as written."*
 
 Tools: `retrieve_chunks(query)`, `get_mastery(learner_id)`,
 `draft_remediation(competency)`, `queue_telemetry(record)`.
@@ -146,12 +180,14 @@ The agent recommends. The facilitator approves remediation before it is saved.
 2. **Course Hub** — Capsule 101 pre-installed; Capsule 102 downloadable;
    simulated 2-second download with progress.
 3. **Story Reader** — 5–7 swipeable cards, "Pakinggan" TTS readout, one
-   "tap the red flag" drill, Taglish/Ilocano context toggle.
+   "tap the red flag" drill, Filipino/English interface toggle.
 4. **Quiz Arena** — four answer tiles, countdown, combo multiplier, adaptive
    difficulty, remediation card on struggle, pass-and-play for two learners on
    one phone.
-5. **Kabsat AI** — text input plus quick-prompt chips; RAG answer with source
-   citation; TTS readout; offline refusal path.
+5. **Kabsat AI** — text input plus quick-prompt chips; predefined persona
+   answers; content answers generated on-device over retrieved chunks, with an
+   extractive fallback; source citation; TTS readout; answers mirror the
+   question's language.
 6. **LGU Dashboard** — mastery radar across four pillars, weak-concept list,
    sync queue, simulated reconnection flush, barangay heatmap, facilitator
    approval gate.
@@ -175,7 +211,13 @@ overclaiming.
 - [ ] Both capsules persist across a reload (IndexedDB).
 - [ ] Two consecutive misses produce an easy question and a remediation card.
 - [ ] Two correct answers under 6 s produce a harder question.
-- [ ] Ten scripted questions return a grounded answer with a source citation.
+- [ ] A personal question ("sino ka?", "who are you?") answers immediately, in
+      the question's language, without an out-of-scope warning.
+- [ ] A content question is answered by the on-device model with no network, and
+      cites the retrieved source.
+- [ ] A generated answer that drifts out of the question's language is discarded
+      and replaced by the corpus answer.
+- [ ] English questions get English answers; Tagalog questions get Tagalog.
 - [ ] An out-of-scope question returns an honest refusal, not an invented answer.
 - [ ] The sync queue counts logs and flushes on simulated reconnect, and the
       dashboard updates.
@@ -192,13 +234,19 @@ overclaiming.
 - Banding is a heuristic, not a validated mastery model.
 - The item bank is small and synthetic.
 - Ilocano copy needs a native-speaker check.
-- Offline answers are retrieved and composed, not generated.
+- Content answers are generated by a 0.5B model: about 2.6 tokens/second, 70–100
+  seconds for a full answer, and the output is noticeably weaker than the
+  human-written corpus text.
+- Tagalog generation is unreliable. The language guard usually discards it and
+  returns the corpus answer instead, so Tagalog answers are effectively retrieved.
+- The model is a one-time ~400 MB download. Without it the tutor still works, as
+  retrieval with an extractive answer.
 - Voice input is out of scope for v1; quick-prompt chips replace it. Only voice
   output works offline.
 - Capsule transfer is OS-mediated. The app does not implement Bluetooth itself,
   and the demo phones may need to be paired beforehand.
-- The APK is a Capacitor WebView build, roughly 6-10 MB, not Kotlin-native. Say
-  that plainly rather than claiming a 3 MB native footprint.
+- The APK is a Capacitor WebView build, about 6.8 MB, not Kotlin-native. Say that
+  plainly rather than claiming a 3 MB native footprint.
 
 ## Open questions
 
