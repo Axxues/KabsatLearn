@@ -94,8 +94,9 @@ read-only status is policy, not enforcement.
 - The UI has been exercised in Chromium: hub, reader + drill, quiz + reveal,
   tutor with source citation, dashboard sync. TTS, audio, system share, and the
   APK itself remain untested.
-- The APK has not yet been installed on a physical phone. `adb devices` is empty,
-  so on-device and airplane-mode verification is outstanding.
+- The APK has been installed and launched on a TECNO LJ6. Offline is detected with
+  the radios actually disabled, and the designed UI renders. The service worker is
+  disabled on native because a cached shell served stale content after updates.
 - `.opencode/skills/frontend-design/SKILL.md` exists and was verified against a
   baseline.
 - The `probe` system was deleted after capability testing.

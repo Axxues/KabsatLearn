@@ -53,12 +53,16 @@ Last updated 09:10, about 40 minutes into the build.
 | 9 WebRTC transfer | **deferred** | — | — |
 | 10 APK, install test, pitch | **in progress** | `5b9db0f` | 09:09 |
 
-- APK built: `app/android/app/build/outputs/apk/debug/app-debug.apk`, 4,269,752 bytes (4.07 MB).
+- APK rebuilt and installed on a physical TECNO LJ6: `Systems/System1/pitch/kabsatlearn-debug.apk`, 4,421,206 bytes (4.22 MB).
 - Tests: 55 passing via `npx vitest run`.
-- Browser smoke test (Chromium against `npm run preview`): course hub, reader and
-  red-flag drill, quiz answer and reveal, tutor answer with source, dashboard
-  queue flush. All verified by driving the real UI, not by inspection.
-- Blocked: `adb devices` is empty, so the on-device install and the airplane-mode test cannot run yet.
+- Device-verified: cold start on a clean install, the designed dark UI renders, and
+  offline is detected with the radios genuinely off (`Active default network: none`),
+  showing the OFFLINE chip. No uncaught console errors.
+- Fixed after device testing: the service worker served a stale shell after the APK
+  was replaced; the network listener was subscribed twice; the Capacitor bridge was
+  called before it was ready; the status bar overlapped the content.
+- Still unverified on hardware: TTS voice, audio, system share, pass-and-play, and a
+  full ten-question round.
 
 ---
 
