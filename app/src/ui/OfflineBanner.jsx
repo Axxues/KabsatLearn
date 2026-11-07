@@ -1,11 +1,12 @@
 import { useOnline } from '../lib/useOnline.js'
 
-export default function OfflineBanner() {
-  const online = useOnline()
+export default function OfflineBanner({ online: onlineProp }) {
+  const hookValue = useOnline()
+  const online = onlineProp ?? hookValue
 
   if (online) {
     return (
-      <p className="flex items-center gap-2 px-4 py-2 text-sm text-[var(--color-good)]">
+      <p className="flex items-center gap-2 text-sm text-[var(--color-good)]">
         <span aria-hidden="true" className="inline-block size-2 rounded-full bg-[var(--color-good)]" />
         Online
       </p>
@@ -13,12 +14,12 @@ export default function OfflineBanner() {
   }
 
   return (
-    <div
+    <p
       role="status"
-      className="flex items-center gap-2 border-b border-[var(--color-line)] bg-[var(--color-accent)] px-4 py-2 text-sm font-medium text-[var(--color-on-accent)]"
+      className="flex items-center gap-2 rounded-full bg-[var(--color-accent)] px-3 py-1 text-xs font-semibold text-[var(--color-on-accent)]"
     >
       <span aria-hidden="true" className="inline-block size-2 rounded-full bg-[var(--color-on-accent)]" />
-      Offline mode — your courses still work
-    </div>
+      Offline
+    </p>
   )
 }
