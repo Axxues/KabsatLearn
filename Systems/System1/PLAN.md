@@ -36,6 +36,27 @@ The failures most likely to bite a user, each pinned to a task below:
 4. **Query with no match above threshold** — tutor must refuse and suggest a capsule. (Task 6)
 5. **Flush with an empty queue** — must be a no-op, not a hang. (Task 7)
 
+## Progress
+
+Last updated 09:10, about 40 minutes into the build.
+
+| Task | Status | Commit | Time |
+|---|---|---|---|
+| 1 Shell, offline cache, banner | done | `fa8f322` | 08:47 |
+| 2 Capsule schema and content | done | `fe9450f` | 08:53 |
+| 3 Store, import, SHA-256 | done | `fd1612d` | 08:58 |
+| 4 Hub, reader, TTS, drill | done | `f34bf1e` | 09:00 |
+| 5 Adaptive Kahoot arena | done | `42fefdf` | 09:01 |
+| 6 RAG tutor | done | `f0e09f0` | 09:02 |
+| 7 Telemetry, dashboard, approval | done | `4e8dae1` | 09:03 |
+| 8 Kabsat Pass | done | `ad9d4b0` | 09:03 |
+| 9 WebRTC transfer | **deferred** | — | — |
+| 10 APK, install test, pitch | **in progress** | `5b9db0f` | 09:09 |
+
+- APK built: `app/android/app/build/outputs/apk/debug/app-debug.apk`, 4,269,752 bytes (4.07 MB).
+- Tests: 54 passing via `npx vitest run`.
+- Blocked: `adb devices` is empty, so the on-device install and the airplane-mode test cannot run yet.
+
 ---
 
 ### Task 1: Shell, offline cache, and offline banner
@@ -194,10 +215,10 @@ The failures most likely to bite a user, each pinned to a task below:
 **Interfaces:**
 - Consumes: the built `dist/` from every earlier task.
 
-- [ ] `npm install @capacitor/core @capacitor/cli @capacitor/android`
-- [ ] `npx cap init KabsatLearn com.kabsatlearn.app --web-dir=dist`
-- [ ] `npm run build && npx cap add android && npx cap sync android`
-- [ ] `cd android && ./gradlew assembleDebug` (Windows: `gradlew.bat assembleDebug`)
+- [x] `npm install @capacitor/core @capacitor/cli @capacitor/android`
+- [x] `npx cap init KabsatLearn com.kabsatlearn.app --web-dir=dist`
+- [x] `npm run build && npx cap add android && npx cap sync android`
+- [x] `cd android && ./gradlew assembleDebug` (Windows: `gradlew.bat assembleDebug`)
 - [ ] Copy the APK to `pitch/kabsatlearn-debug.apk`; record its exact size in bytes.
 - [ ] Install on two physical Android phones: `adb install -r <apk>`.
 - [ ] Verify on device in airplane mode: open a capsule, finish a quiz, ask Kabsat
@@ -210,12 +231,26 @@ The failures most likely to bite a user, each pinned to a task below:
 
 ## Checkpoints
 
-| Time | Gate |
-|---|---|
-| 10:30 | Task 1–3 green; app installs a capsule offline |
-| 12:30 | Task 4–5 green; a full quiz round adapts |
-| 14:30 | Task 6–7 green; **feature freeze** |
-| 15:30 | Deploy done, prompts doc done, rehearsal |
-| 16:30 | Submitted |
+| Time | Original gate | Actual |
+|---|---|---|
+| 10:30 | Tasks 1–3 green | **done 08:58** |
+| 12:30 | Tasks 4–5 green | **done 09:01** |
+| 14:30 | Tasks 6–7 green, feature freeze | **done 09:03** |
+| 15:30 | APK, prompts doc, rehearsal | APK built 09:05; prompts and rehearsal pending |
+| 16:30 | Submitted | — |
+
+### Remaining work, highest risk first
+
+1. **Install the APK on a real Android phone** and run the airplane-mode check.
+   Nothing on this machine can substitute for it — `adb devices` is empty.
+2. **`pitch/prompts.md`** — system prompt, four tool descriptions, three sample
+   conversations. This is a scoring requirement, not a nicety.
+3. **`@capacitor/share`** for Kabsat Pass inside the WebView, replacing
+   `navigator.share`, which is unreliable there.
+4. **Rehearse and record** a backup screen capture of the full demo.
+5. **Task 9 (WebRTC)** only if 1–4 are finished. Otherwise stay with import.
+
+Keep the rest of the day for rehearsal and Q&A prep. The build is no longer the
+critical path; verifying it on a phone is.
 
 If a checkpoint slips 45 minutes, cut the lowest-value item still open and note it in the pitch as a deliberate scope decision.
