@@ -1,3 +1,5 @@
+import { Zap } from 'lucide-react'
+
 /**
  * Offline banner, rendered directly below the app header by App.
  *
@@ -10,9 +12,10 @@ export default function OfflineBanner({ online }) {
   return (
     <div
       role="status"
-      className="w-full bg-[var(--color-accent)] px-4 py-2 text-center text-xs font-bold uppercase tracking-wide text-[var(--color-on-accent)]"
+      className="flex w-full items-center justify-center gap-1.5 bg-[var(--color-accent)] px-4 py-2 text-center text-xs font-bold uppercase tracking-wide text-[var(--color-on-accent)]"
     >
-      ⚡ Offline — your courses still work
+      <Zap className="size-3.5 stroke-[2.5]" aria-hidden="true" />
+      <span>Offline — your courses still work</span>
     </div>
   )
 }

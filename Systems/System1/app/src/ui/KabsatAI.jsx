@@ -1,5 +1,8 @@
 import { useState, useRef, useEffect } from 'react'
-import { answerOffline } from '../lib/rag.js'
+import { answerOffline, contextFor } from '../lib/rag.js'
+// The on-device model runtime is ~6 MB, so it is loaded only when the learner
+// asks for an explanation. Static import would make every launch parse it.
+const llm = () => import('../lib/llm.js')
 import { speak } from '../lib/tts.js'
 import { useI18n } from '../lib/i18n.jsx'
 import {
@@ -12,7 +15,7 @@ import {
   Sparkles,
 } from 'lucide-react'
 
-function Bubble({ message }) {
+function Bubble({ message, canExplain, onExplain }) {
   const { lang, t } = useI18n()
   const mine = message.role === 'user'
   const [speaking, setSpeaking] = useState(false)
@@ -39,7 +42,7 @@ function Bubble({ message }) {
               : 'rounded-tl-xs border border-[var(--color-line)] bg-[var(--color-surface)] text-[var(--color-ink)]'
           }`}
         >
-          <p className="whitespace-pre-line">{message.text}</p>
+          <p className="whitespace-pre-line">{message.text || (message.thinking ? '…' : '')}</p>
 
           {/* Source Citation for Grounded Replies */}
           {message.source && (
@@ -59,6 +62,19 @@ function Bubble({ message }) {
             <div className="flex items-center gap-1.5 rounded-lg border border-[var(--color-warn)]/30 bg-[var(--color-warn-subtle)] px-2.5 py-1 text-xs font-semibold text-[var(--color-warn)]">
               <AlertCircle className="size-3.5 shrink-0 stroke-[2.5]" aria-hidden="true" />
               <span>{t('outOfScopeAlert')}</span>
+            </div>
+          )}
+
+          {canExplain && !mine && message.source && (
+            <div className="pt-1">
+              <button
+                type="button"
+                onClick={onExplain}
+                className="btn-press inline-flex items-center gap-1.5 rounded-lg border border-[var(--color-accent)]/30 bg-[var(--color-accent-subtle)] px-2.5 py-1 text-xs font-bold text-[var(--color-accent)]"
+              >
+                <Sparkles className="size-3 stroke-[2.5]" aria-hidden="true" />
+                <span>{lang === 'en' ? 'Explain more' : 'Ipaliwanag pa'}</span>
+              </button>
             </div>
           )}
 
@@ -93,7 +109,7 @@ function Bubble({ message }) {
 }
 
 export default function KabsatAI({ capsule, onExit }) {
-  const { t, translations } = useI18n()
+  const { t, lang, translations } = useI18n()
   const [messages, setMessages] = useState(() => [
     {
       role: 'assistant',
@@ -101,7 +117,60 @@ export default function KabsatAI({ capsule, onExit }) {
     },
   ])
   const [input, setInput] = useState('')
+  const [model, setModel] = useState({ state: 'idle', progress: 0 })
   const messagesEndRef = useRef(null)
+
+  const prepareModel = async () => {
+    setModel({ state: 'loading', progress: 0 })
+    try {
+      const { loadEngine } = await llm()
+      await loadEngine((report) => setModel({ state: 'loading', progress: report.progress ?? 0 }))
+      setModel({ state: 'ready', progress: 1 })
+    } catch {
+      setModel({ state: 'error', progress: 0 })
+    }
+  }
+
+  const explainAt = async (index) => {
+    const target = messages[index]
+    const question = [...messages.slice(0, index)].reverse().find((entry) => entry.role === 'user')
+    if (!target || !question) return
+
+    const { language, chunks } = contextFor(question.text, capsule)
+    setMessages((current) => [
+      ...current,
+      {
+        role: 'assistant',
+        text: '',
+        thinking: true,
+        answered: true,
+        source: target.source,
+        confidence: target.confidence,
+      },
+    ])
+
+    const patchLast = (update) =>
+      setMessages((current) =>
+        current.map((entry, position) => (position === current.length - 1 ? { ...entry, ...update } : entry)),
+      )
+
+    try {
+      const { explain } = await llm()
+      const result = await explain({
+        query: question.text,
+        chunks,
+        language,
+        onToken: (text) => patchLast({ text, thinking: false }),
+      })
+      patchLast({
+        text: result.ok && result.text ? result.text : target.text,
+        thinking: false,
+        guardFailed: !result.ok,
+      })
+    } catch {
+      patchLast({ text: target.text, thinking: false, guardFailed: true })
+    }
+  }
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -133,9 +202,19 @@ export default function KabsatAI({ capsule, onExit }) {
   const chips = translations.quickChips || []
 
   return (
-    <div className="mx-auto flex flex-1 min-h-0 max-w-[430px] flex-col bg-[var(--color-bg)] text-[var(--color-ink)] shadow-2xl transition-colors duration-200">
+    <div
+      className="mx-auto flex flex-1 min-h-0 max-w-[430px] flex-col bg-[var(--color-bg)] text-[var(--color-ink)] shadow-2xl transition-colors duration-200"
+      style={{ paddingTop: 'var(--sat)', paddingBottom: 'var(--sab)' }}
+    >
+      {/* Top Safe Area Shield: keeps the mobile device status bar/panel area clean when scrolling */}
+      <div
+        className="fixed top-0 left-0 right-0 z-40 bg-[var(--color-bg)] pointer-events-none"
+        style={{ height: 'var(--sat)' }}
+        aria-hidden="true"
+      />
+
       {/* Header */}
-      <header className="sticky top-0 z-30 flex items-center justify-between border-b border-[var(--color-line)] bg-[var(--color-surface)]/95 px-4 py-3 backdrop-blur-md">
+      <header className="safe-sticky-header z-30 flex items-center justify-between border-b border-[var(--color-line)] bg-[var(--color-surface)]/95 px-4 py-3 backdrop-blur-md">
         <button
           type="button"
           onClick={onExit}
@@ -156,11 +235,42 @@ export default function KabsatAI({ capsule, onExit }) {
         </div>
       </header>
 
+      {model.state === 'ready' ? (
+        <div className="border-b border-[var(--color-line)] bg-[var(--color-accent-subtle)] px-4 py-1.5 text-[11px] font-bold text-[var(--color-accent)]">
+          ⚡ {lang === 'en' ? 'On-device AI ready · works offline' : 'On-device AI handa · gumagana offline'}
+        </div>
+      ) : (
+        <div className="flex items-center gap-2 border-b border-[var(--color-line)] bg-[var(--color-surface)] px-4 py-2">
+          <button
+            type="button"
+            onClick={prepareModel}
+            disabled={model.state === 'loading'}
+            className="btn-press inline-flex items-center gap-1.5 rounded-lg border border-[var(--color-line)] px-2.5 py-1.5 text-[11px] font-bold text-[var(--color-muted)] disabled:opacity-60"
+          >
+            {model.state === 'loading'
+              ? `${lang === 'en' ? 'Downloading' : 'Dina-download'} ${Math.round(model.progress * 100)}%`
+              : lang === 'en'
+                ? 'Download on-device AI (~400 MB)'
+                : 'I-download ang AI (~400 MB)'}
+          </button>
+          {model.state === 'error' && (
+            <span className="text-[11px] font-semibold text-[var(--color-warn)]">
+              {lang === 'en' ? 'Download failed' : 'Bigo ang download'}
+            </span>
+          )}
+        </div>
+      )}
+
       {/* Chat Messages Log */}
       <main className="flex-1 min-h-0 overflow-y-auto px-4 py-4 space-y-4">
         <ul className="space-y-3.5">
           {messages.map((message, index) => (
-            <Bubble key={index} message={message} />
+            <Bubble
+              key={index}
+              message={message}
+              canExplain={model.state === 'ready'}
+              onExplain={() => explainAt(index)}
+            />
           ))}
           <div ref={messagesEndRef} />
         </ul>

@@ -467,7 +467,8 @@ export default function QuizArena({ capsule, onExit, onRunningChange }) {
         {/* Multi-Player Indicator or Streak info */}
         <div className="mt-2 flex items-center justify-between text-[11px]">
           {players === 2 ? (
-            <span className="font-bold text-[var(--color-accent)]">
+            <span className="inline-flex items-center gap-1 font-bold text-[var(--color-accent)]">
+              <Users className="size-3.5 text-[var(--color-accent)] stroke-[2]" aria-hidden="true" />
               {t('turnIndicator', { n: current + 1 })}
             </span>
           ) : (

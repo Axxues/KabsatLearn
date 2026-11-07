@@ -1,6 +1,11 @@
 @import "tailwindcss";
 
 :root {
+  --sat: var(--safe-area-inset-top, env(safe-area-inset-top, 0px));
+  --sab: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px));
+  --sal: var(--safe-area-inset-left, env(safe-area-inset-left, 0px));
+  --sar: var(--safe-area-inset-right, env(safe-area-inset-right, 0px));
+
   --color-bg: #f6f8fb;
   --color-surface: #ffffff;
   --color-surface-hover: #f1f5f9;
@@ -85,6 +90,12 @@ body {
 
 .tap-highlight-none {
   -webkit-tap-highlight-color: transparent;
+}
+
+/* Safe-area sticky header: stays pinned below the mobile status bar/panel even during scroll */
+.safe-sticky-header {
+  position: sticky;
+  top: var(--sat);
 }
 
 /* 01. Button Press: Sink to 95%, then spring back */

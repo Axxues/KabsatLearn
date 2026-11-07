@@ -15,7 +15,30 @@ describe('answerOffline', () => {
   it('does not greet the learner twice when no name is given', () => {
     const result = answerOffline('paano ang OTP', capsule101)
     expect(result.reply.startsWith('Kabsat Kabsat')).toBe(false)
-    expect(result.reply.startsWith('Kabsat,')).toBe(true)
+    expect(result.reply.startsWith('Kabsat —')).toBe(true)
+  })
+
+  it('answers in English when the question is in English', () => {
+    const result = answerOffline('What should I do if someone asks for my OTP?', capsule101)
+
+    expect(result.lang).toBe('en')
+    expect(result.reply).toContain('Kabsat here')
+    expect(result.reply).toContain('one-time password')
+  })
+
+  it('answers in Tagalog when the question is in Tagalog', () => {
+    const result = answerOffline('Paano kung hinihingi ang OTP ko?', capsule101)
+
+    expect(result.lang).toBe('tl')
+    expect(result.reply).toContain('tungkol sa')
+  })
+
+  it('refuses in the language of the question', () => {
+    const english = answerOffline('Who is the president of the Philippines', capsule101)
+
+    expect(english.lang).toBe('en')
+    expect(english.source).toBeNull()
+    expect(english.reply).toContain("don't cover")
   })
 
   it('refuses an uncovered question instead of inventing an answer', () => {
@@ -66,7 +89,7 @@ describe('answerOnline', () => {
       fetchImpl: fakeFetch,
     })
 
-    expect(captured.system).toBe(SYSTEM_PROMPT)
+    expect(captured.system).toContain('Taglish')
     expect(captured.messages[0].content).toContain('CONTEXT:')
     expect(result.online).toBe(true)
   })

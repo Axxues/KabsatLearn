@@ -124,9 +124,19 @@ export default function StoryReader({ capsule, onExit }) {
   }
 
   return (
-    <div className="mx-auto flex min-h-dvh max-w-[430px] flex-col bg-[var(--color-bg)] text-[var(--color-ink)] shadow-2xl transition-colors duration-200">
+    <div
+      className="mx-auto flex min-h-dvh max-w-[430px] flex-col bg-[var(--color-bg)] text-[var(--color-ink)] shadow-2xl transition-colors duration-200"
+      style={{ paddingTop: 'var(--sat)', paddingBottom: 'var(--sab)' }}
+    >
+      {/* Top Safe Area Shield: keeps the mobile device status bar/panel area clean when scrolling */}
+      <div
+        className="fixed top-0 left-0 right-0 z-40 bg-[var(--color-bg)] pointer-events-none"
+        style={{ height: 'var(--sat)' }}
+        aria-hidden="true"
+      />
+
       {/* Reader Header */}
-      <header className="sticky top-0 z-30 flex items-center justify-between border-b border-[var(--color-line)] bg-[var(--color-surface)]/95 px-4 py-3 backdrop-blur-md">
+      <header className="safe-sticky-header z-30 flex items-center justify-between border-b border-[var(--color-line)] bg-[var(--color-surface)]/95 px-4 py-3 backdrop-blur-md">
         <button
           type="button"
           onClick={onExit}

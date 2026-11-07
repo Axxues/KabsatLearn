@@ -39,3 +39,16 @@ createRoot(document.getElementById('root')).render(
     <App />
   </StrictMode>,
 )
+
+// TEMPORARY capability probe: remove after reading logcat.
+if (typeof navigator !== 'undefined' && navigator.gpu) {
+  navigator.gpu
+    .requestAdapter()
+    .then((adapter) => {
+      console.log('WEBGPU_PROBE adapter=' + (adapter ? 'YES' : 'NULL'))
+    })
+    .catch((error) => console.log('WEBGPU_PROBE error=' + error.message))
+} else {
+  console.log('WEBGPU_PROBE navigator.gpu=NONE')
+}
+console.log('WEBGPU_PROBE ua=' + navigator.userAgent)

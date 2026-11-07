@@ -1,0 +1,30 @@
+{
+  "capsule-101": {
+    "k1": "An OTP is a one-time password sent to your phone. No legitimate company, agent, or relative should ever ask for it. If someone does, it is a scam.",
+    "k2": "Check the domain before tapping. The real GCash is at gcash.com. Fake links often end in .help, .xyz, or .top, or misspell the company name.",
+    "k3": "DSWD does not charge a fee and does not ask for an OTP to release aid. If someone asks for a payment or an OTP to release help, it is a scam.",
+    "k4": "A screenshot is not proof of a transfer. Open the app and check your balance before sending any money back.",
+    "k5": "If you suddenly lose signal, cannot make calls, and OTPs stop arriving, a SIM swap may be in progress. Call your network provider immediately from another phone.",
+    "k6": "Before paying by QR, check the recipient name in the app. If it does not match who you expect, cancel the payment.",
+    "k7": "Use a random PIN that is not a birthday, not 1234, and never posted on social media. Change it if you suspect someone knows it.",
+    "k8": "If you are scammed, change your PIN immediately, report it in the app, call the hotline, and screenshot the conversation before blocking the sender. The first 30 minutes matter most.",
+    "k9": "The sender name on a text message can be faked. A name like GCash or a logo proves nothing. Check the number and never tap the link.",
+    "k10": "A photo of your ID can be used to open an account in your name. Blur the ID number and never post it publicly.",
+    "k11": "A legitimate wallet lists its fees inside the app, never in a text message. If someone texts you to pay a fee to release money, it is a scam.",
+    "k12": "If your account is hacked, use the official recovery flow in the app and the hotline. Never pay anyone offering a recovery service on social media."
+  },
+  "capsule-102": {
+    "k1": "An online job is work done with a phone or laptop and internet: virtual assistant, transcription, social media manager, or data entry. Many entry-level gigs need no degree.",
+    "k2": "No legitimate employer asks for a registration fee, training fee, or load. If you must pay to work, it is a scam.",
+    "k3": "One clear photo, one line about your skill, and one way to contact you. That is all you need to start.",
+    "k4": "Fake job posts offer very high pay, require no experience, and ask for a fee. A real employer states the scope and the working hours.",
+    "k5": "Before applying, make one sample that matches the job: a spreadsheet, a transcription sample, or a simple graphic. That is what you show instead of experience.",
+    "k6": "Apply to three to five jobs a day and track where you applied. Most will not reply, and that is normal.",
+    "k7": "Before starting, agree on scope, hours, and payment. If the work grows, agree on the new rate before continuing.",
+    "k8": "No legitimate employer asks for your OTP for verification. Refuse and report the person asking.",
+    "k9": "Use a traceable payment method such as a bank transfer or a wallet with a record. Avoid payments with no receipt or trail.",
+    "k10": "In an online interview, ask about scope, hours, and payment. Be careful if they refuse to answer.",
+    "k11": "If an employer scams you, report and block them, and screenshot the evidence. Do not pay more to recover what you lost.",
+    "k12": "For your first client, start with a small task and a clear deadline. Good communication matters more than a fancy portfolio."
+  }
+}

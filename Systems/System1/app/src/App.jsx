@@ -36,7 +36,8 @@ function BottomNav({ tabs, tab, onSelect }) {
   return (
     <nav
       aria-label="Main Navigation"
-      className="sticky bottom-0 z-30 grid grid-cols-4 border-t border-[var(--color-line)] bg-[var(--color-surface)]/95 py-1.5 backdrop-blur-md"
+      className="fixed bottom-0 left-0 right-0 z-30 mx-auto grid max-w-[430px] grid-cols-4 border-t border-[var(--color-line)] bg-[var(--color-surface)]/95 pt-1.5 backdrop-blur-md"
+      style={{ paddingBottom: 'calc(var(--sab) + 0.375rem)' }}
     >
       {tabs.map((item) => {
         const active = item.id === tab
@@ -198,7 +199,13 @@ function MainApp() {
 
   if (tab === 'quiz') {
     return (
-      <div className={pageShell}>
+      <div
+        className={pageShell}
+        style={{
+          paddingTop: 'var(--sat)',
+          paddingBottom: quizRunning ? 'var(--sab)' : 'calc(var(--sab) + 3.75rem)',
+        }}
+      >
         <QuizArena
           capsule={capsule101}
           onExit={() => selectTab('hub')}
@@ -211,7 +218,13 @@ function MainApp() {
 
   if (tab === 'tutor') {
     return (
-      <div className={pageShell}>
+      <div
+        className={pageShell}
+        style={{
+          paddingTop: 'var(--sat)',
+          paddingBottom: 'calc(var(--sab) + 3.75rem)',
+        }}
+      >
         <KabsatAI capsule={capsule101} onExit={() => selectTab('hub')} />
         {navigation}
       </div>
@@ -219,9 +232,19 @@ function MainApp() {
   }
 
   return (
-    <div className="mx-auto flex min-h-dvh max-w-[430px] flex-col bg-[var(--color-bg)] text-[var(--color-ink)] shadow-2xl transition-colors duration-200 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
+    <div
+      className="mx-auto flex min-h-dvh max-w-[430px] flex-col bg-[var(--color-bg)] text-[var(--color-ink)] shadow-2xl transition-colors duration-200"
+      style={{ paddingTop: 'var(--sat)', paddingBottom: 'var(--sab)' }}
+    >
+      {/* Top Safe Area Shield: keeps the mobile device status bar/panel area clean when scrolling */}
+      <div
+        className="fixed top-0 left-0 right-0 z-40 bg-[var(--color-bg)] pointer-events-none"
+        style={{ height: 'var(--sat)' }}
+        aria-hidden="true"
+      />
+
       {/* Top Mobile App Header */}
-      <header className="sticky top-0 z-30 flex items-center justify-between border-b border-[var(--color-line)] bg-[var(--color-surface)]/95 px-4 py-3 backdrop-blur-md">
+      <header className="safe-sticky-header z-30 flex items-center justify-between border-b border-[var(--color-line)] bg-[var(--color-surface)]/95 px-4 py-3 backdrop-blur-md">
         <div className="flex items-center gap-2.5">
           <img
             src="/icon.svg"
@@ -274,7 +297,7 @@ function MainApp() {
       <OfflineBanner online={online} />
 
       {/* Main Content Area with Technique 05: Fast, then slow (page-enter) */}
-      <main key={`${tab}-${lang}`} className="flex-1 px-4 py-5 page-enter">
+      <main key={`${tab}-${lang}`} className="flex-1 px-4 pt-5 pb-[calc(var(--sab)+5.5rem)] page-enter">
         {tab === 'hub' && (
           <CourseHub
             capsules={capsules}
