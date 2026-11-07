@@ -322,14 +322,9 @@ function MainApp() {
             className="size-9 rounded-xl border border-[var(--color-line)] bg-white p-1 shadow-xs shrink-0"
           />
           <div>
-            <div className="flex items-center gap-1.5">
-              <span className="text-xs font-bold uppercase tracking-wider text-[var(--color-accent)]">
-                {t('appTitle')}
-              </span>
-              <span className="rounded-full bg-[var(--color-terracotta)]/15 px-1.5 py-0.2 text-[10px] font-bold text-[var(--color-terracotta)]">
-                {t('regionTag')}
-              </span>
-            </div>
+            <p className="text-xs font-bold uppercase tracking-wider text-[var(--color-accent)]">
+              {t('appTitle')}
+            </p>
             <h1 className="text-base font-bold leading-tight text-[var(--color-ink)]">
               {tab === 'hub' ? t('headerCourses') : t('headerDashboard')}
             </h1>

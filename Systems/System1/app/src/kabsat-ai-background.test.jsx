@@ -3,6 +3,13 @@ import { createRoot } from 'react-dom/client'
 import { afterEach, beforeAll, beforeEach, describe, expect, test, vi } from 'vitest'
 import App from './App.jsx'
 
+vi.mock('./lib/llm.js', () => ({
+  engineReady: vi.fn(() => true),
+  isModelCached: vi.fn(async () => true),
+  loadEngine: vi.fn(async () => ({})),
+  explain: vi.fn(async () => ({ ok: true, text: 'Huwag maniwala sa pekeng ayuda.' })),
+}))
+
 beforeAll(() => {
   if (!window.matchMedia) {
     window.matchMedia = () => ({
@@ -76,7 +83,7 @@ describe('Kabsat AI ongoing query and rotating icon', () => {
 
     // 2. Click a quick prompt chip to trigger a query
     const chip = [...container.querySelectorAll('main button')].find((b) =>
-      b.textContent.includes('OTP'),
+      b.textContent.includes('Sino ka'),
     )
     expect(chip).not.toBeNull()
     click(chip)
@@ -112,8 +119,8 @@ describe('Kabsat AI ongoing query and rotating icon', () => {
 
     // 8. Return to Kabsat AI page: the query must NOT have been interrupted, answer must be present
     click(buttonStartingWith('Kabsat AI'))
-    expect(container.textContent).toContain('Paano kung hinihingi ang OTP ko?')
-    expect(container.textContent).toMatch(/tungkol sa OTP safety|98% match/i)
+    expect(container.textContent).toContain('Sino ka?')
+    expect(container.textContent).toMatch(/Ako si Kabsat/i)
   })
 
   test('form submission disables send button while processing and preserves query when navigating to Quiz', async () => {

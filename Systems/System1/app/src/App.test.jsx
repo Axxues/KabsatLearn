@@ -33,10 +33,10 @@ describe('app header', () => {
     expect(header).not.toMatch(/\b(online|offline)\b/i)
   })
 
-  test('keeps the brand, region badge, page title and theme toggle', () => {
+  test('keeps the brand, page title and theme toggle, and no region badge', () => {
     const header = renderHeader()
     expect(header).toContain('KabsatLearn')
-    expect(header).toContain('La Union')
+    expect(header).not.toContain('La Union')
     expect(header).toContain('Mga Kurso')
     expect(header).toContain('alt="KabsatLearn logo"')
     expect(header).toMatch(/aria-label="Switch to dark mode"/)

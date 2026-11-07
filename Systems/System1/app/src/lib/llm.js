@@ -25,6 +25,7 @@ export function progressSnapshot() {
 
 export async function isModelCached() {
   try {
+    if (typeof caches === 'undefined') return false
     return await hasModelInCache(MODEL_ID)
   } catch {
     return false

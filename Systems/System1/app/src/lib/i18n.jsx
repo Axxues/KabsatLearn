@@ -128,10 +128,7 @@ const TRANSLATIONS = {
     send: 'Send',
     stop: 'Itigil',
     quickChips: [
-      'Paano kung hinihingi ang OTP ko?',
-      'Peke ba ang link na ito?',
-      'May nagtext na ayuda, totoo ba?',
-      'Nabiktima ako, ano gagawin?',
+      'Sino ka?',
     ],
 
     // Dashboard
@@ -292,10 +289,7 @@ const TRANSLATIONS = {
     send: 'Send',
     stop: 'Stop',
     quickChips: [
-      'What if someone asks for my OTP?',
-      'Is this link fake or a scam?',
-      'I got an ayuda text, is it real?',
-      'I got scammed, what should I do?',
+      'Who are you?',
     ],
 
     // Dashboard
