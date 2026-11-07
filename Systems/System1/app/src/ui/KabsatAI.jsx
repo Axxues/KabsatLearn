@@ -133,7 +133,7 @@ export default function KabsatAI({ capsule, onExit }) {
   const chips = translations.quickChips || []
 
   return (
-    <div className="mx-auto flex min-h-dvh max-w-[430px] flex-col bg-[var(--color-bg)] text-[var(--color-ink)] shadow-2xl transition-colors duration-200">
+    <div className="mx-auto flex flex-1 min-h-0 max-w-[430px] flex-col bg-[var(--color-bg)] text-[var(--color-ink)] shadow-2xl transition-colors duration-200">
       {/* Header */}
       <header className="sticky top-0 z-30 flex items-center justify-between border-b border-[var(--color-line)] bg-[var(--color-surface)]/95 px-4 py-3 backdrop-blur-md">
         <button
@@ -157,7 +157,7 @@ export default function KabsatAI({ capsule, onExit }) {
       </header>
 
       {/* Chat Messages Log */}
-      <main className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+      <main className="flex-1 min-h-0 overflow-y-auto px-4 py-4 space-y-4">
         <ul className="space-y-3.5">
           {messages.map((message, index) => (
             <Bubble key={index} message={message} />

@@ -3,8 +3,10 @@ import capsule101 from './data/capsules/capsule-101.json'
 import capsule102 from './data/capsules/capsule-102.json'
 import { getCapsule, listCapsules, seedCapsule } from './lib/capsuleStore.js'
 import { importCapsuleFile, shareCapsule } from './lib/share.js'
+import { useOnline } from './lib/useOnline.js'
 import { I18nProvider, useI18n } from './lib/i18n.jsx'
 import CourseHub from './ui/CourseHub.jsx'
+import OfflineBanner from './ui/OfflineBanner.jsx'
 import QuizArena from './ui/QuizArena.jsx'
 import KabsatAI from './ui/KabsatAI.jsx'
 import Dashboard from './ui/Dashboard.jsx'
@@ -30,13 +32,55 @@ const CATALOG = [capsule101, capsule102].map((capsule) => ({
   kb: Math.max(1, Math.round(JSON.stringify(capsule).length / 1024)),
 }))
 
+function BottomNav({ tabs, tab, onSelect }) {
+  return (
+    <nav
+      aria-label="Main Navigation"
+      className="sticky bottom-0 z-30 grid grid-cols-4 border-t border-[var(--color-line)] bg-[var(--color-surface)]/95 py-1.5 backdrop-blur-md"
+    >
+      {tabs.map((item) => {
+        const active = item.id === tab
+        const Icon = item.icon
+        return (
+          <button
+            key={item.id}
+            type="button"
+            aria-current={active ? 'page' : undefined}
+            onClick={() => onSelect(item.id)}
+            className={`btn-press flex flex-col items-center justify-center gap-1 py-1.5 text-xs font-medium transition-colors ${
+              active
+                ? 'text-[var(--color-accent)]'
+                : 'text-[var(--color-muted)] hover:text-[var(--color-ink)]'
+            }`}
+          >
+            <div
+              className={`flex size-8 items-center justify-center rounded-xl transition-all duration-150 ${
+                active
+                  ? 'bg-[var(--color-accent-subtle)] text-[var(--color-accent)] shadow-xs scale-105'
+                  : 'text-[var(--color-muted)]'
+              }`}
+            >
+              <Icon className="size-4.5 stroke-[2]" aria-hidden="true" />
+            </div>
+            <span className={`text-[11px] leading-tight ${active ? 'font-bold' : 'font-medium'}`}>
+              {item.label}
+            </span>
+          </button>
+        )
+      })}
+    </nav>
+  )
+}
+
 function MainApp() {
   const { lang, setLang, t } = useI18n()
+  const online = useOnline()
   const [tab, setTab] = useState('hub')
   const [readerId, setReaderId] = useState(null)
   const [capsules, setCapsules] = useState([])
   const [downloadingId, setDownloadingId] = useState(null)
   const [toast, setToast] = useState(null)
+  const [quizRunning, setQuizRunning] = useState(false)
   const [theme, setTheme] = useState(() => {
     if (typeof window !== 'undefined') {
       const stored = localStorage.getItem('kabsat_theme')
@@ -85,6 +129,11 @@ function MainApp() {
     }
   }, [toast])
 
+  const selectTab = (nextTab) => {
+    if (nextTab !== 'quiz') setQuizRunning(false)
+    setTab(nextTab)
+  }
+
   const download = async (id) => {
     const capsule = id === 'capsule-102' ? capsule102 : null
     if (!capsule) return
@@ -115,14 +164,6 @@ function MainApp() {
     return <StoryReader capsule={capsule} onExit={() => setReaderId(null)} />
   }
 
-  if (tab === 'quiz') {
-    return <QuizArena capsule={capsule101} onExit={() => setTab('hub')} />
-  }
-
-  if (tab === 'tutor') {
-    return <KabsatAI capsule={capsule101} onExit={() => setTab('hub')} />
-  }
-
   const tabs = [
     {
       id: 'hub',
@@ -150,8 +191,35 @@ function MainApp() {
     },
   ]
 
+  const navigation = <BottomNav tabs={tabs} tab={tab} onSelect={selectTab} />
+
+  const pageShell =
+    'mx-auto flex min-h-dvh max-w-[430px] flex-col bg-[var(--color-bg)] text-[var(--color-ink)] shadow-2xl transition-colors duration-200'
+
+  if (tab === 'quiz') {
+    return (
+      <div className={pageShell}>
+        <QuizArena
+          capsule={capsule101}
+          onExit={() => selectTab('hub')}
+          onRunningChange={setQuizRunning}
+        />
+        {!quizRunning && navigation}
+      </div>
+    )
+  }
+
+  if (tab === 'tutor') {
+    return (
+      <div className={pageShell}>
+        <KabsatAI capsule={capsule101} onExit={() => selectTab('hub')} />
+        {navigation}
+      </div>
+    )
+  }
+
   return (
-    <div className="mx-auto flex min-h-dvh max-w-[430px] flex-col bg-[var(--color-bg)] text-[var(--color-ink)] shadow-2xl transition-colors duration-200">
+    <div className="mx-auto flex min-h-dvh max-w-[430px] flex-col bg-[var(--color-bg)] text-[var(--color-ink)] shadow-2xl transition-colors duration-200 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
       {/* Top Mobile App Header */}
       <header className="sticky top-0 z-30 flex items-center justify-between border-b border-[var(--color-line)] bg-[var(--color-surface)]/95 px-4 py-3 backdrop-blur-md">
         <div className="flex items-center gap-2.5">
@@ -203,6 +271,8 @@ function MainApp() {
         </div>
       </header>
 
+      <OfflineBanner online={online} />
+
       {/* Main Content Area with Technique 05: Fast, then slow (page-enter) */}
       <main key={`${tab}-${lang}`} className="flex-1 px-4 py-5 page-enter">
         {tab === 'hub' && (
@@ -240,42 +310,7 @@ function MainApp() {
         )}
       </main>
 
-      {/* Bottom Mobile Navigation */}
-      <nav
-        aria-label="Main Navigation"
-        className="sticky bottom-0 z-30 grid grid-cols-4 border-t border-[var(--color-line)] bg-[var(--color-surface)]/95 py-1.5 backdrop-blur-md"
-      >
-        {tabs.map((item) => {
-          const active = item.id === tab
-          const Icon = item.icon
-          return (
-            <button
-              key={item.id}
-              type="button"
-              aria-current={active ? 'page' : undefined}
-              onClick={() => setTab(item.id)}
-              className={`btn-press flex flex-col items-center justify-center gap-1 py-1.5 text-xs font-medium transition-colors ${
-                active
-                  ? 'text-[var(--color-accent)]'
-                  : 'text-[var(--color-muted)] hover:text-[var(--color-ink)]'
-              }`}
-            >
-              <div
-                className={`flex size-8 items-center justify-center rounded-xl transition-all duration-150 ${
-                  active
-                    ? 'bg-[var(--color-accent-subtle)] text-[var(--color-accent)] shadow-xs scale-105'
-                    : 'text-[var(--color-muted)]'
-                }`}
-              >
-                <Icon className="size-4.5 stroke-[2]" aria-hidden="true" />
-              </div>
-              <span className={`text-[11px] leading-tight ${active ? 'font-bold' : 'font-medium'}`}>
-                {item.label}
-              </span>
-            </button>
-          )
-        })}
-      </nav>
+      {navigation}
     </div>
   )
 }

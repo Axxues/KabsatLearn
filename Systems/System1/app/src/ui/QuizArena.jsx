@@ -105,7 +105,7 @@ function Tile({ tile, index, text, state, disabled, onPick }) {
   )
 }
 
-export default function QuizArena({ capsule, onExit }) {
+export default function QuizArena({ capsule, onExit, onRunningChange }) {
   const { t } = useI18n()
   const bank = capsule.questions
   const [players, setPlayers] = useState(1)
@@ -132,6 +132,10 @@ export default function QuizArena({ capsule, onExit }) {
     const timer = setInterval(() => setNow(Date.now()), 100)
     return () => clearInterval(timer)
   }, [])
+
+  useEffect(() => {
+    onRunningChange?.(phase === 'question' || phase === 'reveal')
+  }, [phase, onRunningChange])
 
   useEffect(() => {
     if (phase === 'question' && remaining <= 0) {
@@ -219,7 +223,7 @@ export default function QuizArena({ capsule, onExit }) {
   // --- Intro View ---
   if (phase === 'intro') {
     return (
-      <div className="mx-auto flex min-h-dvh max-w-[430px] flex-col justify-between bg-[var(--color-bg)] p-5 text-[var(--color-ink)] shadow-2xl transition-colors duration-200">
+      <div className="mx-auto flex flex-1 min-h-0 max-w-[430px] flex-col justify-between bg-[var(--color-bg)] p-5 text-[var(--color-ink)] shadow-2xl transition-colors duration-200">
         <header className="flex items-center justify-between pt-2">
           <button
             type="button"
@@ -311,7 +315,7 @@ export default function QuizArena({ capsule, onExit }) {
   if (phase === 'done') {
     const winner = scores[0] === scores[1] ? null : scores[0] > scores[1] ? 0 : 1
     return (
-      <div className="mx-auto flex min-h-dvh max-w-[430px] flex-col justify-between bg-[var(--color-bg)] p-5 text-[var(--color-ink)] shadow-2xl transition-colors duration-200">
+      <div className="mx-auto flex flex-1 min-h-0 max-w-[430px] flex-col justify-between bg-[var(--color-bg)] p-5 text-[var(--color-ink)] shadow-2xl transition-colors duration-200">
         <div className="pt-6 text-center space-y-2">
           <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-[var(--color-good-subtle)] text-[var(--color-good)] shadow-inner">
             <Trophy className="size-8 stroke-[2.5]" aria-hidden="true" />
@@ -399,7 +403,7 @@ export default function QuizArena({ capsule, onExit }) {
   // --- No Question Fallback ---
   if (!question) {
     return (
-      <div className="mx-auto flex min-h-dvh max-w-[430px] flex-col items-center justify-center p-6 text-center bg-[var(--color-bg)]">
+      <div className="mx-auto flex flex-1 min-h-0 max-w-[430px] flex-col items-center justify-center p-6 text-center bg-[var(--color-bg)]">
         <p className="text-sm font-semibold text-[var(--color-muted)]">
           {t('noQuestions')}
         </p>
@@ -424,7 +428,7 @@ export default function QuizArena({ capsule, onExit }) {
         : 'bg-[var(--color-danger)] animate-pulse'
 
   return (
-    <div className="mx-auto flex min-h-dvh max-w-[430px] flex-col bg-[var(--color-bg)] text-[var(--color-ink)] shadow-2xl transition-colors duration-200">
+    <div className="mx-auto flex flex-1 min-h-0 max-w-[430px] flex-col bg-[var(--color-bg)] text-[var(--color-ink)] shadow-2xl transition-colors duration-200">
       {/* Quiz HUD Header */}
       <header className="border-b border-[var(--color-line)] bg-[var(--color-surface)]/95 px-4 pt-3.5 pb-3 backdrop-blur-md">
         <div className="flex items-center justify-between text-xs">
