@@ -1,0 +1,470 @@
+<h2>KabsatLearn Brand Identity • Redesigned Options</h2>
+<p class="subtitle">Elevated vector craft with precise geometry, multi-stop lighting gradients, ambient occlusion shadows, and high-contrast Android launcher scaling.</p>
+
+<style>
+  .v2-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  .v2-card {
+    background: var(--bg-secondary);
+    border: 2px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+    display: flex;
+    flex-direction: column;
+  }
+  .v2-card:hover {
+    border-color: #0284c7;
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(2, 132, 199, 0.15);
+  }
+  .v2-card.selected {
+    border-color: #0284c7;
+    border-width: 2.5px;
+    background: var(--selected-bg);
+    box-shadow: 0 12px 32px rgba(2, 132, 199, 0.22);
+  }
+  .stage-box {
+    padding: 2rem 1.5rem;
+    background: radial-gradient(circle at 50% 20%, #1e293b 0%, #0f172a 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    position: relative;
+    overflow: hidden;
+  }
+  .stage-grid-bg {
+    position: absolute;
+    inset: 0;
+    background-size: 24px 24px;
+    background-image: 
+      linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    pointer-events: none;
+  }
+  .icon-preview-row {
+    display: flex;
+    align-items: center;
+    gap: 1.75rem;
+    z-index: 1;
+  }
+  .icon-squircle {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease;
+  }
+  .icon-squircle:hover {
+    transform: scale(1.06);
+  }
+  .lockup-pill {
+    z-index: 1;
+    background: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 9999px;
+    padding: 0.6rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  }
+  .v2-body {
+    padding: 1.5rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  .v2-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.25rem 0.65rem;
+    border-radius: 9999px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .v2-specs {
+    margin-top: auto;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+  }
+</style>
+
+<!-- 3D Render Highlight Banner -->
+<div style="margin-bottom: 2rem; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border: 1px solid #334155; border-radius: 16px; padding: 1.5rem; display: flex; align-items: center; gap: 2rem; box-shadow: 0 10px 25px rgba(0,0,0,0.25);">
+  <img src="/files/kabsatlearn_3d_icon.jpg" alt="3D Icon Render" style="width: 120px; height: 120px; border-radius: 26px; box-shadow: 0 12px 30px rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.15); object-fit: cover; flex-shrink: 0;" />
+  <div>
+    <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+      <span style="background: #0284c7; color: #fff; font-size: 0.7rem; font-weight: 800; padding: 0.2rem 0.6rem; border-radius: 9999px; letter-spacing: 0.05em;">3D MASTER CONCEPT</span>
+      <h3 style="font-size: 1.3rem; font-weight: 800; color: #f8fafc; margin: 0;">Apple Design Award-Tier 3D Launcher Render</h3>
+    </div>
+    <p style="color: #94a3b8; font-size: 0.88rem; line-height: 1.5; margin-bottom: 0.5rem;">
+      Rendered with continuous fluid ribbon geometry, volumetric ambient light, rim reflection, and satin subsurface finish. Below are the corresponding <strong>production SVG vector assets</strong> engineered to match this exact aesthetic for the in-app code and web builds.
+    </p>
+  </div>
+</div>
+
+<div class="v2-grid">
+
+  <!-- ==================== OPTION 1: SOL-TIDE HORIZON (RECOMMENDED) ==================== -->
+  <div class="v2-card selected" data-choice="1" onclick="toggleSelect(this)">
+    <div class="stage-box">
+      <div class="stage-grid-bg"></div>
+      
+      <div class="icon-preview-row">
+        <!-- 96px Dark App Icon -->
+        <div class="icon-squircle" style="width: 96px; height: 96px; border-radius: 24px; background: linear-gradient(145deg, #0f172a 0%, #1e1b4b 50%, #0c4a6e 100%); box-shadow: 0 16px 36px -6px rgba(12, 74, 110, 0.6), inset 0 1px 1px rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.15);">
+          <svg width="68" height="68" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="sunGlow1" x1="60" y1="16" x2="60" y2="60" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#FBBF24"/>
+                <stop offset="60%" stop-color="#F97316"/>
+                <stop offset="100%" stop-color="#EA580C"/>
+              </linearGradient>
+              <linearGradient id="waveFront1" x1="24" y1="52" x2="60" y2="98" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#38BDF8"/>
+                <stop offset="50%" stop-color="#0284C7"/>
+                <stop offset="100%" stop-color="#1E3A8A"/>
+              </linearGradient>
+              <linearGradient id="waveBack1" x1="96" y1="52" x2="60" y2="98" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#60A5FA"/>
+                <stop offset="50%" stop-color="#2563EB"/>
+                <stop offset="100%" stop-color="#1E40AF"/>
+              </linearGradient>
+              <filter id="shadow1" x="-10%" y="-10%" width="120%" height="130%">
+                <feDropShadow dx="0" dy="4" stdDeviation="3" flood-color="#05152b" flood-opacity="0.5"/>
+              </filter>
+            </defs>
+            <!-- Radiant Beacon Sun -->
+            <circle cx="60" cy="46" r="22" fill="url(#sunGlow1)" filter="url(#shadow1)"/>
+            <!-- Sun Corona Spark / Micro-dot -->
+            <circle cx="60" cy="24" r="3" fill="#FDE047"/>
+            <path d="M60 17 L60 21 M43 27 L46 30 M77 27 L74 30" stroke="#FDE047" stroke-width="2.5" stroke-linecap="round"/>
+            <!-- Ocean Wave Pages (Left Wing / Wave Crest) -->
+            <path d="M60 88 C44 88 28 78 18 64 C26 62 44 70 60 82 Z" fill="#0369A1" opacity="0.4"/>
+            <path d="M60 84 C42 84 26 71 18 54 C28 50 46 60 60 75 Z" fill="url(#waveFront1)" filter="url(#shadow1)"/>
+            <!-- Ocean Wave Pages (Right Wing / Wave Crest) -->
+            <path d="M60 88 C76 88 92 78 102 64 C94 62 76 70 60 82 Z" fill="#1D4ED8" opacity="0.4"/>
+            <path d="M60 84 C78 84 94 71 102 54 C92 50 74 60 60 75 Z" fill="url(#waveBack1)" filter="url(#shadow1)"/>
+            <!-- Center Keel / Bookmark Beacon Line -->
+            <path d="M60 68 L60 88" stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="round"/>
+            <circle cx="60" cy="65" r="2.5" fill="#FFFFFF"/>
+          </svg>
+        </div>
+
+        <!-- 96px Light App Icon preview -->
+        <div class="icon-squircle" style="width: 96px; height: 96px; border-radius: 24px; background: #ffffff; box-shadow: 0 16px 36px -6px rgba(0,0,0,0.12), inset 0 1px 1px rgba(255,255,255,1); border: 1px solid #e2e8f0;">
+          <svg width="68" height="68" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="60" cy="46" r="22" fill="url(#sunGlow1)"/>
+            <circle cx="60" cy="24" r="3" fill="#F59E0B"/>
+            <path d="M60 17 L60 21 M43 27 L46 30 M77 27 L74 30" stroke="#F59E0B" stroke-width="2.5" stroke-linecap="round"/>
+            <path d="M60 88 C44 88 28 78 18 64 C26 62 44 70 60 82 Z" fill="#0284C7" opacity="0.2"/>
+            <path d="M60 84 C42 84 26 71 18 54 C28 50 46 60 60 75 Z" fill="url(#waveFront1)"/>
+            <path d="M60 88 C76 88 92 78 102 64 C94 62 76 70 60 82 Z" fill="#1E40AF" opacity="0.2"/>
+            <path d="M60 84 C78 84 94 71 102 54 C92 50 74 60 60 75 Z" fill="url(#waveBack1)"/>
+            <path d="M60 68 L60 88" stroke="#0F172A" stroke-width="3.5" stroke-linecap="round"/>
+            <circle cx="60" cy="65" r="2.5" fill="#0F172A"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Horizontal Wordmark Lockup -->
+      <div class="lockup-pill">
+        <svg width="32" height="32" viewBox="0 0 120 120" fill="none">
+          <circle cx="60" cy="46" r="22" fill="#F97316"/>
+          <path d="M60 84 C42 84 26 71 18 54 C28 50 46 60 60 75 Z" fill="#38BDF8"/>
+          <path d="M60 84 C78 84 94 71 102 54 C92 50 74 60 60 75 Z" fill="#60A5FA"/>
+          <path d="M60 68 L60 88" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round"/>
+        </svg>
+        <div>
+          <div style="font-size: 1.15rem; font-weight: 800; color: #FFFFFF; letter-spacing: -0.02em; line-height: 1;">
+            Kabsat<span style="color: #38BDF8;">Learn</span>
+          </div>
+          <div style="font-size: 0.65rem; font-weight: 600; color: #94A3B8; letter-spacing: 0.1em; text-transform: uppercase;">
+            San Fernando • La Union
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="v2-body">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+        <h3 style="font-size: 1.25rem; font-weight: 700; color: #0284c7;">1. Sol-Tide Horizon</h3>
+        <span class="v2-badge" style="background: #e0f2fe; color: #0369a1;">RECOMMENDED</span>
+      </div>
+      <p style="font-size: 0.88rem; line-height: 1.45; color: var(--text-primary); margin-bottom: 0.75rem;">
+        <strong>The Concept:</strong> Sweeping ocean waves curl into open book folios that cradle a warm, rising sun beacon. The center spine forms an anchor point of educational progress.
+      </p>
+      <ul style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5; padding-left: 1.2rem; margin-bottom: 1rem;">
+        <li>Aerodynamic, flowing lines evoke San Fernando's renowned surf breaks.</li>
+        <li>Dual-wave wings represent both learning pages and the sibling bond ("kabsat").</li>
+        <li>Flawless scaling: holds high visibility down to 24px in the app header bar.</li>
+      </ul>
+      <div class="v2-specs">
+        <span>Palette: #F97316, #38BDF8, #1E3A8A</span>
+        <span>Aesthetic: Fluid Modern Vector</span>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ==================== OPTION 2: THE BEACON MONOGRAM (K-MARK) ==================== -->
+  <div class="v2-card" data-choice="2" onclick="toggleSelect(this)">
+    <div class="stage-box">
+      <div class="stage-grid-bg"></div>
+      
+      <div class="icon-preview-row">
+        <!-- 96px Dark App Icon -->
+        <div class="icon-squircle" style="width: 96px; height: 96px; border-radius: 24px; background: linear-gradient(145deg, #0b1120 0%, #172554 100%); box-shadow: 0 16px 36px -6px rgba(30, 58, 138, 0.6), inset 0 1px 1px rgba(255,255,255,0.25); border: 1px solid rgba(255,255,255,0.15);">
+          <svg width="68" height="68" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="beamGrad2" x1="42" y1="28" x2="102" y2="48" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#FDE047"/>
+                <stop offset="100%" stop-color="#F97316"/>
+              </linearGradient>
+              <linearGradient id="waveK2" x1="44" y1="60" x2="98" y2="98" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#38BDF8"/>
+                <stop offset="100%" stop-color="#1D4ED8"/>
+              </linearGradient>
+              <linearGradient id="pillar2" x1="26" y1="24" x2="44" y2="98" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#F8FAFC"/>
+                <stop offset="100%" stop-color="#94A3B8"/>
+              </linearGradient>
+            </defs>
+            <!-- Lighthouse Stem / 'K' Spire -->
+            <path d="M28 32 C28 26 40 26 40 32 L40 92 C40 95 28 95 28 92 Z" fill="url(#pillar2)"/>
+            <!-- Lighthouse Lamp Room & Dome -->
+            <path d="M26 32 L42 32 L39 24 C38 21 30 21 29 24 Z" fill="#F59E0B"/>
+            <circle cx="34" cy="28" r="3.5" fill="#FEF08A"/>
+            <!-- Upper Arm of 'K': Radiating Beacon Ray / Rising Horizon -->
+            <path d="M42 54 L94 28 C99 26 102 30 98 34 L56 64 Z" fill="url(#beamGrad2)"/>
+            <!-- Lower Arm of 'K': Sweeping Ocean Surf Wave -->
+            <path d="M48 60 L92 90 C96 93 92 98 86 96 C70 92 56 82 42 68 Z" fill="url(#waveK2)"/>
+          </svg>
+        </div>
+
+        <!-- 96px Light App Icon preview -->
+        <div class="icon-squircle" style="width: 96px; height: 96px; border-radius: 24px; background: #ffffff; box-shadow: 0 16px 36px -6px rgba(0,0,0,0.12), inset 0 1px 1px rgba(255,255,255,1); border: 1px solid #e2e8f0;">
+          <svg width="68" height="68" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M28 32 C28 26 40 26 40 32 L40 92 C40 95 28 95 28 92 Z" fill="#1E293B"/>
+            <path d="M26 32 L42 32 L39 24 C38 21 30 21 29 24 Z" fill="#EA580C"/>
+            <circle cx="34" cy="28" r="3.5" fill="#FBBF24"/>
+            <path d="M42 54 L94 28 C99 26 102 30 98 34 L56 64 Z" fill="url(#beamGrad2)"/>
+            <path d="M48 60 L92 90 C96 93 92 98 86 96 C70 92 56 82 42 68 Z" fill="url(#waveK2)"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Horizontal Wordmark Lockup -->
+      <div class="lockup-pill">
+        <svg width="28" height="28" viewBox="0 0 120 120" fill="none">
+          <path d="M28 32 L40 32 L40 92 L28 92 Z" fill="#FFFFFF"/>
+          <path d="M42 54 L94 28 L56 64 Z" fill="#F97316"/>
+          <path d="M48 60 L92 90 C70 92 56 82 42 68 Z" fill="#38BDF8"/>
+        </svg>
+        <div>
+          <div style="font-size: 1.15rem; font-weight: 800; color: #FFFFFF; letter-spacing: -0.02em; line-height: 1;">
+            Kabsat<span style="color: #F97316;">Learn</span>
+          </div>
+          <div style="font-size: 0.65rem; font-weight: 600; color: #94A3B8; letter-spacing: 0.1em; text-transform: uppercase;">
+            Poro Point Beacon Identity
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="v2-body">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+        <h3 style="font-size: 1.25rem; font-weight: 700; color: #1e293b;">2. The Beacon Monogram (Lettermark 'K')</h3>
+      </div>
+      <p style="font-size: 0.88rem; line-height: 1.45; color: var(--text-primary); margin-bottom: 0.75rem;">
+        <strong>The Concept:</strong> A bold, architectural monogram that weaves the letter 'K' (Kabsat) directly out of San Fernando's historic Poro Point Lighthouse tower, an upward sunrise beacon, and an incoming ocean surf breaker.
+      </p>
+      <ul style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5; padding-left: 1.2rem; margin-bottom: 1rem;">
+        <li>High-tech, sharp tech-forward identity (Linear / Stripe caliber).</li>
+        <li>Unmistakable initial lettermark makes the app instant to spot on busy app grids.</li>
+        <li>Direct architectural tribute to Poro Point's lighthouse navigation history.</li>
+      </ul>
+      <div class="v2-specs">
+        <span>Palette: #FDE047, #F97316, #38BDF8, #1E293B</span>
+        <span>Aesthetic: Precision Monogram</span>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ==================== OPTION 3: HARMONIC COMMUNION (KABSAT LEAF & SUN) ==================== -->
+  <div class="v2-card" data-choice="3" onclick="toggleSelect(this)">
+    <div class="stage-box">
+      <div class="stage-grid-bg"></div>
+      
+      <div class="icon-preview-row">
+        <!-- 96px Dark App Icon -->
+        <div class="icon-squircle" style="width: 96px; height: 96px; border-radius: 24px; background: linear-gradient(145deg, #091322 0%, #064e3b 100%); box-shadow: 0 16px 36px -6px rgba(6, 78, 59, 0.6), inset 0 1px 1px rgba(255,255,255,0.25); border: 1px solid rgba(255,255,255,0.15);">
+          <svg width="68" height="68" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="sunGrad3" x1="60" y1="20" x2="60" y2="58" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#FEF08A"/>
+                <stop offset="60%" stop-color="#F59E0B"/>
+                <stop offset="100%" stop-color="#EA580C"/>
+              </linearGradient>
+              <linearGradient id="leafLeft3" x1="20" y1="50" x2="60" y2="96" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#10B981"/>
+                <stop offset="100%" stop-color="#0284C7"/>
+              </linearGradient>
+              <linearGradient id="leafRight3" x1="100" y1="50" x2="60" y2="96" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#38BDF8"/>
+                <stop offset="100%" stop-color="#1E40AF"/>
+              </linearGradient>
+            </defs>
+            <!-- Concentric Learning Beacons (WiFi / Offline Arc) -->
+            <path d="M42 32 C48 26 72 26 78 32" stroke="#FDE047" stroke-width="3" stroke-linecap="round" opacity="0.8"/>
+            <path d="M34 24 C44 16 76 16 86 24" stroke="#FBBF24" stroke-width="3" stroke-linecap="round" opacity="0.5"/>
+            <!-- Radiant Central Sun Disc -->
+            <circle cx="60" cy="48" r="18" fill="url(#sunGrad3)"/>
+            <!-- Sibling Protective Arms (Interlocking Leaf-Waves) -->
+            <path d="M60 96 C36 96 18 80 18 58 C32 58 48 70 60 84 Z" fill="url(#leafLeft3)"/>
+            <path d="M60 96 C84 96 102 80 102 58 C88 58 72 70 60 84 Z" fill="url(#leafRight3)"/>
+            <!-- Center Seed of Wisdom -->
+            <circle cx="60" cy="80" r="3.5" fill="#FFFFFF"/>
+          </svg>
+        </div>
+
+        <!-- 96px Light App Icon preview -->
+        <div class="icon-squircle" style="width: 96px; height: 96px; border-radius: 24px; background: #ffffff; box-shadow: 0 16px 36px -6px rgba(0,0,0,0.12), inset 0 1px 1px rgba(255,255,255,1); border: 1px solid #e2e8f0;">
+          <svg width="68" height="68" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M42 32 C48 26 72 26 78 32" stroke="#F59E0B" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="60" cy="48" r="18" fill="url(#sunGrad3)"/>
+            <path d="M60 96 C36 96 18 80 18 58 C32 58 48 70 60 84 Z" fill="url(#leafLeft3)"/>
+            <path d="M60 96 C84 96 102 80 102 58 C88 58 72 70 60 84 Z" fill="url(#leafRight3)"/>
+            <circle cx="60" cy="80" r="3.5" fill="#064E3B"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Horizontal Wordmark Lockup -->
+      <div class="lockup-pill">
+        <svg width="28" height="28" viewBox="0 0 120 120" fill="none">
+          <circle cx="60" cy="48" r="18" fill="#F59E0B"/>
+          <path d="M60 96 C36 96 18 80 18 58 C32 58 48 70 60 84 Z" fill="#10B981"/>
+          <path d="M60 96 C84 96 102 80 102 58 C88 58 72 70 60 84 Z" fill="#38BDF8"/>
+        </svg>
+        <div>
+          <div style="font-size: 1.15rem; font-weight: 800; color: #FFFFFF; letter-spacing: -0.02em; line-height: 1;">
+            Kabsat<span style="color: #10B981;">Learn</span>
+          </div>
+          <div style="font-size: 0.65rem; font-weight: 600; color: #94A3B8; letter-spacing: 0.1em; text-transform: uppercase;">
+            Community Growth & Solidarity
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="v2-body">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+        <h3 style="font-size: 1.25rem; font-weight: 700; color: #047857;">3. The Kabsat Haven (Leaf-Wave Crest)</h3>
+      </div>
+      <p style="font-size: 0.88rem; line-height: 1.45; color: var(--text-primary); margin-bottom: 0.75rem;">
+        <strong>The Concept:</strong> Two interlocking hands/petals cupping a sunrise beacon like cupped hands protecting a flame. Infuses emerald growth tones representing personal empowerment.
+      </p>
+      <ul style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5; padding-left: 1.2rem; margin-bottom: 1rem;">
+        <li>Gentle, warm, and highly inviting for out-of-school learners and senior citizens.</li>
+        <li>Subtle offline signal arcs above the sun reflect local capsule distribution.</li>
+        <li>Emerald & azure palette reflects both the lush hills and coastline of La Union.</li>
+      </ul>
+      <div class="v2-specs">
+        <span>Palette: #10B981, #0284C7, #F59E0B</span>
+        <span>Aesthetic: Organic Humanist Emblem</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+<!-- ==================== LIVE MOBILE APP UI SIMULATION ==================== -->
+<div class="mockup" style="margin-top: 2rem;">
+  <div class="mockup-header" style="display: flex; justify-content: space-between; align-items: center;">
+    <span>In-App Mobile Header & Home Screen Simulation (Option 1 • Sol-Tide Horizon)</span>
+    <span style="color: var(--success); font-weight: 600;">Hardware-Accelerated 60fps</span>
+  </div>
+  <div class="mockup-body" style="background: #020617; display: flex; justify-content: center; padding: 2.5rem 1rem;">
+    <!-- Android Phone Frame -->
+    <div style="width: 100%; max-width: 390px; background: #0f172a; border: 2px solid #334155; border-radius: 28px; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.7); display: flex; flex-direction: column;">
+      
+      <!-- Phone Status Bar -->
+      <div style="background: #1e293b; padding: 0.5rem 1.25rem 0.25rem; display: flex; justify-content: space-between; align-items: center; font-size: 0.7rem; color: #94a3b8; font-weight: 600;">
+        <span>9:41 AM</span>
+        <div style="display: flex; align-items: center; gap: 0.4rem;">
+          <span style="font-size: 0.65rem; color: #38bdf8;">OFFLINE</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12.55a11 11 0 0 1 14.08 0M1.42 9a16 16 0 0 1 21.16 0M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="16" height="10" rx="2"/><line x1="22" y1="11" x2="22" y2="13"/></svg>
+        </div>
+      </div>
+
+      <!-- App Header Bar with New Logo -->
+      <div style="background: #1e293b; border-bottom: 1px solid #334155; padding: 0.75rem 1.25rem; display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+          <!-- 36px Icon Badge -->
+          <div style="width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, #0c4a6e, #1e1b4b); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.15);">
+            <svg width="24" height="24" viewBox="0 0 120 120" fill="none">
+              <circle cx="60" cy="46" r="22" fill="#F97316"/>
+              <path d="M60 84 C42 84 26 71 18 54 C28 50 46 60 60 75 Z" fill="#38BDF8"/>
+              <path d="M60 84 C78 84 94 71 102 54 C92 50 74 60 60 75 Z" fill="#60A5FA"/>
+              <path d="M60 68 L60 88" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div>
+            <div style="font-size: 0.7rem; font-weight: 800; letter-spacing: 0.08em; color: #38BDF8; text-transform: uppercase; line-height: 1;">KabsatLearn</div>
+            <div style="font-size: 1.05rem; font-weight: 700; color: #F8FAFC; line-height: 1.2;">Daka-adal (Your Courses)</div>
+          </div>
+        </div>
+        
+        <!-- Offline Pill Indicator -->
+        <div style="display: flex; align-items: center; gap: 0.4rem; background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 9999px; padding: 0.25rem 0.65rem;">
+          <span style="width: 7px; height: 7px; border-radius: 50%; background: #F59E0B; box-shadow: 0 0 8px #F59E0B;"></span>
+          <span style="font-size: 0.72rem; font-weight: 700; color: #FCD34D;">Offline Ready</span>
+        </div>
+      </div>
+
+      <!-- App Content Preview -->
+      <div style="padding: 1.25rem; display: flex; flex-direction: column; gap: 1rem;">
+        <div style="background: #1e293b; border: 1px solid #334155; border-radius: 14px; padding: 1rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+            <span style="font-size: 0.75rem; font-weight: 700; color: #38bdf8; text-transform: uppercase;">Capsule 101</span>
+            <span style="font-size: 0.7rem; background: #064e3b; color: #34d399; font-weight: 700; padding: 0.15rem 0.5rem; border-radius: 9999px;">Installed</span>
+          </div>
+          <div style="font-size: 0.95rem; font-weight: 700; color: #f8fafc; margin-bottom: 0.25rem;">Budgeting for Coastal Households</div>
+          <div style="font-size: 0.8rem; color: #94a3b8;">5 story cards • 5 quiz questions • 24 KB</div>
+        </div>
+
+        <div style="background: #1e293b; border: 1px solid #334155; border-radius: 14px; padding: 1rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+            <span style="font-size: 0.75rem; font-weight: 700; color: #f97316; text-transform: uppercase;">Capsule 102</span>
+            <span style="font-size: 0.7rem; background: #374151; color: #d1d5db; font-weight: 700; padding: 0.15rem 0.5rem; border-radius: 9999px;">Available</span>
+          </div>
+          <div style="font-size: 0.95rem; font-weight: 700; color: #f8fafc; margin-bottom: 0.25rem;">Spotting Text Scams & Phishing</div>
+          <div style="font-size: 0.8rem; color: #94a3b8;">4 story cards • 5 quiz questions • 21 KB</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

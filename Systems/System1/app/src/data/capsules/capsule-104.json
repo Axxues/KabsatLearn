@@ -1,0 +1,301 @@
+{
+  "id": "capsule-104",
+  "version": 1,
+  "title": "Perang May Plano",
+  "subtitle": "Budget, ipon, at utang na hindi lumulubog",
+  "persona": "young earner at pamilyang maliit ang kita",
+  "competency": ["financial_literacy"],
+  "shared_by": "K-0001",
+  "share_count": 0,
+  "cards": [
+    {
+      "id": "c1",
+      "title": "Saan napupunta ang pera?",
+      "body": "Itala ang bawat gastos sa loob ng 30 araw, kasama ang maliliit: pamasahe, load, at meryenda. Gumamit ng notebook o notes app. Doon mo makikita ang totoong gastos.",
+      "tip": "Isulat kahit ang piso. Doon lumilitaw ang totoong gastos."
+    },
+    {
+      "id": "c2",
+      "title": "Budget na totoo",
+      "body": "Unahin ang needs bago ang wants. Ang 50/30/20 ay gabay lamang, hindi batas. Gamitin ang envelopes para sa bawat kategorya para may takda ang gastos.",
+      "tip": "Kung kulang, bawasan ang wants bago ang needs."
+    },
+    {
+      "id": "c3",
+      "title": "Bayaran muna ang sarili",
+      "body": "Magtabi bago gumastos, kahit P20 sa isang araw. Ilagay agad ito sa hiwalay na wallet o lalagyan para hindi magastos sa ibang bagay.",
+      "tip": "Ihiwalay ang ipon bago ito magastos."
+    },
+    {
+      "id": "c4",
+      "title": "Emergency fund",
+      "body": "Target ang 3 hanggang 6 na buwan ng needs. Simulan sa isang linggo lang. Itago ito nang hiwalay pero madaling abutin kapag may biglaang gastos.",
+      "tip": "Ang emergency fund ay para sa hindi inaasahan, hindi sa sale."
+    },
+    {
+      "id": "c5",
+      "title": "Utang: alam mo ba ang tubo?",
+      "body": "Tingnan ang kabuuang babayaran, hindi lang ang linggong hulog. Ang 5-6 ay mahal ang tubo. Isulat ang kasunduan: halaga, tubo, petsa ng bayad, at iskedyul.",
+      "tip": "Kung P100 ang inutang at P120 ang bayad sa isang linggo, mataas ang tubo."
+    },
+    {
+      "id": "c6",
+      "title": "Investment scams",
+      "body": "Red flag ang garantisadong mataas na tubo, pagmamadali, at referral bonus. I-check ang SEC registration bago magbayad sa kahit anong alok.",
+      "tip": "Kung garantisado at napakataas, malamang scam.",
+      "drill": {
+        "prompt": "I-tap ang lahat ng red flag sa alok na ito.",
+        "segments": [
+          { "text": "Guaranteed 30% per month", "flag": true },
+          { "text": "Limited slots today only", "flag": true },
+          { "text": "Nakarehistro sa SEC", "flag": false },
+          { "text": "Mag-refer ng 3 kaibigan para kumita", "flag": true },
+          { "text": "May nakasulat na kontrata", "flag": false }
+        ],
+        "hint": "Tatlo: garantisadong mataas na tubo, pagmamadali, at referral bonus. Ang legit na investment ay may risk at dokumento."
+      }
+    }
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "band": "foundational",
+      "stem": "Ano ang unang hakbang sa pagpaplano ng pera?",
+      "options": [
+        "Itala kung saan napupunta ang pera",
+        "Bumili ng bagong wallet",
+        "Mag-utang agad",
+        "Maghintay ng sweldo"
+      ],
+      "answer": 0,
+      "competency": "financial_literacy"
+    },
+    {
+      "id": "q2",
+      "band": "foundational",
+      "stem": "Alin ang needs?",
+      "options": [
+        "Bagong sapatos",
+        "Pamasahe papasok sa trabaho",
+        "Load para sa laro",
+        "Kape sa mall"
+      ],
+      "answer": 1,
+      "competency": "financial_literacy"
+    },
+    {
+      "id": "q3",
+      "band": "foundational",
+      "stem": "Magkano ang dapat itabi araw-araw?",
+      "options": [
+        "Wala, kung maliit ang kita",
+        "Kahit maliit, basta regular",
+        "Kalahati ng kita",
+        "Lahat ng matira"
+      ],
+      "answer": 1,
+      "competency": "financial_literacy"
+    },
+    {
+      "id": "q4",
+      "band": "foundational",
+      "stem": "Ano ang emergency fund?",
+      "options": [
+        "Ipon para sa sale",
+        "Ipon para sa biglaang gastos na hindi utang",
+        "Pera para sa luho",
+        "Utang na mababa ang tubo"
+      ],
+      "answer": 1,
+      "competency": "financial_literacy"
+    },
+    {
+      "id": "q5",
+      "band": "core",
+      "stem": "Kulang ang kita ngayong buwan. Ano ang unang ayusin?",
+      "options": [
+        "Bawasan ang wants at protektahan ang needs",
+        "Mag-utang para sa luho",
+        "Bawasan ang pagkain",
+        "Huwag magbayad ng kuryente"
+      ],
+      "answer": 0,
+      "competency": "financial_literacy"
+    },
+    {
+      "id": "q6",
+      "band": "core",
+      "stem": "May nag-alok ng garantisadong 30% tubo bawat buwan. Ano ito?",
+      "options": [
+        "Magandang pagkakataon",
+        "Malamang scam; walang garantisadong ganoon kataas",
+        "Normal sa negosyo",
+        "Siguradong legit"
+      ],
+      "answer": 1,
+      "competency": "financial_literacy"
+    },
+    {
+      "id": "q7",
+      "band": "core",
+      "stem": "Bakit delikado ang 5-6?",
+      "options": [
+        "Mababa ang tubo",
+        "Mataas ang tubo at mabilis lumaki ang utang",
+        "Libre ito",
+        "May seguro"
+      ],
+      "answer": 1,
+      "competency": "financial_literacy"
+    },
+    {
+      "id": "q8",
+      "band": "stretch",
+      "stem": "Paano mo i-check kung legit ang isang investment company?",
+      "options": [
+        "Tingnan kung nakarehistro sa SEC at mag-ingat sa referral schemes",
+        "Tingnan ang dami ng miyembro",
+        "Tingnan ang logo",
+        "Tanungin ang nag-recruit"
+      ],
+      "answer": 0,
+      "competency": "financial_literacy"
+    },
+    {
+      "id": "q9",
+      "band": "stretch",
+      "stem": "Ano ang dapat gawin bago mangutang?",
+      "options": [
+        "Uminom ng kape",
+        "Tingnan kung kaya ng kita ang buwanang bayad at isulat ang usapan",
+        "Ibigay ang ID",
+        "Magpautang din"
+      ],
+      "answer": 1,
+      "competency": "financial_literacy"
+    },
+    {
+      "id": "q10",
+      "band": "stretch",
+      "stem": "May extra P1,000 ka. Ano ang pinakauna?",
+      "options": [
+        "Bumili ng bagong phone",
+        "Ilagay sa emergency fund bago ang luho",
+        "Kumain sa labas",
+        "Mag-load ng laro"
+      ],
+      "answer": 1,
+      "competency": "financial_literacy"
+    }
+  ],
+  "chunks": [
+    {
+      "id": "k1",
+      "concept": "Expense tracking",
+      "competency": "financial_literacy",
+      "difficulty": "foundational",
+      "text": "Itala ang bawat gastos sa loob ng 30 araw, kasama ang maliliit, para makita kung saan talaga napupunta ang pera.",
+      "keywords": ["gastos", "track", "30 araw", "notebook", "pera"],
+      "source_id": "c1"
+    },
+    {
+      "id": "k2",
+      "concept": "Needs vs wants",
+      "competency": "financial_literacy",
+      "difficulty": "foundational",
+      "text": "Unahin ang needs. Ang wants ay optional at ito ang unang bawasan kapag kulang ang kita.",
+      "keywords": ["needs", "wants", "kita", "gastos", "priority"],
+      "source_id": "c2"
+    },
+    {
+      "id": "k3",
+      "concept": "50/30/20",
+      "competency": "financial_literacy",
+      "difficulty": "core",
+      "text": "Ang 50/30/20 ay gabay para sa needs, wants, at ipon, hindi batas na pareho sa lahat ng kita.",
+      "keywords": ["50/30/20", "budget", "needs", "wants", "ipon"],
+      "source_id": "c2"
+    },
+    {
+      "id": "k4",
+      "concept": "Envelope budgeting",
+      "competency": "financial_literacy",
+      "difficulty": "core",
+      "text": "Hatiin ang cash sa mga envelope na may label para may takdang limit ang bawat kategorya.",
+      "keywords": ["envelope", "cash", "kategorya", "limit", "budget"],
+      "source_id": "c2"
+    },
+    {
+      "id": "k5",
+      "concept": "Pay yourself first",
+      "competency": "financial_literacy",
+      "difficulty": "foundational",
+      "text": "Ihiwalay ang ipon bago gumastos, kahit maliit lang basta regular. Ilagay ito sa hiwalay na lalagyan o wallet.",
+      "keywords": ["ipon", "save", "regular", "hiwalay", "gastos"],
+      "source_id": "c3"
+    },
+    {
+      "id": "k6",
+      "concept": "Emergency fund",
+      "competency": "financial_literacy",
+      "difficulty": "core",
+      "text": "Target ang tatlo hanggang anim na buwan ng needs. Simulan sa isang linggo at itago ito nang hiwalay pero madaling abutin.",
+      "keywords": ["emergency fund", "ipon", "buwan", "needs", "hiwalay"],
+      "source_id": "c4"
+    },
+    {
+      "id": "k7",
+      "concept": "Cost of debt",
+      "competency": "financial_literacy",
+      "difficulty": "stretch",
+      "text": "Ihambing ang kabuuang babayaran, hindi lang ang linggong hulog. Mahal ang tubo ng 5-6 at mabilis lumaki ang utang.",
+      "keywords": ["utang", "tubo", "5-6", "hulog", "kabuuang bayad"],
+      "source_id": "c5"
+    },
+    {
+      "id": "k8",
+      "concept": "Written loan terms",
+      "competency": "financial_literacy",
+      "difficulty": "core",
+      "text": "Bago mangutang, isulat ang halaga, tubo, petsa ng bayad, at iskedyul. Tingnan kung kaya ng kita ang buwanang bayad.",
+      "keywords": ["utang", "kontrata", "tubo", "iskedyul", "kasunduan"],
+      "source_id": "c5"
+    },
+    {
+      "id": "k9",
+      "concept": "Investment red flags",
+      "competency": "financial_literacy",
+      "difficulty": "stretch",
+      "text": "Red flag ang garantisadong mataas na tubo, pagmamadali, at referral bonus. Ang legit na investment ay may risk at dokumento.",
+      "keywords": ["investment", "scam", "tubo", "referral", "red flag"],
+      "source_id": "c6"
+    },
+    {
+      "id": "k10",
+      "concept": "SEC check",
+      "competency": "financial_literacy",
+      "difficulty": "stretch",
+      "text": "I-check ang alok sa listahan ng SEC registered entities bago magbayad. Ang registration ay hindi garantiya ng kita, pero senyales ito ng lehitimong kumpanya.",
+      "keywords": ["sec", "registration", "investment", "check", "kumpanya"],
+      "source_id": "c6"
+    },
+    {
+      "id": "k11",
+      "concept": "Sinking funds",
+      "competency": "financial_literacy",
+      "difficulty": "core",
+      "text": "Magtabi ng maliit buwan-buwan para sa alam nang gastos tulad ng tuition at Pasko, para hindi ito maging utang.",
+      "keywords": ["sinking fund", "ipon", "tuition", "pasko", "gastos"],
+      "source_id": "c4"
+    },
+    {
+      "id": "k12",
+      "concept": "Spending plan review",
+      "competency": "financial_literacy",
+      "difficulty": "core",
+      "text": "Balikan ang budget bawat buwan at ayusin ang kategorya kung hindi tugma. Huwag itong itapon at simulan muli.",
+      "keywords": ["budget", "review", "buwan", "kategorya", "plano"],
+      "source_id": "c1"
+    }
+  ]
+}

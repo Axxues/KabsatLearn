@@ -1,0 +1,233 @@
+﻿8-HOUR HACKATHON GUIDELINES
+
+Overview:
+The 8-Hour Hackathon aims to challenge participants to develop innovative, technology-enabled, and feasible solutions to identified local problems within a limited period. It seeks to:
+Encourage creativity, innovation, and problem-solving using science, technology, and digital solutions;
+Develop functional prototypes or proof-of-concepts addressing real community, government, business, or environmental challenges;
+Promote the responsible use of Artificial Intelligence (AI), digital technologies, data, and emerging technologies; and
+Identify promising solutions with potential for further development, adoption, commercialization, or deployment.
+
+Eligibility and Team Composition:
+The hackathon is open to students currently enrolled in college in the Province of La Union and senior high school students of schools in the City of San Fernando, La Union and member schools of the ICT Council.
+Each team shall have at most three (3) members and a coach.
+Each team shall designate a Team Leader who shall serve as the official representative.
+Teams may use AI tools, open-source software, APIs, cloud services, and other legally available digital resources, provided that their use is properly acknowledged and does not violate applicable licenses, copyrights, privacy, or other laws.
+Participants under eighteen (18) need signed parent or guardian consent and a school-endorsed adult coach.
+All participants must present a valid school ID during the registration proper for identity and eligibility verification.
+
+Challenge:
+The Organizers shall announce one or more problem statements/challenge areas before the start of the hackathon. Teams shall select a challenge and develop a technology-based solution within the prescribed eight-hour period.
+
+The proposed solution should demonstrate a clear connection between the problem, proposed intervention, target users, and expected impact.
+
+Hackathon Rules and Mechanics:
+The official development period shall be eight (8) hours, excluding orientation and final judging.
+Teams must start development only after the official announcement of the challenge.
+Teams may use pre-existing libraries, frameworks, APIs, datasets, templates, and development tools. However, the core solution presented must be developed or substantially configured during the hackathon.
+Participants may use AI-assisted development tools, including AI coding assistants and generative AI. Teams remain responsible for the accuracy, originality, security, legality, and functionality of their outputs.
+Any third-party materials, datasets, APIs, models, or open-source components must be properly acknowledged.
+Teams shall not use confidential, proprietary, personal, or illegally obtained data.
+Plagiarism, misrepresentation of authorship, unauthorized copying of another team's work, or submission of a previously completed project as the hackathon output shall constitute grounds for disqualification.
+Internet access, provided equipment, APIs, datasets, and other resources shall be subject to the facilities and policies established by the Organizers.
+Teams must submit their output before the prescribed deadline. Late submissions may be disqualified or penalized at the discretion of the Organizers.
+The decision of the Board of Judges shall be final and unappealable.
+
+Required Outputs:
+At the end of the eight-hour development period, each team shall submit:
+Working Prototype/Demonstration – a functional application, proof-of-concept, mock-up, or demonstrable solution;
+Pitch Presentation and Demo – maximum 7 minutes; and
+Q&A – maximum 10 minutes, including questions from the judges.
+
+The Organizers may prescribe an online submission repository or standard submission template.
+
+Hackathon Schedule:
+Submission of Entry Form
+November 4, 2026
+Competition Proper: November 7, 2026
+Registration
+7:00AM - 7:30AM
+Mentoring Session
+7:30AM - 8:00AM
+Challenge Briefing and Team Preparation
+8:00AM - 8:30AM
+Hackathon Development Period
+8:30AM - 4:30PM
+Submission of Outputs
+4:30PM - 4:45PM
+Pitching and Demonstration
+5:00PM - 7:00PM
+Judging and Deliberation
+7:00PM - 7:30PM
+Awarding and Recognition
+November 13. 2026
+
+What to bring
+Signed parent or guardian consent, for participants under 18.
+Proof of school or institutional endorsement for participants and coaches.
+Valid school ID for all 3 members
+Your own accounts and subscriptions for any AI tools, APIs or software you plan to use. Free tiers and open-source options are encouraged.
+Laptops, Chargers, Mobile Devices, extension cords
+
+What will be provided by the organizers
+Venue and Internet connection
+Power supply
+AM and PM snacks. Packed lunch, and water
+The Program of Activities, containing the full-day timetable and the opening and closing of the program.
+Note that the organizers do not provide or reimburse subscriptions and usage fees for AI tools, APIs, software and other technologies; these are shouldered by the teams.
+
+Responsible AI and data rules:
+Comply with the Data Privacy Act of 2012 (RA 10173): no real citizen personal data; use public, anonymized or organizer-provided synthetic data only.
+Disclose every AI tool used (LLM APIs, coding assistants, pre-trained models) in the pitch deck.
+AI agents and automated features must not auto-approve benefits, diagnose illness or impose penalties; they recommend and an officer decides.
+Health solutions must show a clear "not a medical diagnosis" notice and refer to a health worker.
+Teams using AI agents must show their prompts in the pitch deck and during Q&A: the system prompt, the tool or function descriptions the agent can call, and 2 to 3 sample conversations with inputs and outputs. 
+Store API keys in environment variables, never in public repositories.
+
+Criteria for Judging:
+Entries are scored out of 100 points on 4 criteria by a panel of at least three judges: one from the LGU, one AI or ML practitioner, and one domain expert for the track.
+
+Criteria
+Weight 
+What judges look for
+Citizen impact and G2C relevance
+30%
+Solves a real, local problem; clear citizen persona; measurable benefit such as time saved, cost reduced or people reached
+Technical implementation
+30%
+Working, well-built solution with sound architecture, data handling and a human approval step; teams without AI are judged on the same scale. Well-used AI agents or ML/AI models (tool-using agent, sound data prep, reported metric, honest limits) can raise this score
+Feasibility and scalability
+20%
+Realistic for LGU implementation, considering available budget, internet connectivity, infrastructure, and staff capabilities; designed to function effectively under low-bandwidth conditions or through SMS-based services where appropriate; and supported by a clear, practical, and achievable implementation plan.
+Innovation and presentation
+20%
+Fresh or cross-track approach; working demo, clear pitch, time discipline and strong Q&A answers
+
+Intellectual Property, Data, and Responsible Innovation
+The intellectual property rights over the solution shall remain with the participating team, subject to any prior rights, third-party licenses, datasets, or specific agreements with the Organizers, partners, or sponsors.
+Participants shall ensure that their outputs comply with applicable Philippine laws on intellectual property, data privacy, cybersecurity, and responsible use of AI and digital technologies.
+Teams shall disclose material use of AI-generated content, third-party software, datasets, APIs, or other external resources.
+The Organizers may document, photograph, record, and showcase the hackathon outputs for non-commercial promotional, educational, and innovation-development purposes, with proper attribution to the participating teams.
+Winning teams may be invited to further develop, pilot, incubate, or present their solutions to relevant government agencies, investors, industry partners, academe, or innovation support organizations.
+
+Disqualification: 
+A team may be disqualified for:
+Submission after the prescribed deadline;
+Plagiarism or unauthorized copying;
+Misrepresentation of the team's work or use of a substantially pre-developed solution;
+Violation of data privacy, intellectual property, cybersecurity, or applicable laws;
+Use of prohibited or illegally obtained resources/data; or
+Conduct that materially compromises the integrity and fairness of the competition.
+
+
+Awards and Prizes:
+Award
+Prize
+Champion
+Php 15,000.00, medals, certificates
+1st runner-up
+Php 10,000.00, medals, certificates
+2nd runner-up
+Php 5,000.00, medals, certificates
+Consolation Prizes (7)
+Php 1,000.00, certificates
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+REGISTRATION FORM
+
+Team Information:
+School Name		: _____________________________________________________________________
+Name of Coach	: _____________________________________________________________________
+eMail Address		: _____________________________________________________________________
+Mobile Number	: _____________________________________________________________________
+
+Team Members:
+	Full Name (LN, FN, MI)
+	
+	Course/Year
+	
+	Email Address
+	
+	Contact Number
+	
+	
+	Full Name (LN, FN, MI)
+	
+	Course/Year
+	
+	Email Address
+	
+	Contact Number
+	
+	
+	Full Name (LN, FN, MI)
+	
+	Course/Year
+	
+	Email Address
+	
+	Contact Number
+	
+
+DECLARATION AND CONSENT
+We certify that the information provided is true and correct. We agree to comply with the 8-Hour Hackathon Guidelines, including rules on originality, intellectual property, responsible use of AI, data privacy, cybersecurity, and submission requirements.
+
+We understand that submission of a substantially pre-developed project, plagiarism, unauthorized use of another team's work, or violation of the competition rules may result in disqualification. We likewise authorize the Organizers to document and showcase our team's participation and submit solutions for non-commercial promotional, educational, and innovation-development purposes, with proper attribution.
+
+Coach:							College Dean:
+
+
+Signature: _______________________________		Signature: _____________________________
+Printed Name: ___________________________		Printed Name: _________________________
+Date: ___________________________________		Position: _______________________________
+Date: _________________________________
+
+
+
+Parent or Guardian Consent Form
+
+
+This form is required for all participants below 18 years old. Please have the form completely filled out and signed by a parent or legal guardian, and submit it together with the registration form as a mandatory requirement for participation.
+
+Participant Information
+Name			: ______________________________________________________________________
+Grade/Level		: ______________________________________________________________________
+School			: ______________________________________________________________________
+Course/Strand		: ______________________________________________________________________
+Name of Coach	: ______________________________________________________________________
+
+Consent:
+I, the undersigned parent/legal guardian of the participant named above, confirm that I have read and understood the Hackathon Guidelines and give my consent for my child to:
+My child may join the hackathon on November 7, 2026 at the City Hall, City of San Fernando, from 7:00AM to 7:00PM.
+My child will be under the supervision of the organizers and the school-endorsed coach named above during the event.
+My child will follow the event rules, code of conduct and responsible AI guidelines. I understand that violations may lead to disqualification.
+In case of a medical emergency, the organizers may give first aid and bring my child to the nearest medical facility. They will contact me right away.
+Photos and videos of my child taken during the event may be used by the organizers and the LGU for documentation and promotion
+
+Data Privacy:
+In line with the Data Privacy Act of 2012 (RA 10173), I allow the organizers to collect and process the personal information in this form. It will be used only for registration, eligibility checks, event communications and awarding. It will not be shared with third parties without my consent.
+
+
+
+
+_____________________________________		_____________________________________
+      Signature Over Printed Name			       Signature Over Printed Name
+              Parent/Guardian 				       Authorized School Personnel
+
+
+
+
+

@@ -1,0 +1,301 @@
+{
+  "id": "capsule-106",
+  "version": 1,
+  "title": "Tindahang Maayos",
+  "subtitle": "Inventory, tubo, at stock na hindi nauubos o nabubulok",
+  "persona": "may-ari ng sari-sari store at maliit na negosyo",
+  "competency": ["business_operations", "financial_literacy"],
+  "shared_by": "K-0001",
+  "share_count": 0,
+  "cards": [
+    {
+      "id": "c1",
+      "title": "Bakit mahalaga ang inventory?",
+      "body": "Ipinapakita ng inventory kung ano ang nasa stock, ano ang mabilis mabenta, at ano ang kulang. Nakakaiwas ito sa walang laman na shelf, sa nabubulok na stock, at sa nawawalang benta.",
+      "tip": "Ang hindi mo binibilang ay hindi mo kontrolado."
+    },
+    {
+      "id": "c2",
+      "title": "Stock card",
+      "body": "Isulat sa stock card ang item, unit cost, selling price, stock in, stock out, balance, at expiry. Puwedeng notebook o offline spreadsheet ang gamitin. I-record agad ang bawat galaw sa araw ding iyon.",
+      "tip": "Isang linya bawat galaw ng stock."
+    },
+    {
+      "id": "c3",
+      "title": "Reorder point",
+      "body": "Ang reorder point ay average daily sales na pinarami ng lead time, dagdagan ng safety stock. Halimbawa, 10 nabenta kada araw na pinarami ng 3 araw na delivery, dagdagan ng 10 safety stock, ay 40. Kapag bumaba sa 40 ang stock, mag-order na.",
+      "tip": "Mag-order bago maubos, hindi pagkatapos."
+    },
+    {
+      "id": "c4",
+      "title": "FIFO at expiry",
+      "body": "First in, first out: ilagay sa harap ang lumang stock at sa likod ang bagong dating. I-check ang expiry dates linggo-linggo at ilabas agad ang mga expired na item.",
+      "tip": "Ang lumang stock ang nasa harap, hindi sa likod.",
+      "drill": {
+        "prompt": "I-tap ang lahat ng dapat i-record bilang bawas o problema.",
+        "segments": [
+          { "text": "5 kilo ng bigas na bagong dating", "flag": false },
+          { "text": "3 basag na softdrinks", "flag": true },
+          { "text": "2 sabon na nawawala", "flag": true },
+          { "text": "1 bagong delivery", "flag": false },
+          { "text": "6 na itlog na basag", "flag": true }
+        ],
+        "hint": "Tatlo: basag na softdrinks, nawawalang sabon, at basag na itlog. Dapat itala agad ang bawas."
+      }
+    },
+    {
+      "id": "c5",
+      "title": "Kita at puhunan",
+      "body": "Ihiwalay ang pera ng tindahan sa pera ng bahay. Ang gross profit ay benta minus gastos sa mga produktong nabenta. I-record din ang withdrawal ng may-ari para malinaw ang tunay na kita.",
+      "tip": "Ang pera ng tindahan ay hindi pera ng bahay."
+    },
+    {
+      "id": "c6",
+      "title": "Slow-moving at overstock",
+      "body": "Balikan ang 30-day sales para makita ang mabagal bumili. I-bundle o i-discount ang slow-moving items, at i-base ang susunod na order sa sales at sa terms ng supplier. Huwag mag-order ng marami ng hindi naman bumibili.",
+      "tip": "Bawal ma-in love sa stock na hindi bumibili."
+    }
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "band": "foundational",
+      "stem": "Ano ang inventory?",
+      "options": [
+        "Listahan ng mga customer",
+        "Listahan ng stock, bilang, at halaga",
+        "Listahan ng utang sa supplier",
+        "Listahan ng sahod ng empleyado"
+      ],
+      "answer": 1,
+      "competency": "business_operations"
+    },
+    {
+      "id": "q2",
+      "band": "foundational",
+      "stem": "Ano ang isusulat sa stock card?",
+      "options": [
+        "Pangalan ng customer at address",
+        "Item, unit cost, presyo, stock in at out, balanse, at expiry",
+        "Sahod ng empleyado",
+        "Listahan ng gustong bilhin"
+      ],
+      "answer": 1,
+      "competency": "business_operations"
+    },
+    {
+      "id": "q3",
+      "band": "foundational",
+      "stem": "Bakit ihiwalay ang pera ng tindahan?",
+      "options": [
+        "Para malaman ang tunay na kita at hindi magastos ang puhunan",
+        "Para mahirapan sa pagbilang",
+        "Para hindi na kailangan ng resibo",
+        "Para maging cash lang sa bahay"
+      ],
+      "answer": 0,
+      "competency": "financial_literacy"
+    },
+    {
+      "id": "q4",
+      "band": "foundational",
+      "stem": "Ano ang FIFO?",
+      "options": [
+        "Unahin ang pinakabago sa stock",
+        "Unahin ang pinakamahal",
+        "Unahin ang naunang dumating na stock",
+        "Unahin ang pinakamabenta"
+      ],
+      "answer": 2,
+      "competency": "business_operations"
+    },
+    {
+      "id": "q5",
+      "band": "core",
+      "stem": "Paano makalkula ang reorder point?",
+      "options": [
+        "Benta minus gastos",
+        "Average daily sales times lead time plus safety stock",
+        "Kabuuang stock na hinati sa presyo",
+        "Bilang ng customer kada araw"
+      ],
+      "answer": 1,
+      "competency": "business_operations"
+    },
+    {
+      "id": "q6",
+      "band": "core",
+      "stem": "Ano ang gross profit?",
+      "options": [
+        "Benta minus gastos sa produkto",
+        "Benta dagdag gastos",
+        "Ang buong cash sa drawer",
+        "Ang utang sa supplier"
+      ],
+      "answer": 0,
+      "competency": "financial_literacy"
+    },
+    {
+      "id": "q7",
+      "band": "core",
+      "stem": "May 3 basag na softdrinks sa delivery. Ano ang gawin?",
+      "options": [
+        "Itago at ibenta pa rin",
+        "I-record agad bilang shrinkage at i-report sa supplier",
+        "Huwag nang itala",
+        "Ibigay sa customer nang libre at huwag sabihin"
+      ],
+      "answer": 1,
+      "competency": "business_operations"
+    },
+    {
+      "id": "q8",
+      "band": "stretch",
+      "stem": "Mabagal bumili ang isang item. Ano ang gawin?",
+      "options": [
+        "Mag-order pa ng marami",
+        "Itago sa likod",
+        "I-bundle o i-discount at bawasan ang susunod na order",
+        "Itaas ang presyo nang husto"
+      ],
+      "answer": 2,
+      "competency": "business_operations"
+    },
+    {
+      "id": "q9",
+      "band": "stretch",
+      "stem": "Bakit delikado ang sobrang stock ng mabilis masira?",
+      "options": [
+        "Nauubos ang pera sa stock at nalulugi sa expiry",
+        "Mas maganda ang shelf",
+        "Bumababa ang presyo ng supplier",
+        "Nadadagdagan ang customer"
+      ],
+      "answer": 0,
+      "competency": "financial_literacy"
+    },
+    {
+      "id": "q10",
+      "band": "stretch",
+      "stem": "Ano ang tamang gawin bago mag-order ng marami?",
+      "options": [
+        "Tingnan ang 30-day sales at supplier terms",
+        "Tingnan ang dami ng tao sa tindahan",
+        "Sumunod sa sabi ng kapitbahay",
+        "Bumili ng lahat ng naka-sale"
+      ],
+      "answer": 0,
+      "competency": "business_operations"
+    }
+  ],
+  "chunks": [
+    {
+      "id": "k1",
+      "concept": "What inventory is",
+      "competency": "business_operations",
+      "difficulty": "foundational",
+      "text": "Ang inventory ay talaan ng stock, bilang, at halaga. Ipinapakita nito kung ano ang mabenta at kung ano ang kulang.",
+      "keywords": ["inventory", "stock", "bilang", "halaga", "talaan"],
+      "source_id": "c1"
+    },
+    {
+      "id": "k2",
+      "concept": "Stock card fields",
+      "competency": "business_operations",
+      "difficulty": "foundational",
+      "text": "Isulat sa stock card ang item, unit cost, selling price, stock in, stock out, balance, at expiry.",
+      "keywords": ["stock card", "unit cost", "presyo", "balance", "expiry"],
+      "source_id": "c2"
+    },
+    {
+      "id": "k3",
+      "concept": "Daily recording",
+      "competency": "business_operations",
+      "difficulty": "foundational",
+      "text": "Itala ang bawat galaw ng stock sa araw ding iyon, kahit maliit na bawas.",
+      "keywords": ["record", "araw", "bawas", "stock", "maliit"],
+      "source_id": "c2"
+    },
+    {
+      "id": "k4",
+      "concept": "Reorder point",
+      "competency": "business_operations",
+      "difficulty": "core",
+      "text": "Ang reorder point ay average daily sales na pinarami ng lead time, dagdagan ng safety stock.",
+      "keywords": ["reorder point", "daily sales", "lead time", "safety stock", "order"],
+      "source_id": "c3"
+    },
+    {
+      "id": "k5",
+      "concept": "Safety stock",
+      "competency": "business_operations",
+      "difficulty": "core",
+      "text": "Ang sobrang stock na itinatabi ay panakip sa delay ng delivery at biglaang dami ng customer.",
+      "keywords": ["safety stock", "delay", "delivery", "demand", "extra"],
+      "source_id": "c3"
+    },
+    {
+      "id": "k6",
+      "concept": "FIFO and expiry",
+      "competency": "business_operations",
+      "difficulty": "core",
+      "text": "Ibenta muna ang lumang stock, i-check ang dates linggo-linggo, at ilabas ang mga expired.",
+      "keywords": ["fifo", "expiry", "lumang stock", "dates", "linggo"],
+      "source_id": "c4"
+    },
+    {
+      "id": "k7",
+      "concept": "Shrinkage",
+      "competency": "business_operations",
+      "difficulty": "core",
+      "text": "Ang basag, panis, at nawawalang item ay lugi at dapat itala agad.",
+      "keywords": ["shrinkage", "basag", "panis", "nawawala", "lugi"],
+      "source_id": "c4"
+    },
+    {
+      "id": "k8",
+      "concept": "Gross profit",
+      "competency": "financial_literacy",
+      "difficulty": "core",
+      "text": "Ang gross profit ay benta minus gastos sa mga produktong nabenta.",
+      "keywords": ["gross profit", "benta", "gastos", "produkto", "tubo"],
+      "source_id": "c5"
+    },
+    {
+      "id": "k9",
+      "concept": "Separate cash",
+      "competency": "financial_literacy",
+      "difficulty": "core",
+      "text": "Ihiwalay ang pera ng tindahan sa pera ng bahay at itala ang withdrawal ng may-ari.",
+      "keywords": ["cash", "hiwalay", "bahay", "tindahan", "withdrawal"],
+      "source_id": "c5"
+    },
+    {
+      "id": "k10",
+      "concept": "Slow-moving stock",
+      "competency": "business_operations",
+      "difficulty": "stretch",
+      "text": "I-bundle, i-discount, o itigil ang pag-order ng mga item na hindi bumibili.",
+      "keywords": ["slow-moving", "bundle", "discount", "order", "stock"],
+      "source_id": "c6"
+    },
+    {
+      "id": "k11",
+      "concept": "Suppliers and lead time",
+      "competency": "business_operations",
+      "difficulty": "stretch",
+      "text": "Alamin ang delivery days, minimum order, at credit terms ng supplier bago mag-order.",
+      "keywords": ["supplier", "delivery", "minimum order", "credit terms", "lead time"],
+      "source_id": "c6"
+    },
+    {
+      "id": "k12",
+      "concept": "30-day review",
+      "competency": "business_operations",
+      "difficulty": "stretch",
+      "text": "Balikan ang isang buwang sales para magpasya kung ano ang oorderin muli at ano ang ititigil.",
+      "keywords": ["30-day", "sales", "review", "reorder", "buwan"],
+      "source_id": "c6"
+    }
+  ]
+}

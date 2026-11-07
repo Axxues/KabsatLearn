@@ -1,0 +1,8 @@
+{
+  "appId": "com.kabsatlearn.app",
+  "appName": "KabsatLearn",
+  "webDir": "dist",
+  "android": {
+    "adjustMarginsForEdgeToEdge": "disable"
+  }
+}

@@ -1,0 +1,441 @@
+import { useState, useRef, useEffect, useCallback } from 'react'
+import { answerOffline, contextFor, matchPredefinedLesson } from './rag.js'
+import { listCapsules } from './capsuleStore.js'
+import { CAPSULE_BY_ID } from '../data/catalogue.js'
+
+const llm = () => import('./llm.js')
+
+export const AI_SESSION_STORAGE_KEY = 'kabsat_ai_session'
+
+export function loadSavedAiSession() {
+  if (typeof localStorage === 'undefined') return null
+  try {
+    const raw = localStorage.getItem(AI_SESSION_STORAGE_KEY)
+    if (!raw) return null
+    const parsed = JSON.parse(raw)
+    if (Array.isArray(parsed?.messages) && parsed.messages.length > 1) {
+      return parsed.messages.map((msg) =>
+        msg.thinking
+          ? {
+              ...msg,
+              thinking: false,
+              answered: true,
+              text: msg.text || '',
+            }
+          : msg,
+      )
+    }
+  } catch {
+    // Ignore parse error
+  }
+  return null
+}
+
+export function saveAiSession(messages) {
+  if (typeof localStorage === 'undefined') return
+  try {
+    if (messages.length <= 1) {
+      clearAiSession()
+      return
+    }
+    const cleanMessages = messages.map((msg) =>
+      msg.thinking
+        ? { ...msg, thinking: false, answered: true, text: msg.text || '' }
+        : msg,
+    )
+    localStorage.setItem(
+      AI_SESSION_STORAGE_KEY,
+      JSON.stringify({
+        updatedAt: Date.now(),
+        messages: cleanMessages,
+      }),
+    )
+  } catch {
+    // Ignore storage quota errors
+  }
+}
+
+export function clearAiSession() {
+  if (typeof localStorage === 'undefined') return
+  try {
+    localStorage.removeItem(AI_SESSION_STORAGE_KEY)
+  } catch {
+    // Ignore
+  }
+}
+
+export function useKabsatAiState({ capsule, installedCapsules = [], t, lang }) {
+  const [messages, setMessages] = useState(() => {
+    const saved = loadSavedAiSession()
+    if (saved && saved.length > 0) {
+      return saved
+    }
+    return [
+      {
+        role: 'assistant',
+        text: t('aiWelcome', { title: capsule.title }),
+      },
+    ]
+  })
+  const [input, setInput] = useState('')
+  const [isProcessing, setIsProcessing] = useState(false)
+  const [model, setModel] = useState({ state: 'idle', progress: 0 })
+  const [known, setKnown] = useState(() => {
+    if (typeof localStorage === 'undefined') return false
+    return localStorage.getItem('kabsat_llm_cached') === '1'
+  })
+  const [storedCapsules, setStoredCapsules] = useState([])
+
+  useEffect(() => {
+    let cancelled = false
+    listCapsules()
+      .then((list) => {
+        if (!cancelled && Array.isArray(list) && list.length > 0) {
+          setStoredCapsules(list)
+        }
+      })
+      .catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  const messagesRef = useRef(messages)
+  useEffect(() => {
+    messagesRef.current = messages
+    if (messages.length > 0) {
+      saveAiSession(messages)
+    }
+  }, [messages])
+
+  // Sync welcome greeting when only the initial welcome message exists and language flips
+  useEffect(() => {
+    setMessages((current) => {
+      if (current.length === 1 && current[0].role === 'assistant') {
+        const welcome = t('aiWelcome', { title: capsule.title })
+        if (current[0].text !== welcome) {
+          return [{ role: 'assistant', text: welcome }]
+        }
+      }
+      return current
+    })
+  }, [capsule.title, lang, t])
+
+  const abortControllerRef = useRef(null)
+
+  const stop = useCallback(() => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort()
+      abortControllerRef.current = null
+    }
+    setIsProcessing(false)
+    setMessages((current) =>
+      current.map((msg, idx) =>
+        idx === current.length - 1 && msg.thinking
+          ? {
+              ...msg,
+              thinking: false,
+              answered: true,
+              text: msg.text || (lang === 'en' ? 'Response generation stopped.' : 'Itinigil ang pagbuo ng sagot.'),
+            }
+          : msg,
+      ),
+    )
+  }, [lang])
+
+  const resetSession = useCallback(() => {
+    clearAiSession()
+    setInput('')
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort()
+      abortControllerRef.current = null
+    }
+    setIsProcessing(false)
+    setMessages([
+      {
+        role: 'assistant',
+        text: t('aiWelcome', { title: capsule.title }),
+      },
+    ])
+  }, [capsule.title, t])
+
+  const prepareModel = async () => {
+    setModel({ state: 'loading', progress: 0 })
+    try {
+      const { loadEngine } = await llm()
+      await loadEngine((report) => setModel({ state: 'loading', progress: report.progress ?? 0 }))
+      setModel({ state: 'ready', progress: 1 })
+      setKnown(true)
+      localStorage.setItem('kabsat_llm_cached', '1')
+    } catch {
+      setModel({ state: 'error', progress: 0 })
+    }
+  }
+
+  const ask = useCallback(
+    async (question, { delay = 1000 } = {}) => {
+      const text = question?.trim()
+      if (!text) return
+
+      const baseCandidates =
+        installedCapsules && installedCapsules.length > 0
+          ? installedCapsules
+          : capsule
+            ? [capsule]
+            : []
+
+      const allCandidates = [...baseCandidates, ...storedCapsules]
+
+      // Hydrate any summary/stub capsules from catalog or store
+      const candidates = allCandidates.map((c) => {
+        if (!c) return c
+        if (Array.isArray(c.cards) && Array.isArray(c.questions)) return c
+        if (c.id && CAPSULE_BY_ID?.[c.id]) return CAPSULE_BY_ID[c.id]
+        return c
+      })
+
+      const matched = matchPredefinedLesson(text, candidates, lang)
+      if (matched) {
+        setInput('')
+        setIsProcessing(false)
+        abortControllerRef.current = null
+        setMessages((current) => [
+          ...current,
+          { role: 'user', text },
+          {
+            role: 'assistant',
+            text: matched.reply,
+            source: matched.source,
+            confidence: 100,
+            kind: 'predefined',
+            answered: true,
+            thinking: false,
+          },
+        ])
+        return
+      }
+
+      const abortController = new AbortController()
+      abortControllerRef.current = abortController
+      const { signal } = abortController
+
+      const retrieved = answerOffline(text, capsule, { installedCapsules })
+      setInput('')
+      setIsProcessing(true)
+
+      setMessages((current) => [...current, { role: 'user', text }])
+
+      const waitDelay = (ms) =>
+        new Promise((resolve) => {
+          if (ms <= 0 || signal.aborted) {
+            resolve()
+            return
+          }
+          const timer = setTimeout(resolve, ms)
+          signal.addEventListener('abort', () => {
+            clearTimeout(timer)
+            resolve()
+          })
+        })
+
+      // Persona questions are the only predefined answers.
+      if (retrieved.kind === 'persona') {
+        setMessages((current) => [
+          ...current,
+          {
+            role: 'assistant',
+            text: '',
+            thinking: true,
+            answered: false,
+          },
+        ])
+
+        await waitDelay(delay)
+        if (signal.aborted) return
+
+        setMessages((current) =>
+          current.map((msg, idx) =>
+            idx === current.length - 1
+              ? {
+                  ...msg,
+                  role: 'assistant',
+                  text: retrieved.reply,
+                  source: null,
+                  confidence: 100,
+                  kind: 'persona',
+                  answered: true,
+                  thinking: false,
+                }
+              : msg,
+          ),
+        )
+        setIsProcessing(false)
+        abortControllerRef.current = null
+        return
+      }
+
+      // Content questions go to the on-device model with fallback to retrieved answer
+      setMessages((current) => [
+        ...current,
+        {
+          role: 'assistant',
+          text: '',
+          thinking: true,
+          answered: true,
+          source: retrieved.source,
+          confidence: retrieved.confidence,
+          kind: 'content',
+        },
+      ])
+
+      const patchLast = (update) =>
+        setMessages((current) =>
+          current.map((entry, position) => (position === current.length - 1 ? { ...entry, ...update } : entry)),
+        )
+
+      try {
+        const { explain, engineReady, loadEngine, isModelCached } = await llm()
+        if (signal.aborted) return
+
+        if (!engineReady()) {
+          const cached = await isModelCached()
+          if (!cached) {
+            await waitDelay(delay)
+            if (signal.aborted) return
+            patchLast({ text: retrieved.reply, thinking: false, kind: 'fallback', needsModel: true })
+            return
+          }
+
+          if (signal.aborted) return
+          await loadEngine((report) =>
+            patchLast({
+              thinking: true,
+              text: `${lang === 'en' ? 'Loading on-device AI' : 'Naglo-load ng AI'} ${Math.round(
+                (report.progress ?? 0) * 100,
+              )}%`,
+            }),
+          )
+          if (signal.aborted) return
+          patchLast({ text: '', thinking: true })
+        }
+
+        const { language, chunks } = contextFor(text, capsule, 1)
+        if (signal.aborted) return
+
+        const generated = await explain({
+          query: text,
+          chunks,
+          language,
+          signal,
+          onToken: (partial) => {
+            if (!signal.aborted) patchLast({ text: partial, thinking: false })
+          },
+        })
+
+        if (signal.aborted) return
+
+        if (generated && generated.ok && generated.text) {
+          patchLast({ text: generated.text, thinking: false, kind: 'generated' })
+        } else if (generated && generated.aborted) {
+          patchLast({
+            text: lang === 'en' ? 'Response generation stopped.' : 'Itinigil ang pagbuo ng sagot.',
+            thinking: false,
+          })
+        } else {
+          patchLast({ text: retrieved.reply, thinking: false, kind: 'fallback', guardFailed: true })
+        }
+      } catch {
+        if (!signal.aborted) {
+          await waitDelay(delay)
+          if (!signal.aborted) {
+            patchLast({ text: retrieved.reply, thinking: false, kind: 'fallback' })
+          }
+        }
+      } finally {
+        if (!signal.aborted) {
+          setIsProcessing(false)
+          abortControllerRef.current = null
+        }
+      }
+    },
+    [capsule, installedCapsules, lang, storedCapsules],
+  )
+
+  const explainAt = useCallback(
+    async (index) => {
+      const currentMessages = messagesRef.current
+      const target = currentMessages[index]
+      const question = [...currentMessages.slice(0, index)].reverse().find((entry) => entry.role === 'user')
+      if (!target || !question) return
+
+      const abortController = new AbortController()
+      abortControllerRef.current = abortController
+      const { signal } = abortController
+
+      const { language, chunks } = contextFor(question.text, capsule, 1)
+
+      setMessages((current) => [
+        ...current,
+        {
+          role: 'assistant',
+          text: '',
+          thinking: true,
+          answered: true,
+          source: target.source,
+          confidence: target.confidence,
+        },
+      ])
+      setIsProcessing(true)
+
+      const patchLast = (update) =>
+        setMessages((current) =>
+          current.map((entry, position) => (position === current.length - 1 ? { ...entry, ...update } : entry)),
+        )
+
+      try {
+        const { explain } = await llm()
+        if (signal.aborted) return
+        const result = await explain({
+          query: question.text,
+          chunks,
+          language,
+          signal,
+          onToken: (text) => {
+            if (!signal.aborted) patchLast({ text, thinking: false })
+          },
+        })
+        if (signal.aborted) return
+        patchLast({
+          text: result.ok && result.text ? result.text : target.text,
+          thinking: false,
+          guardFailed: !result.ok,
+        })
+      } catch {
+        if (!signal.aborted) {
+          patchLast({ text: target.text, thinking: false, guardFailed: true })
+        }
+      } finally {
+        if (!signal.aborted) {
+          setIsProcessing(false)
+          abortControllerRef.current = null
+        }
+      }
+    },
+    [capsule],
+  )
+
+  return {
+    messages,
+    setMessages,
+    input,
+    setInput,
+    isProcessing,
+    stop,
+    model,
+    prepareModel,
+    ask,
+    explainAt,
+    known,
+    resetSession,
+  }
+}

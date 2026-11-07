@@ -1,0 +1,17 @@
+node_modules/
+dist/
+dev-dist/
+__pycache__/
+*.pyc
+.DS_Store
+.env
+.env.local
+*.local
+
+# Android build output
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/app/src/main/assets/public/
+
