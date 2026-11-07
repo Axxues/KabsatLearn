@@ -54,7 +54,10 @@ Last updated 09:10, about 40 minutes into the build.
 | 10 APK, install test, pitch | **in progress** | `5b9db0f` | 09:09 |
 
 - APK built: `app/android/app/build/outputs/apk/debug/app-debug.apk`, 4,269,752 bytes (4.07 MB).
-- Tests: 54 passing via `npx vitest run`.
+- Tests: 55 passing via `npx vitest run`.
+- Browser smoke test (Chromium against `npm run preview`): course hub, reader and
+  red-flag drill, quiz answer and reveal, tutor answer with source, dashboard
+  queue flush. All verified by driving the real UI, not by inspection.
 - Blocked: `adb devices` is empty, so the on-device install and the airplane-mode test cannot run yet.
 
 ---

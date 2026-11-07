@@ -26,7 +26,7 @@ function refusal(capsule) {
  * Offline generation: compose a grounded answer from the best chunk.
  * No invention. Refuses when the retrieval score is below threshold.
  */
-export function answerOffline(query, capsule, { name = 'Kabsat', threshold = THRESHOLD } = {}) {
+export function answerOffline(query, capsule, { name = '', threshold = THRESHOLD } = {}) {
   const results = retrieve(indexFor(capsule), query, 3)
   const top = results[0]
 
@@ -35,7 +35,8 @@ export function answerOffline(query, capsule, { name = 'Kabsat', threshold = THR
   }
 
   const confidence = Math.min(98, Math.round(60 + top.score * 6))
-  const reply = `Kabsat ${name}, tungkol sa ${top.chunk.concept}: ${top.chunk.text}`
+  const greeting = name ? `Kabsat ${name}, ` : 'Kabsat, '
+  const reply = `${greeting}tungkol sa ${top.chunk.concept}: ${top.chunk.text}`
 
   return {
     reply,

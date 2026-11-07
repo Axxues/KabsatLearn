@@ -90,7 +90,10 @@ read-only status is policy, not enforcement.
 - `Systems/System1/` is KabsatLearn: a Capacitor-wrapped Android app. Design and
   progress live in `DESIGN.md` and `PLAN.md`. All feature tasks are built; the
   APK is at `Systems/System1/pitch/kabsatlearn-debug.apk` (4.07 MB).
-- 54 tests pass via `npx vitest run` from `Systems/System1/app`.
+- 55 tests pass via `npx vitest run` from `Systems/System1/app`.
+- The UI has been exercised in Chromium: hub, reader + drill, quiz + reveal,
+  tutor with source citation, dashboard sync. TTS, audio, system share, and the
+  APK itself remain untested.
 - The APK has not yet been installed on a physical phone. `adb devices` is empty,
   so on-device and airplane-mode verification is outstanding.
 - `.opencode/skills/frontend-design/SKILL.md` exists and was verified against a

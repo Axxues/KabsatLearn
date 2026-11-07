@@ -12,6 +12,12 @@ describe('answerOffline', () => {
     expect(result.reply).toContain('Ana')
   })
 
+  it('does not greet the learner twice when no name is given', () => {
+    const result = answerOffline('paano ang OTP', capsule101)
+    expect(result.reply.startsWith('Kabsat Kabsat')).toBe(false)
+    expect(result.reply.startsWith('Kabsat,')).toBe(true)
+  })
+
   it('refuses an uncovered question instead of inventing an answer', () => {
     const result = answerOffline('sino ang presidente ng Pilipinas', capsule101)
 
@@ -20,8 +26,7 @@ describe('answerOffline', () => {
     expect(result.reply).toContain(capsule101.title)
   })
 
-  it('keeps answers grounded in the capsule text', () => {
-    const result = answerOffline('nabiktima ako ng scam, ano gagawin', capsule101)
+  it('keeps answers grounded in the capsule text', () => {    const result = answerOffline('nabiktima ako ng scam, ano gagawin', capsule101)
     const chunk = capsule101.chunks.find((c) => c.id === result.matches[0].chunk.id)
 
     expect(result.source).not.toBeNull()
