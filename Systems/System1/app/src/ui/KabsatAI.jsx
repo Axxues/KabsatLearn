@@ -59,7 +59,7 @@ function Bubble({ message, canExplain, onExplain }) {
           )}
 
           {/* Out of scope refusal alert */}
-          {!message.source && !mine && message.answered && (
+          {!message.source && !mine && message.answered && message.kind !== 'persona' && (
             <div className="flex items-center gap-1.5 rounded-lg border border-[var(--color-warn)]/30 bg-[var(--color-warn-subtle)] px-2.5 py-1 text-xs font-semibold text-[var(--color-warn)]">
               <AlertCircle className="size-3.5 shrink-0 stroke-[2.5]" aria-hidden="true" />
               <span>{t('outOfScopeAlert')}</span>
@@ -200,6 +200,7 @@ export default function KabsatAI({ capsule, onExit }) {
         text: result.reply,
         source: result.source,
         confidence: result.confidence,
+        kind: result.kind,
         answered: true,
       },
     ])

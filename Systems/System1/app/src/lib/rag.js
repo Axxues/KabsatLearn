@@ -1,5 +1,6 @@
 import { buildIndex, retrieve } from './bm25.js'
 import { detectLanguage, matchesLanguage } from './lang.js'
+import { matchPersona, personaAnswer } from './persona.js'
 import translations from '../data/translations/en.json'
 
 const indexCache = new WeakMap()
@@ -52,6 +53,20 @@ function refusal(capsule, language) {
  */
 export function answerOffline(query, capsule, { name = '', threshold = THRESHOLD } = {}) {
   const asked = detectLanguage(query)
+
+  // Social questions are answered directly, not treated as missing knowledge.
+  const persona = matchPersona(query)
+  if (persona) {
+    return {
+      reply: personaAnswer(persona, asked),
+      source: null,
+      confidence: 100,
+      matches: [],
+      lang: asked,
+      kind: 'persona',
+    }
+  }
+
   const results = retrieve(indexFor(capsule), query, 3)
   const top = results[0]
 
