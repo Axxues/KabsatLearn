@@ -2,9 +2,9 @@
 
 > **For agentic workers:** execute task by task. Checkpoints are marked. Steps use `- [ ]`.
 
-**Goal:** An offline-first PWA where an out-of-school youth can take a micro-course, play an adaptive quiz, ask a grounded question, and sync progress later.
+**Goal:** An offline-first Android app where an out-of-school youth can take a micro-course, play an adaptive quiz, ask a grounded question, and sync progress later.
 
-**Architecture:** Vite + React + Tailwind PWA. Service worker precaches the shell; IndexedDB stores capsules, progress, and telemetry. A BM25 retriever over capsule chunks feeds two generators: a deterministic offline composer and an optional online LLM. Peer transfer of capsules is OS-mediated, with a timeboxed WebRTC stretch goal.
+**Architecture:** Vite + React + Tailwind build, wrapped by Capacitor into an Android APK. Assets are bundled, so the service worker is an optimisation rather than a requirement; IndexedDB stores capsules, progress, and telemetry. A BM25 retriever over capsule chunks feeds two generators: a deterministic offline composer and an optional online LLM. Peer transfer of capsules is OS-mediated, with a timeboxed WebRTC stretch goal.
 
 **Tech Stack:** Vite, React, Tailwind, Dexie (IndexedDB), Web Crypto, Web Audio, SpeechSynthesis.
 
@@ -19,7 +19,7 @@
 - No real personal data. Learner IDs are pseudonymous (`K-####`), never names.
 - Human approval before any remediation is recorded.
 - Must run in airplane mode after first load.
-- No APK, no accounts, no login.
+- No hosted PWA, no accounts, no login.
 - TTS uses Filipino. Ilocano is on-screen text only.
 - STT is online-only. Do not claim otherwise.
 - Offline answers are retrieved and composed, never generated.
@@ -61,10 +61,10 @@ The failures most likely to bite a user, each pinned to a task below:
 - Create: `app/src/data/capsules/capsule-101.json`, `capsule-102.json`, `app/src/data/synonyms.json`, `app/src/lib/schema.js`
 
 **Interfaces:**
-- Produces: capsule shape `{id, version, title, persona, competency, cards[], questions[], chunks[], intents[], shared_by, hash}`; `validateCapsule(obj): {ok, errors[]}`.
+- Produces: capsule shape `{id, version, title, persona, competency, cards[], questions[], chunks[], shared_by, hash}`; `validateCapsule(obj): {ok, errors[]}`.
 
 - [ ] Define the schema in `schema.js`: required keys, version `1`, question `{id, band: 'foundational'|'core'|'stretch', stem, options[4], answer, competency}`.
-- [ ] Author capsule 101 (Ligtas Digital Wallet): 6 cards, 10 questions, 12 intents, 12 chunks.
+- [ ] Author capsule 101 (Ligtas Digital Wallet): 6 cards, 10 questions, 12 RAG chunks.
 - [ ] Author capsule 102 (Unang Hakbang sa Online Trabaho): same counts.
 - [ ] Test `validateCapsule` rejects a missing key and accepts both real capsules. Run vitest. Expect PASS.
 - [ ] Commit.
