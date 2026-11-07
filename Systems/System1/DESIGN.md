@@ -1,29 +1,47 @@
 # KabsatLearn
 
-Offline-first, gamified micro-learning for out-of-school youth in San Fernando,
-La Union. Ships as an Android app that works with no internet.
+Offline-first, gamified micro-learning for Region 1 (Ilocos Region). Ships as an
+Android app that works with no internet.
 
 ## Intent
 
-A learner with one shared entry-level Android phone and no data can still take a
-short course, play an adaptive quiz, and ask a question — then have their
-progress reach the City Education Office the next time a barangay has Wi-Fi.
+A learner anywhere in Region 1 — Ilocos Norte, Ilocos Sur, La Union, Pangasinan,
+or Dagupan City — can take a short course, play an adaptive quiz, and ask a
+question on one shared entry-level phone with no data, then have their progress
+reach the nearest education office the next time a barangay or school has Wi-Fi.
 
 ## Why
 
 Standard learning apps assume continuous data, a capable device, and English
-literacy. In upland and coastal barangays all three fail at once — and they fail
-hardest exactly when school is suspended. The City already has a digital spine
-(C3, eBPLS, TOM); the gap is the last mile, not another dashboard.
+literacy. Across Region 1's coastal, upland, and island communities all three fail
+at once — and they fail hardest exactly when classes are suspended. The region
+already has pockets of digital infrastructure; the gap is the last mile, not
+another dashboard.
 
-## Primary persona
+## Target users
 
-An out-of-school youth, 17, in a coastal barangay. Attends ALS sessions twice a
-week. Shares one PHP 3,000 Android phone with three siblings. No data at home.
-Reads Tagalog comfortably, English with effort, Ilocano at home.
+Region 1 is not one audience. The app serves anyone without reliable access to
+continuous education, and the content is organised so each sector can be served
+by its own capsule without changing the app.
 
-Secondary reach: senior citizens for the anti-scam capsule. Tertiary user: the
-City Education / ALS coordinator, who needs to know which competency to reteach.
+| Segment | What they need | v1 coverage |
+|---|---|---|
+| Out-of-school youth | A path back into learning and income | Capsule 102 |
+| Students | Practice and revision without data | Quiz Arena on any capsule |
+| Working adults | Short lessons between shifts | 6-card micro-capsules |
+| Unemployed individuals | Digital livelihood skills | Capsule 102 |
+| Women | Safe digital finance and online income | Capsules 101 and 102 |
+| Senior citizens | Fraud protection in plain language, read aloud | Capsule 101 + TTS |
+| Persons with disabilities | Voice output, large targets, high contrast | TTS and accessible UI |
+| Other underserved sectors | Farmers, fisherfolk, vendors, IP communities | Planned capsule packs |
+
+A 17-year-old out-of-school youth in a coastal barangay remains the anchor user:
+shares one PHP 3,000 phone with three siblings, attends ALS twice a week, reads
+Tagalog comfortably and Ilocano at home. If it works for her, it works for the
+rest.
+
+Pilot: San Fernando City, the hackathon host. The capsule format and the dashboard
+roll up to municipal, provincial, and regional level without a code change.
 
 ## Goals
 
@@ -75,7 +93,7 @@ City Education / ALS coordinator, who needs to know which competency to reteach.
 
 ```
 UI: React + Tailwind
-  Course Hub · Story Reader · Quiz Arena · Kabsat AI · LGU Dashboard
+  Course Hub · Story Reader · Quiz Arena · Kabsat AI · Insights Dashboard
 Offline: Service Worker (app shell) + IndexedDB (capsules, XP, telemetry queue)
 Intelligence:
   Persona    — predefined answers for social questions (sino ka, hello, thanks)
@@ -165,7 +183,7 @@ the pitch rather than claiming a fast assistant.
 ### Online agent (disclosable)
 
 System prompt (as implemented): *"You are Kabsat, an offline tutor for
-out-of-school youth in San Fernando, La Union. Answer ONLY from CONTEXT. If
+out-of-school youth in Region 1, Ilocos Region. Answer ONLY from CONTEXT. If
 CONTEXT lacks the answer, say you do not know. Reply in simple Taglish or
 English, at most 45 words. Keep key terms exactly as written."*
 
@@ -188,9 +206,9 @@ The agent recommends. The facilitator approves remediation before it is saved.
    answers; content answers generated on-device over retrieved chunks, with an
    extractive fallback; source citation; TTS readout; answers mirror the
    question's language.
-6. **LGU Dashboard** — mastery radar across four pillars, weak-concept list,
-   sync queue, simulated reconnection flush, barangay heatmap, facilitator
-   approval gate.
+6. **Insights Dashboard** — mastery radar across four pillars, weak-concept list,
+   sync queue, simulated reconnection flush, barangay and municipality rollups,
+   facilitator approval gate, and provincial/regional aggregation.
 7. **Kabsat Pass** — send a capsule through the OS share sheet, import a
    `.kabsat` file, verify its hash, and unlock the course offline. Shows who
    shared it and how many hops it has travelled.
@@ -233,7 +251,11 @@ overclaiming.
 
 - Banding is a heuristic, not a validated mastery model.
 - The item bank is small and synthetic.
-- Ilocano copy needs a native-speaker check.
+- v1 content covers two of the eight target segments — senior citizens and
+  out-of-school youth. The other six are served by the same engine but have no
+  capsules yet, and the pitch must not imply otherwise.
+- Ilocano and Pangasinan copy need native-speaker checks. v1 ships Tagalog and
+  English only, so the app is usable region-wide but not yet fully localised.
 - Content answers are generated by a 0.5B model: about 2.6 tokens/second, 70–100
   seconds for a full answer, and the output is noticeably weaker than the
   human-written corpus text.
@@ -250,5 +272,6 @@ overclaiming.
 
 ## Open questions
 
-- Does the City Education Office want barangay-level or learner-level rollups?
+- Which offices own the rollups — DepEd Region 1 divisions, ALS coordinators, or
+  provincial LGUs — and do they want barangay, municipal, or learner-level data?
 - Is there an existing ALS competency list we should tag against?
