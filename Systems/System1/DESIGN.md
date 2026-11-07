@@ -1,7 +1,7 @@
 # KabsatLearn
 
 Offline-first, gamified micro-learning for out-of-school youth in San Fernando,
-La Union. PWA, no install, works with no internet.
+La Union. Ships as an Android app that works with no internet.
 
 ## Intent
 
@@ -38,7 +38,9 @@ City Education / ALS coordinator, who needs to know which competency to reteach.
 
 ## Non-goals
 
-- Native Android app or APK. The PWA is the deliverable; an APK is a stretch.
+- A Kotlin/Compose native rewrite. The app is a React build wrapped by
+  Capacitor into an Android app. That is a deliberate 8-hour trade, and the pitch
+  says so plainly.
 - Accounts, login, or real authentication.
 - Ilocano text-to-speech. Android ships Filipino, not Ilocano.
 - On-device neural embeddings or a local generative LLM.
@@ -78,6 +80,8 @@ Intelligence:
 Telemetry  — <1 KB JSON logs, queue, flush on simulated reconnect
 Transport  — Web Share API, file import, SHA-256 integrity check
              (WebRTC over a hotspot is a timeboxed stretch goal)
+Packaging  — Capacitor wraps dist/ into an APK; assets are bundled, so the
+             service worker is an optimisation rather than a requirement
 ```
 
 ### Offline capsule sharing (Kabsat Pass)
@@ -193,6 +197,8 @@ overclaiming.
   output works offline.
 - Capsule transfer is OS-mediated. The app does not implement Bluetooth itself,
   and the demo phones may need to be paired beforehand.
+- The APK is a Capacitor WebView build, roughly 6-10 MB, not Kotlin-native. Say
+  that plainly rather than claiming a 3 MB native footprint.
 
 ## Open questions
 
