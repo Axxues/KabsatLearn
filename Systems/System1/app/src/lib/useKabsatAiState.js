@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { answerOffline, contextFor } from './rag.js'
+import { answerOffline, contextFor, matchPredefinedLesson } from './rag.js'
+import { listCapsules } from './capsuleStore.js'
+import { CAPSULE_BY_ID } from '../data/catalogue.js'
 
 const llm = () => import('./llm.js')
 
@@ -62,7 +64,7 @@ export function clearAiSession() {
   }
 }
 
-export function useKabsatAiState({ capsule, t, lang }) {
+export function useKabsatAiState({ capsule, installedCapsules = [], t, lang }) {
   const [messages, setMessages] = useState(() => {
     const saved = loadSavedAiSession()
     if (saved && saved.length > 0) {
@@ -82,6 +84,21 @@ export function useKabsatAiState({ capsule, t, lang }) {
     if (typeof localStorage === 'undefined') return false
     return localStorage.getItem('kabsat_llm_cached') === '1'
   })
+  const [storedCapsules, setStoredCapsules] = useState([])
+
+  useEffect(() => {
+    let cancelled = false
+    listCapsules()
+      .then((list) => {
+        if (!cancelled && Array.isArray(list) && list.length > 0) {
+          setStoredCapsules(list)
+        }
+      })
+      .catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   const messagesRef = useRef(messages)
   useEffect(() => {
@@ -160,11 +177,49 @@ export function useKabsatAiState({ capsule, t, lang }) {
       const text = question?.trim()
       if (!text) return
 
+      const baseCandidates =
+        installedCapsules && installedCapsules.length > 0
+          ? installedCapsules
+          : capsule
+            ? [capsule]
+            : []
+
+      const allCandidates = [...baseCandidates, ...storedCapsules]
+
+      // Hydrate any summary/stub capsules from catalog or store
+      const candidates = allCandidates.map((c) => {
+        if (!c) return c
+        if (Array.isArray(c.cards) && Array.isArray(c.questions)) return c
+        if (c.id && CAPSULE_BY_ID?.[c.id]) return CAPSULE_BY_ID[c.id]
+        return c
+      })
+
+      const matched = matchPredefinedLesson(text, candidates, lang)
+      if (matched) {
+        setInput('')
+        setIsProcessing(false)
+        abortControllerRef.current = null
+        setMessages((current) => [
+          ...current,
+          { role: 'user', text },
+          {
+            role: 'assistant',
+            text: matched.reply,
+            source: matched.source,
+            confidence: 100,
+            kind: 'predefined',
+            answered: true,
+            thinking: false,
+          },
+        ])
+        return
+      }
+
       const abortController = new AbortController()
       abortControllerRef.current = abortController
       const { signal } = abortController
 
-      const retrieved = answerOffline(text, capsule)
+      const retrieved = answerOffline(text, capsule, { installedCapsules })
       setInput('')
       setIsProcessing(true)
 
@@ -303,7 +358,7 @@ export function useKabsatAiState({ capsule, t, lang }) {
         }
       }
     },
-    [capsule, lang],
+    [capsule, installedCapsules, lang, storedCapsules],
   )
 
   const explainAt = useCallback(

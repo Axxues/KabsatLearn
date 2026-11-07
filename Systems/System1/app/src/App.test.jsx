@@ -198,7 +198,7 @@ describe('popup notifications', () => {
     })
     // Wait for initial seed and course list to load
     for (let attempt = 0; attempt < 50; attempt += 1) {
-      if (container.textContent.includes('Ibahagi')) break
+      if (container.querySelector('button[aria-label^="Options for"]')) break
       await act(async () => {
         await new Promise((resolve) => setTimeout(resolve, 20))
       })
@@ -214,8 +214,15 @@ describe('popup notifications', () => {
   })
 
   test('floating toast notification appears at the top with in and out animation', async () => {
+    const menuBtn = container.querySelector('button[aria-label^="Options for"]')
+    expect(menuBtn).not.toBeNull()
+
+    await act(async () => {
+      menuBtn.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    })
+
     const shareBtn = [...container.querySelectorAll('button')].find((b) =>
-      b.textContent.includes('Ibahagi')
+      b.textContent.includes('Ibahagi') || b.textContent.includes('Share')
     )
     expect(shareBtn).not.toBeNull()
 
@@ -256,5 +263,150 @@ describe('popup notifications', () => {
     await vi.waitFor(() => {
       expect(container.querySelector('[role="status"]')).toBeNull()
     })
+  })
+
+  test('clicking profile button in header opens dropdown with Profile and Archive options', async () => {
+    const profileBtn = container.querySelector('header button[aria-label="Profile"]')
+    expect(profileBtn).not.toBeNull()
+
+    // Initially menu is closed
+    expect(container.textContent).not.toContain('Archive')
+
+    // Click profile button to open dropdown
+    await act(async () => {
+      profileBtn.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    })
+
+    const dropdown = container.querySelector('[role="menu"]')
+    expect(dropdown).not.toBeNull()
+    expect(dropdown.textContent).toContain('Profile')
+    expect(dropdown.textContent).toContain('Archive')
+
+    // Clicking Archive opens ArchivePage
+    const archiveMenuOption = [...dropdown.querySelectorAll('button')].find(
+      (b) => b.textContent.includes('Archive')
+    )
+    expect(archiveMenuOption).toBeTruthy()
+
+    await act(async () => {
+      archiveMenuOption.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    })
+
+    // ArchivePage is now rendered with its header and empty state or courses
+    expect(container.querySelector('h1').textContent).toMatch(/Archive|Naka-archive/i)
+
+    // Back button returns to Hub
+    const backBtn = container.querySelector('header button')
+    await act(async () => {
+      backBtn.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    })
+
+    expect(container.querySelector('h1').textContent).toContain('Mga Kurso')
+  })
+
+  test('archiving a course moves it to ArchivePage and removes it from active CourseHub', async () => {
+    // Locate 3-dots button on installed course card
+    const menuBtn = container.querySelector('button[aria-label^="Options for"]')
+    expect(menuBtn).not.toBeNull()
+
+    // Open card 3-dots menu
+    await act(async () => {
+      menuBtn.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    })
+
+    // Click Archive option
+    const archiveCardOption = [...container.querySelectorAll('button')].find(
+      (b) => b.textContent.includes('Archive') || b.textContent.includes('I-archive')
+    )
+    expect(archiveCardOption).toBeTruthy()
+
+    await act(async () => {
+      archiveCardOption.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    })
+
+    // Course should no longer be in active CourseHub installed section list
+    const installedSection = container.querySelector('section[aria-labelledby="installed-heading"]')
+    expect(installedSection.querySelector('li')).toBeNull()
+
+    // Open profile menu -> Archive
+    const profileBtn = container.querySelector('header button[aria-label="Profile"]')
+    await act(async () => {
+      profileBtn.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    })
+
+    const archiveMenuOption = [...container.querySelectorAll('[role="menu"] button')].find(
+      (b) => b.textContent.includes('Archive')
+    )
+    await act(async () => {
+      archiveMenuOption.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    })
+
+    // Course is present in ArchivePage
+    expect(container.textContent).toContain('Ligtas na Digital Wallet')
+
+    // Click Unarchive button
+    const unarchiveBtn = [...container.querySelectorAll('button')].find(
+      (b) => b.textContent.includes('Ibalik sa Kurso') || b.textContent.includes('Unarchive')
+    )
+    expect(unarchiveBtn).toBeTruthy()
+
+    await act(async () => {
+      unarchiveBtn.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    })
+
+    // Go back to CourseHub
+    const backBtn = container.querySelector('header button')
+    await act(async () => {
+      backBtn.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    })
+
+    // Course is restored in installed section
+    expect(container.querySelector('section[aria-labelledby="installed-heading"]')).not.toBeNull()
+  })
+
+  test('opening a course from ArchivePage in StoryReader and exiting returns to ArchivePage', async () => {
+    // Archive capsule-101
+    const menuBtn = container.querySelector('button[aria-label^="Options for"]')
+    await act(async () => {
+      menuBtn.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    })
+    const archiveCardOption = [...container.querySelectorAll('button')].find(
+      (b) => b.textContent.includes('Archive') || b.textContent.includes('I-archive')
+    )
+    await act(async () => {
+      archiveCardOption.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    })
+
+    // Open ArchivePage
+    const profileBtn = container.querySelector('header button[aria-label="Profile"]')
+    await act(async () => {
+      profileBtn.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    })
+    const archiveMenuOption = [...container.querySelectorAll('[role="menu"] button')].find(
+      (b) => b.textContent.includes('Archive')
+    )
+    await act(async () => {
+      archiveMenuOption.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    })
+
+    // Click on the archived course card to open StoryReader
+    const archivedCard = container.querySelector('li')
+    await act(async () => {
+      archivedCard.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    })
+
+    // StoryReader is open and renders exit button
+    const exitReaderBtn =
+      container.querySelector('button[aria-label="Bumalik sa mga aralin"]') ||
+      container.querySelector('header button')
+    expect(exitReaderBtn).not.toBeNull()
+
+    // Exit StoryReader
+    await act(async () => {
+      exitReaderBtn.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    })
+
+    // User is returned to ArchivePage, NOT CourseHub
+    expect(container.querySelector('h1').textContent).toMatch(/Archive|Naka-archive/i)
   })
 })

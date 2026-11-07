@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { CAPSULE_BY_ID, CATALOG, SEEDED_IDS } from './data/catalogue.js'
 import { getCapsule, listCapsules, seedCapsule } from './lib/capsuleStore.js'
 import { importCapsuleFile, shareCapsule, downloadCapsule } from './lib/share.js'
 import { useOnline } from './lib/useOnline.js'
 import { I18nProvider, useI18n } from './lib/i18n.jsx'
 import { useKabsatAiState } from './lib/useKabsatAiState.js'
+import { archiveCourse, getArchivedCourseIds, unarchiveCourse } from './lib/archiveStore.js'
 import CourseHub from './ui/CourseHub.jsx'
 import OfflineBanner from './ui/OfflineBanner.jsx'
 import QuizArena from './ui/QuizArena.jsx'
@@ -13,6 +14,7 @@ import Dashboard from './ui/Dashboard.jsx'
 import StoryReader from './ui/StoryReader.jsx'
 import AnimatedSuccessCheck from './ui/AnimatedSuccessCheck.jsx'
 import Profile from './ui/Profile.jsx'
+import ArchivePage from './ui/ArchivePage.jsx'
 import { emptyProfile, loadProfile } from './lib/profile.js'
 import {
   BookOpen,
@@ -24,6 +26,7 @@ import {
   X,
   Languages,
   UserRound,
+  Archive,
 } from 'lucide-react'
 
 const TUTOR_CAPSULE = CAPSULE_BY_ID['capsule-101']
@@ -84,6 +87,11 @@ function MainApp() {
   const online = useOnline()
   const [profile, setProfile] = useState(null)
   const [showProfile, setShowProfile] = useState(false)
+  const [showArchive, setShowArchive] = useState(false)
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false)
+  const [readerReturnTo, setReaderReturnTo] = useState(null)
+  const [archivedIds, setArchivedIds] = useState(getArchivedCourseIds)
+  const profileMenuRef = useRef(null)
 
   useEffect(() => {
     let cancelled = false
@@ -94,10 +102,34 @@ function MainApp() {
       cancelled = true
     }
   }, [])
-  const kabsatAi = useKabsatAiState({ capsule: TUTOR_CAPSULE, t, lang })
+
+  useEffect(() => {
+    if (!profileMenuOpen) return
+    const handleClickOutside = (e) => {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(e.target)) {
+        setProfileMenuOpen(false)
+      }
+    }
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') setProfileMenuOpen(false)
+    }
+    document.addEventListener('click', handleClickOutside)
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      document.removeEventListener('click', handleClickOutside)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [profileMenuOpen])
+
   const [tab, setTab] = useState('hub')
   const [readerId, setReaderId] = useState(null)
   const [capsules, setCapsules] = useState([])
+  const kabsatAi = useKabsatAiState({
+    capsule: TUTOR_CAPSULE,
+    installedCapsules: capsules.filter((c) => c.installed),
+    t,
+    lang,
+  })
   const [downloadingId, setDownloadingId] = useState(null)
   const [toast, setToast] = useState(null)
   const [isToastExiting, setIsToastExiting] = useState(false)
@@ -186,11 +218,16 @@ function MainApp() {
     setDownloadingId(id)
     await new Promise((resolve) => setTimeout(resolve, 1800))
     await seedCapsule(capsule)
+    const nextArchived = unarchiveCourse(id)
+    setArchivedIds(nextArchived)
     await refresh()
     setDownloadingId(null)
   }
 
-  const openReader = (id) => setReaderId(id)
+  const openReader = (id, returnTo = null) => {
+    setReaderReturnTo(returnTo)
+    setReaderId(id)
+  }
 
   const share = async (id, mode = 'download') => {
     try {
@@ -211,8 +248,25 @@ function MainApp() {
 
   const importFile = async (file) => {
     const result = await importCapsuleFile(file)
+    const courseId = result.id || result.capsule?.id
+    if (result.ok && courseId) {
+      const nextArchived = unarchiveCourse(courseId)
+      setArchivedIds(nextArchived)
+    }
     triggerToast(result.ok ? t('importSuccess') : t('importRefused', { error: result.error }))
     await refresh()
+  }
+
+  const handleArchive = (capsule) => {
+    const next = archiveCourse(capsule.id)
+    setArchivedIds(next)
+    triggerToast(t('toastArchived'))
+  }
+
+  const handleUnarchive = (id) => {
+    const next = unarchiveCourse(id)
+    setArchivedIds(next)
+    triggerToast(t('toastUnarchived'))
   }
 
   if (showProfile) {
@@ -228,9 +282,35 @@ function MainApp() {
     )
   }
 
+  if (showArchive) {
+    const archivedCapsules = capsules.filter((c) => c.installed && archivedIds.includes(c.id))
+    return (
+      <ArchivePage
+        archivedCourses={archivedCapsules}
+        onClose={() => setShowArchive(false)}
+        onOpenCourse={(c) => {
+          setShowArchive(false)
+          openReader(c.id, 'archive')
+        }}
+        onUnarchive={handleUnarchive}
+      />
+    )
+  }
+
   if (readerId) {
     const capsule = CAPSULE_BY_ID[readerId]
-    return <StoryReader capsule={capsule} onExit={() => setReaderId(null)} />
+    return (
+      <StoryReader
+        capsule={capsule}
+        onExit={() => {
+          setReaderId(null)
+          if (readerReturnTo === 'archive') {
+            setShowArchive(true)
+            setReaderReturnTo(null)
+          }
+        }}
+      />
+    )
   }
 
   const tabs = [
@@ -269,22 +349,30 @@ function MainApp() {
     />
   )
 
+  const activeCapsules = capsules.filter((c) => !archivedIds.includes(c.id))
+
   const quizCourses = (
-    capsules.length > 0
-      ? capsules
-      : CATALOG.map((course) => ({ ...course, installed: SEEDED_IDS.includes(course.id) }))
-  ).map((course) => ({
-    id: course.id,
-    title: course.title,
-    questions: course.questions,
-    installed: course.installed,
-    capsule: CAPSULE_BY_ID[course.id],
-  }))
+    activeCapsules.length > 0
+      ? activeCapsules
+      : CATALOG.filter((c) => !archivedIds.includes(c.id)).map((course) => ({
+          ...course,
+          installed: SEEDED_IDS.includes(course.id),
+        }))
+  )
+    .filter((course) => course.installed)
+    .map((course) => ({
+      id: course.id,
+      title: course.title,
+      questions: course.questions,
+      installed: course.installed,
+      capsule: CAPSULE_BY_ID[course.id],
+    }))
 
   const activeQuizCourse =
     quizCourses.find((course) => course.id === quizCourseId && course.installed) ||
     quizCourses.find((course) => course.installed) ||
-    quizCourses[0]
+    quizCourses[0] ||
+    null
 
   const selectQuizCourse = (id) => {
     const course = quizCourses.find((candidate) => candidate.id === id && candidate.installed)
@@ -306,13 +394,14 @@ function MainApp() {
         }}
       >
         <QuizArena
-          key={activeQuizCourse.id}
-          capsule={activeQuizCourse.capsule}
+          key={activeQuizCourse?.id || 'empty-quiz'}
+          capsule={activeQuizCourse?.capsule || null}
           courses={quizCourses}
-          selectedCourseId={activeQuizCourse.id}
+          selectedCourseId={activeQuizCourse?.id || null}
           onSelectCourse={selectQuizCourse}
           onLockedCourse={() => selectTab('hub')}
           onExit={() => selectTab('hub')}
+          onOpenArchive={() => setShowArchive(true)}
           onRunningChange={setQuizRunning}
         />
         {!quizRunning && navigation}
@@ -391,15 +480,49 @@ function MainApp() {
             )}
           </button>
 
-          {/* Profile: local-only, opened from the top right */}
-          <button
-            type="button"
-            onClick={() => setShowProfile(true)}
-            aria-label="Profile"
-            className="btn-press flex size-9 items-center justify-center rounded-xl border border-[var(--color-line)] bg-[var(--color-surface)] text-[var(--color-muted)] hover:text-[var(--color-ink)]"
-          >
-            <UserRound className="size-4.5 stroke-[2]" aria-hidden="true" />
-          </button>
+          {/* Profile & Archive Menu dropdown */}
+          <div className="relative" ref={profileMenuRef}>
+            <button
+              type="button"
+              onClick={() => setProfileMenuOpen((prev) => !prev)}
+              aria-label="Profile"
+              className="btn-press flex size-9 items-center justify-center rounded-xl border border-[var(--color-line)] bg-[var(--color-surface)] text-[var(--color-muted)] hover:text-[var(--color-ink)]"
+            >
+              <UserRound className="size-4.5 stroke-[2]" aria-hidden="true" />
+            </button>
+
+            {profileMenuOpen && (
+              <div
+                role="menu"
+                className="absolute right-0 top-full mt-1.5 w-40 rounded-xl border border-[var(--color-line)] bg-[var(--color-surface)] py-1.5 shadow-xl backdrop-blur-md z-50 animate-fade-in"
+              >
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={() => {
+                    setProfileMenuOpen(false)
+                    setShowProfile(true)
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 text-left text-xs font-semibold text-[var(--color-ink)] hover:bg-[var(--color-accent-subtle)] hover:text-[var(--color-accent)] transition-colors"
+                >
+                  <UserRound className="size-4 stroke-[2]" aria-hidden="true" />
+                  <span>{t('profileMenu') || 'Profile'}</span>
+                </button>
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={() => {
+                    setProfileMenuOpen(false)
+                    setShowArchive(true)
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 text-left text-xs font-semibold text-[var(--color-ink)] hover:bg-[var(--color-accent-subtle)] hover:text-[var(--color-accent)] transition-colors"
+                >
+                  <Archive className="size-4 stroke-[2]" aria-hidden="true" />
+                  <span>{t('archiveMenu') || 'Archive'}</span>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </header>
 
@@ -409,10 +532,11 @@ function MainApp() {
       <main key={`${tab}-${lang}`} className="flex-1 px-4 pt-5 pb-[calc(var(--sab)+5.5rem)] page-enter">
         {tab === 'hub' && (
           <CourseHub
-            capsules={capsules}
+            capsules={activeCapsules}
             onOpen={openReader}
             onDownload={download}
             onShare={share}
+            onArchive={handleArchive}
             onImport={importFile}
             downloadingId={downloadingId}
           />

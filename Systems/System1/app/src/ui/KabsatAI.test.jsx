@@ -265,4 +265,23 @@ describe('Kabsat AI send and stop button', () => {
     expect(listenBtn.textContent).toMatch(/Pakinggan|Listen/)
     expect(listenBtn.querySelector('.animate-soundwave-1')).toBeNull()
   })
+
+  test('asking a question matching a lesson card title immediately renders predefined answer with 100% source citation and without thinking delay', async () => {
+    const input = container.querySelector('#ask')
+    expect(input).not.toBeNull()
+
+    setInputValue(input, 'Ang OTP ay susi ng bahay mo')
+
+    await act(async () => {
+      const form = input.closest('form')
+      form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }))
+    })
+
+    // Immediately rendered without waiting for delay or LLM resolution
+    expect(container.textContent).toContain('Ang one-time password (OTP) ay parang susi ng bahay')
+    expect(container.textContent).toContain('100% match')
+    expect(container.textContent).toContain('Payo:')
+    expect(getSendButton()).not.toBeNull()
+    expect(getStopButton()).toBeUndefined()
+  })
 })

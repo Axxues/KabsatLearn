@@ -33,6 +33,68 @@ function bodyFor(chunk, capsule, language) {
   return { text: chunk.text, language: 'tl' }
 }
 
+export function normalizeForMatch(str) {
+  if (typeof str !== 'string') return ''
+  return str
+    .toLowerCase()
+    .replace(/[?!.,;:—–\-'"“”‘’()¿¡]+/g, ' ')
+    .trim()
+    .replace(/\s+/g, ' ')
+}
+
+export function matchPredefinedLesson(query, capsuleOrCapsules, language = 'tl') {
+  const normalizedQuery = normalizeForMatch(query)
+  if (!normalizedQuery || !capsuleOrCapsules) return null
+
+  const capsules = Array.isArray(capsuleOrCapsules) ? capsuleOrCapsules : [capsuleOrCapsules]
+
+  for (const capsule of capsules) {
+    if (!capsule) continue
+
+    if (Array.isArray(capsule.cards)) {
+      for (const card of capsule.cards) {
+        if (card?.title && normalizeForMatch(card.title) === normalizedQuery) {
+          return {
+            reply: `${card.body ?? ''}${card.tip ? `\n\n${language === 'en' ? 'Tip' : 'Payo'}: ${card.tip}` : ''}`,
+            source: {
+              concept: card.title,
+              capsuleId: capsule.id,
+              capsuleTitle: capsule.title,
+              cardId: card.id,
+            },
+            confidence: 100,
+            matches: [],
+            lang: language,
+            kind: 'predefined',
+          }
+        }
+      }
+    }
+
+    if (Array.isArray(capsule.questions)) {
+      for (const question of capsule.questions) {
+        if (question?.stem && normalizeForMatch(question.stem) === normalizedQuery) {
+          return {
+            reply: `${language === 'en' ? 'Correct answer:' : 'Tamang sagot:'} "${question.options?.[question.answer] ?? ''}".${question.hint ? ` ${question.hint}` : ''}`,
+            source: {
+              concept: question.stem,
+              capsuleId: capsule.id,
+              capsuleTitle: capsule.title,
+              questionId: question.id,
+            },
+            confidence: 100,
+            matches: [],
+            lang: language,
+            kind: 'predefined',
+          }
+        }
+      }
+    }
+  }
+
+  return null
+}
+
 function refusal(capsule, language) {
   if (language === 'en') {
     return `I don't cover that yet. Try the lessons in "${capsule.title}, or download another capsule.`
@@ -44,8 +106,14 @@ function refusal(capsule, language) {
  * Offline generation: compose a grounded answer from the best chunk, in the
  * language of the question. No invention. Refuses when retrieval is weak.
  */
-export function answerOffline(query, capsule, { name = '', threshold = THRESHOLD } = {}) {
+export function answerOffline(query, capsule, { name = '', threshold = THRESHOLD, installedCapsules = [] } = {}) {
   const asked = detectLanguage(query)
+
+  const candidateCapsules = installedCapsules && installedCapsules.length > 0 ? installedCapsules : capsule
+  const predefined = matchPredefinedLesson(query, candidateCapsules, asked)
+  if (predefined) {
+    return predefined
+  }
 
   // Social questions are answered directly, not treated as missing knowledge.
   const persona = matchPersona(query)

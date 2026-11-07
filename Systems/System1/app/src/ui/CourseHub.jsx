@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useI18n } from '../lib/i18n.jsx'
 import {
@@ -14,6 +14,8 @@ import {
   X,
   ChevronRight,
   ChevronDown,
+  MoreVertical,
+  Archive,
 } from 'lucide-react'
 
 function DigitalSafetyArt() {
@@ -183,7 +185,16 @@ const TONE_STYLES = {
   },
 }
 
-function CapsuleCard({ capsule, onOpen, onDownload, onShare, downloading }) {
+function CapsuleCard({
+  capsule,
+  onOpen,
+  onDownload,
+  onShare,
+  onArchive,
+  downloading,
+  menuOpen,
+  onToggleMenu,
+}) {
   const { t } = useI18n()
   const installed = Boolean(capsule.installed)
 
@@ -197,7 +208,17 @@ function CapsuleCard({ capsule, onOpen, onDownload, onShare, downloading }) {
 
   return (
     <li
-      onClick={() => (installed ? onOpen(capsule.id) : onDownload(capsule))}
+      onClick={() => {
+        if (menuOpen) {
+          onToggleMenu(null)
+          return
+        }
+        if (installed) {
+          onOpen(capsule.id)
+        } else {
+          onDownload(capsule)
+        }
+      }}
       className={`card-tactile group relative overflow-hidden rounded-2xl cursor-pointer p-4 sm:p-5 text-white shadow-md transition-all hover:shadow-xl hover:scale-[1.01] ${gradient}`}
     >
       {/* Thematic Vector Illustration */}
@@ -220,26 +241,56 @@ function CapsuleCard({ capsule, onOpen, onDownload, onShare, downloading }) {
           )}
         </div>
 
-        {/* Title Row: Title on the left, Share button aligned to the right */}
+        {/* Title Row: Title on the left, 3-dots menu or download button on the right */}
         <div className="mt-2.5 flex items-start justify-between gap-3">
           <h2 className="text-base sm:text-lg font-black leading-snug tracking-tight text-white drop-shadow-xs line-clamp-2">
             {capsule.title}
           </h2>
 
           {installed ? (
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation()
-                onShare(capsule)
-              }}
-              title={t('passTooltip')}
-              aria-label={t('passAria', { title: capsule.title })}
-              className="btn-press shrink-0 flex items-center gap-1.5 rounded-xl border border-white/30 bg-black/30 hover:bg-black/50 px-3 py-1.5 text-xs font-bold text-white shadow-xs backdrop-blur-md transition-colors"
-            >
-              <Share2 className="size-3.5 stroke-[2.2]" aria-hidden="true" />
-              <span>{t('passCourse')}</span>
-            </button>
+            <div className="relative shrink-0">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onToggleMenu(menuOpen ? null : capsule.id)
+                }}
+                aria-label={`Options for ${capsule.title}`}
+                className="btn-press flex size-8 items-center justify-center rounded-xl border border-white/30 bg-black/30 hover:bg-black/50 text-white backdrop-blur-md transition-colors"
+              >
+                <MoreVertical className="size-4 stroke-[2.2]" aria-hidden="true" />
+              </button>
+
+              {menuOpen && (
+                <div
+                  className="absolute right-0 top-10 z-30 min-w-[140px] rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface)] p-1.5 shadow-xl animate-pop-in"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onToggleMenu(null)
+                      onShare(capsule)
+                    }}
+                    className="btn-press flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-bold text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)] transition-colors"
+                  >
+                    <Share2 className="size-3.5 stroke-[2.2]" aria-hidden="true" />
+                    <span>{t('passCourse')}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onToggleMenu(null)
+                      if (onArchive) onArchive(capsule)
+                    }}
+                    className="btn-press flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-bold text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)] transition-colors"
+                  >
+                    <Archive className="size-3.5 stroke-[2.2]" aria-hidden="true" />
+                    <span>{t('archiveAction')}</span>
+                  </button>
+                </div>
+              )}
+            </div>
           ) : (
             <button
               type="button"
@@ -286,6 +337,7 @@ export default function CourseHub({
   onOpen,
   onDownload,
   onShare,
+  onArchive,
   onImport,
   downloadingId,
 }) {
@@ -293,6 +345,21 @@ export default function CourseHub({
   const [shareTarget, setShareTarget] = useState(null)
   const [confirmDownloadTarget, setConfirmDownloadTarget] = useState(null)
   const [availableOpen, setAvailableOpen] = useState(false)
+  const [activeMenuId, setActiveMenuId] = useState(null)
+
+  useEffect(() => {
+    if (!activeMenuId) return
+    const handleClickOutside = () => setActiveMenuId(null)
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') setActiveMenuId(null)
+    }
+    document.addEventListener('click', handleClickOutside)
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      document.removeEventListener('click', handleClickOutside)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [activeMenuId])
 
   if (capsules.length === 0) {
     return (
@@ -379,7 +446,10 @@ export default function CourseHub({
               onOpen={onOpen}
               onDownload={onDownload}
               onShare={setShareTarget}
+              onArchive={onArchive}
               downloading={downloadingId === capsule.id}
+              menuOpen={activeMenuId === capsule.id}
+              onToggleMenu={setActiveMenuId}
             />
           ))}
         </ul>

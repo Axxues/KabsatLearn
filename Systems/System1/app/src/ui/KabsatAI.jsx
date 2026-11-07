@@ -165,9 +165,15 @@ export default function KabsatAI({
   explainAt: propExplainAt,
   stop: propStop,
   resetSession: propResetSession,
+  installedCapsules,
 }) {
   const { t, lang, translations } = useI18n()
-  const fallback = useKabsatAiState({ capsule, t, lang })
+  const fallback = useKabsatAiState({
+    capsule,
+    installedCapsules: installedCapsules ?? (capsule ? [capsule] : []),
+    t,
+    lang,
+  })
 
   const messages = propMessages ?? fallback.messages
   const input = propInput ?? fallback.input

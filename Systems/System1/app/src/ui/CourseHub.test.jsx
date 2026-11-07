@@ -77,7 +77,7 @@ describe('CourseHub capsule cards and counters', () => {
     container.remove()
   })
 
-  async function renderComponent(capsules, lang = 'fil') {
+  async function renderComponent(capsules, lang = 'fil', handlers = {}) {
     localStorage.setItem('kabsat_lang', lang)
     await act(async () => {
       root.render(
@@ -88,6 +88,7 @@ describe('CourseHub capsule cards and counters', () => {
             onDownload={() => {}}
             onShare={() => {}}
             onImport={() => {}}
+            {...handlers}
           />
         </I18nProvider>
       )
@@ -342,24 +343,73 @@ describe('CourseHub capsule cards and counters', () => {
     expect(document.body.querySelector('[aria-labelledby="confirm-download-modal-title"]')).toBeNull()
   })
 
-  test('installed course card displays "Share" on the share button in English and "Ibahagi" in Filipino', async () => {
-    await renderComponent(oneInstalledOneAvailable, 'en')
-    const installedSectionEn = container.querySelector('section[aria-labelledby="installed-heading"]')
-    const shareBtnEn = installedSectionEn.querySelector('li button')
-    expect(shareBtnEn.textContent).toContain('Share')
-    expect(shareBtnEn.textContent).not.toContain('Pass')
+  test('installed course card renders 3-dots menu button, opening dropdown with Share and Archive options', async () => {
+    let archivedCapsule = null
+    await renderComponent(oneInstalledOneAvailable, 'en', {
+      onArchive: (c) => {
+        archivedCapsule = c
+      },
+    })
+    const installedSection = container.querySelector('section[aria-labelledby="installed-heading"]')
+    const menuBtn = installedSection.querySelector('button[aria-label="Options for Digital Safety"]')
+    expect(menuBtn).not.toBeNull()
 
-    await renderComponent(oneInstalledOneAvailable, 'fil')
-    const installedSectionFil = container.querySelector('section[aria-labelledby="installed-heading"]')
-    const shareBtnFil = installedSectionFil.querySelector('li button')
-    expect(shareBtnFil.textContent).toContain('Ibahagi')
+    // Initially menu is closed
+    expect(installedSection.textContent).not.toContain('Archive')
+
+    // Click 3-dots button to open menu
+    await act(async () => {
+      menuBtn.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    })
+
+    expect(installedSection.textContent).toContain('Share')
+    expect(installedSection.textContent).toContain('Archive')
+
+    // Click Archive option
+    const archiveBtn = [...installedSection.querySelectorAll('button')].find(
+      (b) => b.textContent.trim() === 'Archive'
+    )
+    expect(archiveBtn).toBeTruthy()
+    await act(async () => {
+      archiveBtn.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    })
+
+    expect(archivedCapsule).toEqual(oneInstalledOneAvailable[0])
   })
 
-  test('clicking share button on installed course card opens share modal via portal, cancel dismisses it', async () => {
+  test('installed course card displays "Share" in English and "Ibahagi" in Filipino inside 3-dots menu', async () => {
+    await renderComponent(oneInstalledOneAvailable, 'en')
+    let installedSection = container.querySelector('section[aria-labelledby="installed-heading"]')
+    let menuBtn = installedSection.querySelector('button[aria-label="Options for Digital Safety"]')
+    await act(async () => {
+      menuBtn.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    })
+    expect(installedSection.textContent).toContain('Share')
+    expect(installedSection.textContent).not.toContain('Pass')
+
+    await renderComponent(oneInstalledOneAvailable, 'fil')
+    installedSection = container.querySelector('section[aria-labelledby="installed-heading"]')
+    menuBtn = installedSection.querySelector('button[aria-label="Options for Digital Safety"]')
+    await act(async () => {
+      menuBtn.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    })
+    expect(installedSection.textContent).toContain('Ibahagi')
+    expect(installedSection.textContent).toContain('I-archive')
+  })
+
+  test('clicking share option in 3-dots menu opens share modal via portal, cancel dismisses it', async () => {
     await renderComponent(oneInstalledOneAvailable, 'en')
     const installedSection = container.querySelector('section[aria-labelledby="installed-heading"]')
-    const shareBtn = installedSection.querySelector('li button')
+    const menuBtn = installedSection.querySelector('button[aria-label="Options for Digital Safety"]')
 
+    await act(async () => {
+      menuBtn.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    })
+
+    const shareBtn = [...installedSection.querySelectorAll('button')].find(
+      (b) => b.textContent.trim() === 'Share'
+    )
+    expect(shareBtn).toBeTruthy()
     await act(async () => {
       shareBtn.dispatchEvent(new MouseEvent('click', { bubbles: true }))
     })
@@ -378,5 +428,32 @@ describe('CourseHub capsule cards and counters', () => {
     })
 
     expect(document.body.querySelector('[aria-labelledby="share-modal-title"]')).toBeNull()
+  })
+
+  test('clicking card body while 3-dots menu is open closes menu without triggering onOpen', async () => {
+    let openedId = null
+    await renderComponent(oneInstalledOneAvailable, 'en', {
+      onOpen: (id) => {
+        openedId = id
+      },
+    })
+    const installedSection = container.querySelector('section[aria-labelledby="installed-heading"]')
+    const menuBtn = installedSection.querySelector('button[aria-label="Options for Digital Safety"]')
+    const card = installedSection.querySelector('li')
+
+    // Open menu
+    await act(async () => {
+      menuBtn.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    })
+    expect(installedSection.textContent).toContain('Archive')
+
+    // Click card body
+    await act(async () => {
+      card.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    })
+
+    // Menu is closed, and onOpen was NOT called
+    expect(installedSection.textContent).not.toContain('Archive')
+    expect(openedId).toBeNull()
   })
 })

@@ -91,4 +91,34 @@ describe('i18n emoji scan', () => {
     expect(probeText(container, 'turn')).toBe("Player 1's Turn")
     expect(probeText(container, 'streak')).toBe('3x Streak (+Points!)')
   })
+
+  test('provides archive translations in tl/fil and en without raw emoji', async () => {
+    const dict = dictionary(container)
+    const requiredKeys = [
+      'profileMenu',
+      'archiveMenu',
+      'archiveTitle',
+      'archiveEmptyTitle',
+      'archiveEmptyDesc',
+      'archiveAction',
+      'unarchiveAction',
+      'toastArchived',
+      'toastUnarchived',
+      'quizEmptyArchive',
+      'openArchive',
+    ]
+
+    for (const key of requiredKeys) {
+      expect(dict[key], `Missing key ${key} in Filipino`).toBeTruthy()
+    }
+
+    act(() => {
+      container.querySelector('[data-probe="to-en"]').dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    })
+
+    const enDict = dictionary(container)
+    for (const key of requiredKeys) {
+      expect(enDict[key], `Missing key ${key} in English`).toBeTruthy()
+    }
+  })
 })

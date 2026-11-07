@@ -183,6 +183,21 @@ const TRANSLATIONS = {
     barangayHeading: 'Barangay Heatmap · Synthetic Sample',
     barangayDisclaimer:
       'Sample data para sa demo ng San Fernando City Government. Walang totoong citizen records ang ginamit alinsunod sa Data Privacy Act.',
+
+    // Archive & Profile Menu
+    profileMenu: 'Profile',
+    archiveMenu: 'Archive',
+    archiveTitle: 'Naka-archive na Kurso',
+    archiveEmptyTitle: 'Walang naka-archive na kurso',
+    archiveEmptyDesc: 'Ang mga kursong ia-archive mo mula sa Courses ay lilitaw rito.',
+    archiveAction: 'I-archive',
+    unarchiveAction: 'Ibalik sa Kurso',
+    toastArchived: 'Na-archive na ang kurso.',
+    toastUnarchived: 'Naibalik na sa mga aktibong kurso.',
+    quizEmptyArchive: 'Walang aktibong kurso para sa pagsusulit. Mag-unarchive mula sa Archive o mag-download ng bago.',
+    openArchive: 'Buksan ang Archive',
+    archivedCountSingle: '{n} kurso',
+    archivedCountPlural: '{n} mga kurso',
   },
 
   en: {
@@ -367,6 +382,21 @@ const TRANSLATIONS = {
     barangayHeading: 'Barangay Heatmap · Synthetic Sample',
     barangayDisclaimer:
       'Sample demonstration data for the City Government of San Fernando. No actual citizen records are used pursuant to the Data Privacy Act.',
+
+    // Archive & Profile Menu
+    profileMenu: 'Profile',
+    archiveMenu: 'Archive',
+    archiveTitle: 'Archived Courses',
+    archiveEmptyTitle: 'No archived courses',
+    archiveEmptyDesc: 'Courses you archive from the Courses Hub will appear here.',
+    archiveAction: 'Archive',
+    unarchiveAction: 'Unarchive',
+    toastArchived: 'Course archived.',
+    toastUnarchived: 'Course restored to active courses.',
+    quizEmptyArchive: 'No active courses for quiz. Restore a course from Archive or download one.',
+    openArchive: 'Open Archive',
+    archivedCountSingle: '{n} course',
+    archivedCountPlural: '{n} courses',
   },
 }
 

@@ -34,6 +34,8 @@ import {
   ChevronDown,
   Clock,
   AlertTriangle,
+  BookOpen,
+  Archive,
 } from 'lucide-react'
 
 const DEFAULT_LIMIT_MS = 15000
@@ -135,6 +137,7 @@ function Tile({ tile, index, text, state, disabled, onPick }) {
 export default function QuizArena({
   capsule,
   onExit,
+  onOpenArchive,
   onRunningChange,
   courses = [],
   selectedCourseId,
@@ -142,7 +145,8 @@ export default function QuizArena({
   _onLockedCourse,
 }) {
   const { t } = useI18n()
-  const bank = capsule.questions
+  const bank = capsule?.questions || []
+
   const [players, setPlayers] = useState(1)
   const [selectedPlayers, setSelectedPlayers] = useState(1)
   const [timePerQuestion, setTimePerQuestion] = useState(15)
@@ -357,6 +361,39 @@ export default function QuizArena({
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [confirmExitOpen, cancelExit])
+
+  if (!capsule) {
+    return (
+      <div className="flex flex-1 flex-col items-center justify-center p-6 text-center">
+        <div className="flex size-16 items-center justify-center rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface-sunken)] text-[var(--color-muted)] shadow-inner">
+          <BookOpen className="size-8 stroke-[1.8]" aria-hidden="true" />
+        </div>
+        <p className="mt-4 max-w-[280px] text-xs leading-relaxed text-[var(--color-muted)]">
+          {t('quizEmptyArchive')}
+        </p>
+        <div className="mt-5 flex items-center gap-2.5">
+          {onOpenArchive && (
+            <button
+              type="button"
+              onClick={onOpenArchive}
+              className="btn-press flex items-center gap-1.5 rounded-xl border border-[var(--color-line)] bg-[var(--color-surface)] px-3.5 py-2 text-xs font-bold text-[var(--color-ink)] shadow-xs hover:bg-[var(--color-surface-hover)]"
+            >
+              <Archive className="size-3.5 stroke-[2]" aria-hidden="true" />
+              <span>{t('openArchive')}</span>
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={onExit}
+            className="btn-press flex items-center gap-2 rounded-xl bg-[var(--color-accent)] px-4 py-2 text-xs font-bold text-white shadow-xs"
+          >
+            <ArrowLeft className="size-4 stroke-[2.2]" aria-hidden="true" />
+            <span>{t('headerCourses')}</span>
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   // --- Intro View ---
   if (phase === 'intro') {
