@@ -6,6 +6,7 @@ import { useOnline } from './lib/useOnline.js'
 import CourseHub from './ui/CourseHub.jsx'
 import OfflineBanner from './ui/OfflineBanner.jsx'
 import QuizArena from './ui/QuizArena.jsx'
+import KabsatAI from './ui/KabsatAI.jsx'
 import StoryReader from './ui/StoryReader.jsx'
 
 const TABS = [
@@ -76,6 +77,10 @@ export default function App() {
 
   if (tab === 'quiz') {
     return <QuizArena capsule={capsule101} onExit={() => setTab('hub')} />
+  }
+
+  if (tab === 'tutor') {
+    return <KabsatAI capsule={capsule101} onExit={() => setTab('hub')} />
   }
 
   return (
