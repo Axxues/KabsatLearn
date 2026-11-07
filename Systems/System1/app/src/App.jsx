@@ -442,6 +442,9 @@ function MainApp() {
           <img
             src="/icon.svg"
             alt="KabsatLearn logo"
+            width="36"
+            height="36"
+            style={{ width: '2.25rem', height: '2.25rem' }}
             className="size-9 rounded-xl border border-[var(--color-line)] bg-white p-1 shadow-xs shrink-0"
           />
           <div>
