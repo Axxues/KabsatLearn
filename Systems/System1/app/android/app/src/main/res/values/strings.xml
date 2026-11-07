@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">KabsatLearn</string>
+    <string name="title_activity_main">KabsatLearn</string>
+    <string name="package_name">com.kabsatlearn.app</string>
+    <string name="custom_url_scheme">com.kabsatlearn.app</string>
+</resources>
