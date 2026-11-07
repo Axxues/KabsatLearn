@@ -1,0 +1,301 @@
+{
+  "id": "capsule-103",
+  "version": 1,
+  "title": "Kumpiyansa sa Smartphone",
+  "subtitle": "Digital literacy: paghahanap, kaligtasan, at tamang gamit ng apps",
+  "persona": "out-of-school youth na bagong gumagamit ng smartphone",
+  "competency": ["digital_literacy", "cyber_safety"],
+  "shared_by": "K-0001",
+  "share_count": 0,
+  "cards": [
+    {
+      "id": "c1",
+      "title": "Ano ang digital literacy?",
+      "body": "Ang digital literacy ay ang kakayahang maghanap, mag-check, at gumamit ng impormasyon at apps nang ligtas at tama. Hindi ito nasusukat sa presyo ng phone: kayang matutunan ito sa murang device.",
+      "tip": "Hindi kailangan ng mamahaling phone para maging marunong."
+    },
+    {
+      "id": "c2",
+      "title": "Maghanap nang tama",
+      "body": "Kapag maghahanap, isulat ang partikular na keywords: ano ang hinahanap, saan, at kailan. Halimbawa, ang 'presyo ng bigas San Fernando 2026' ay mas mabuti kaysa sa 'bigas' lang. Buksan ang dalawang resulta at ihambing bago maniwala.",
+      "tip": "Isulat ang tanong na gusto mong sagot, hindi ang paksa lang."
+    },
+    {
+      "id": "c3",
+      "title": "Totoo ba ang nakita mo?",
+      "body": "Bago maniwala, tingnan kung sino ang sumulat at kailan ito nailathala. I-check sa pangalawang mapagkakatiwalaang source. Mag-ingat sa nakakagulat na post at sa mga larawang gawa ng AI.",
+      "tip": "Kung nakakagulat, i-verify muna bago i-share."
+    },
+    {
+      "id": "c4",
+      "title": "Apps mula sa Play Store lang",
+      "body": "Mag-install lang ng apps mula sa Google Play. Basahin ang permissions bago mag-install: ang simpleng app ay hindi dapat humingi ng SMS, contacts, o ID. I-uninstall ang mga app na hindi mo naman ginagamit.",
+      "tip": "Kung flashlight lang ang app, bakit kailangan ang contacts mo?",
+      "drill": {
+        "prompt": "I-tap ang lahat ng red flag sa app na ito.",
+        "segments": [
+          { "text": "Flashlight app", "flag": false },
+          { "text": "Humingi ng contacts", "flag": true },
+          { "text": "Humingi ng SMS", "flag": true },
+          { "text": "4.8 stars sa Play Store", "flag": false },
+          { "text": "Walang privacy policy", "flag": true }
+        ],
+        "hint": "Tatlo ang red flag: contacts, SMS, at walang privacy policy. Ang simpleng app ay hindi dapat humingi ng mga ito."
+      }
+    },
+    {
+      "id": "c5",
+      "title": "Password at 2-step",
+      "body": "Gumamit ng mahabang passphrase na hindi mo ginagamit sa ibang account. I-on ang 2-step verification para may karagdagang code o approval. Itago ang recovery codes sa labas ng phone, sa papel na hindi makikita ng iba.",
+      "tip": "Ang password ay parang susi: hindi ibinibigay at hindi pareho sa lahat ng pinto."
+    },
+    {
+      "id": "c6",
+      "title": "Backup at storage",
+      "body": "Mag-sign in sa Google account para may backup ng contacts at photos. Mag-delete ng hindi ginagamit na media, i-update ang system, at iwasan ang mga 'cleaner' apps na nangangako ng bilis.",
+      "tip": "Ang backup ang paraan para hindi mawala ang mahalaga."
+    }
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "band": "foundational",
+      "stem": "Bago mag-share ng balitang nakakagulat, ano ang unang gagawin?",
+      "options": [
+        "I-verify muna sa ibang mapagkakatiwalaang source",
+        "I-share agad para mabilis",
+        "Idagdag ang sariling komento",
+        "Itanong sa grupo kung totoo"
+      ],
+      "answer": 0,
+      "competency": "digital_literacy"
+    },
+    {
+      "id": "q2",
+      "band": "foundational",
+      "stem": "Saan ligtas mag-download ng app?",
+      "options": [
+        "Sa link na ipinadala sa text",
+        "Sa Google Play Store",
+        "Sa website na may 'free download'",
+        "Sa group chat"
+      ],
+      "answer": 1,
+      "competency": "digital_literacy"
+    },
+    {
+      "id": "q3",
+      "band": "foundational",
+      "stem": "Alin ang matibay na password?",
+      "options": [
+        "Pangalan ng anak",
+        "12345678",
+        "Mahabang passphrase na hindi ginagamit sa ibang account",
+        "Araw ng kaarawan"
+      ],
+      "answer": 2,
+      "competency": "cyber_safety"
+    },
+    {
+      "id": "q4",
+      "band": "foundational",
+      "stem": "Humihingi ng SMS at contacts ang isang flashlight app. Ano ang ibig sabihin nito?",
+      "options": [
+        "Normal lang sa lahat ng app",
+        "Masyadong maraming permiso at may risk sa privacy",
+        "Mas malakas ang flashlight",
+        "Kailangan para gumana"
+      ],
+      "answer": 1,
+      "competency": "cyber_safety"
+    },
+    {
+      "id": "q5",
+      "band": "core",
+      "stem": "May larawan ng pulitiko na may kasamang pekeng balita. Ano ang pinakamainam na gawin?",
+      "options": [
+        "I-share para malaman ng iba",
+        "I-save at i-print",
+        "Huwag i-share at i-check ang source bago maniwala",
+        "Ipadala sa lahat ng contacts"
+      ],
+      "answer": 2,
+      "competency": "digital_literacy"
+    },
+    {
+      "id": "q6",
+      "band": "core",
+      "stem": "Ano ang 2-step verification?",
+      "options": [
+        "Dalawang password",
+        "Karagdagang code o approval bukod sa password",
+        "Dalawang phone",
+        "Dalawang email"
+      ],
+      "answer": 1,
+      "competency": "cyber_safety"
+    },
+    {
+      "id": "q7",
+      "band": "core",
+      "stem": "Paano makatipid sa data habang nag-aaral?",
+      "options": [
+        "Manood ng video sa mobile data",
+        "I-on ang hotspot buong araw",
+        "Mag-stream ng musika",
+        "I-download ang aralin kapag may Wi-Fi at gamitin ito offline"
+      ],
+      "answer": 3,
+      "competency": "digital_literacy"
+    },
+    {
+      "id": "q8",
+      "band": "stretch",
+      "stem": "Paano mo i-verify kung AI-generated ang isang larawan?",
+      "options": [
+        "Tingnan lang kung maganda",
+        "I-share at hintayin ang sagot",
+        "Hanapin ang orihinal na source at tingnan ang detalye ng larawan",
+        "Tanungin ang nag-post kung totoo"
+      ],
+      "answer": 2,
+      "competency": "digital_literacy"
+    },
+    {
+      "id": "q9",
+      "band": "stretch",
+      "stem": "Bakit mapanganib ang pag-post ng screenshot ng ID?",
+      "options": [
+        "Mababawasan ang storage",
+        "Maaaring gamitin ang impormasyon para mag-open ng account sa pangalan mo",
+        "Mababago ang kulay",
+        "Mawawala ang signal"
+      ],
+      "answer": 1,
+      "competency": "cyber_safety"
+    },
+    {
+      "id": "q10",
+      "band": "stretch",
+      "stem": "May app na humihingi ng bayad para sa 'premium' na hindi mo in-order. Ano ang tamang gawin?",
+      "options": [
+        "Magbayad agad para hindi ma-block",
+        "Ibigay ang OTP",
+        "Huwag magbayad; i-check ang official app at i-report",
+        "I-uninstall at mag-install ng ibang APK"
+      ],
+      "answer": 2,
+      "competency": "digital_literacy"
+    }
+  ],
+  "chunks": [
+    {
+      "id": "k1",
+      "concept": "Digital literacy",
+      "competency": "digital_literacy",
+      "difficulty": "foundational",
+      "text": "Ang digital literacy ay ang kakayahang maghanap, mag-check, at gumamit ng impormasyon at apps nang ligtas. Hindi ito nasusukat sa presyo ng phone.",
+      "keywords": ["digital literacy", "impormasyon", "apps", "phone", "kasanayan"],
+      "source_id": "c1"
+    },
+    {
+      "id": "k2",
+      "concept": "Better search",
+      "competency": "digital_literacy",
+      "difficulty": "foundational",
+      "text": "Kapag maghahanap, gumamit ng partikular na keywords at idagdag ang lugar o taon. Buksan ang dalawang resulta at ihambing bago maniwala.",
+      "keywords": ["search", "keywords", "lugar", "taon", "resulta"],
+      "source_id": "c2"
+    },
+    {
+      "id": "k3",
+      "concept": "Verifying posts",
+      "competency": "cyber_safety",
+      "difficulty": "foundational",
+      "text": "Tingnan kung sino ang sumulat at kailan nailathala. I-check sa pangalawang mapagkakatiwalaang source at mag-ingat sa nakakagulat na post at larawang gawa ng AI.",
+      "keywords": ["verify", "source", "may-akda", "petsa", "post"],
+      "source_id": "c3"
+    },
+    {
+      "id": "k4",
+      "concept": "Safe app installs",
+      "competency": "cyber_safety",
+      "difficulty": "core",
+      "text": "Mag-install lang mula sa Google Play. Ang simpleng app ay hindi dapat humingi ng SMS, contacts, o ID.",
+      "keywords": ["google play", "install", "app", "sms", "contacts"],
+      "source_id": "c4"
+    },
+    {
+      "id": "k5",
+      "concept": "App permissions",
+      "competency": "cyber_safety",
+      "difficulty": "core",
+      "text": "Dapat tugma ang permissions sa gamit ng app. Tanggihan ang hindi kailangan at i-uninstall ang mga app na hindi ginagamit.",
+      "keywords": ["permissions", "privacy", "uninstall", "app", "access"],
+      "source_id": "c4"
+    },
+    {
+      "id": "k6",
+      "concept": "Strong passwords",
+      "competency": "cyber_safety",
+      "difficulty": "foundational",
+      "text": "Gumamit ng mahabang passphrase na hindi ginagamit sa ibang account. Huwag itong ibahagi kahit kanino.",
+      "keywords": ["password", "passphrase", "account", "mahaba", "reuse"],
+      "source_id": "c5"
+    },
+    {
+      "id": "k7",
+      "concept": "2-step verification",
+      "competency": "cyber_safety",
+      "difficulty": "core",
+      "text": "Ang 2-step verification ay karagdagang code o approval na pumoprotekta sa account kahit malaman pa ang password.",
+      "keywords": ["2-step", "verification", "code", "password", "account"],
+      "source_id": "c5"
+    },
+    {
+      "id": "k8",
+      "concept": "Backup",
+      "competency": "digital_literacy",
+      "difficulty": "core",
+      "text": "Ang naka-sign in na Google account ay may backup ng contacts at photos. Itago ang recovery codes sa labas ng phone.",
+      "keywords": ["backup", "google account", "contacts", "photos", "recovery"],
+      "source_id": "c6"
+    },
+    {
+      "id": "k9",
+      "concept": "Storage and updates",
+      "competency": "digital_literacy",
+      "difficulty": "stretch",
+      "text": "Mag-delete ng hindi ginagamit na media, i-update ang system, at iwasan ang cleaner apps na nangangako ng bilis.",
+      "keywords": ["storage", "update", "cleaner", "media", "system"],
+      "source_id": "c6"
+    },
+    {
+      "id": "k10",
+      "concept": "Spotting AI images",
+      "competency": "digital_literacy",
+      "difficulty": "stretch",
+      "text": "Tingnan ang kakaibang detalye sa larawan at hanapin ang orihinal na source bago maniwala o mag-share.",
+      "keywords": ["ai", "larawan", "source", "detalye", "share"],
+      "source_id": "c3"
+    },
+    {
+      "id": "k11",
+      "concept": "ID oversharing",
+      "competency": "cyber_safety",
+      "difficulty": "stretch",
+      "text": "Ang screenshot ng ID ay kayang gamitin para mag-open ng account sa pangalan mo. I-blur ang numero at huwag itong ipost sa public.",
+      "keywords": ["id", "screenshot", "privacy", "blur", "account"],
+      "source_id": "c5"
+    },
+    {
+      "id": "k12",
+      "concept": "Data saving",
+      "competency": "digital_literacy",
+      "difficulty": "core",
+      "text": "I-download ang aralin kapag may Wi-Fi at gamitin ito offline. Limitahan ang video streaming kapag mobile data ang gamit.",
+      "keywords": ["data", "wifi", "offline", "download", "streaming"],
+      "source_id": "c2"
+    }
+  ]
+}

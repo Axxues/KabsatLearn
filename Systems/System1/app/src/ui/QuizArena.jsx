@@ -15,7 +15,6 @@ import AnimatedSuccessCheck from './AnimatedSuccessCheck.jsx'
 import {
   ArrowLeft,
   Trophy,
-  Timer,
   Zap,
   User,
   Users,
@@ -24,10 +23,14 @@ import {
   Lightbulb,
   Flame,
   X,
-  TrendingUp,
   ShieldCheck,
   Briefcase,
-  Lock,
+  Smartphone,
+  Wallet,
+  Heart,
+  Package,
+  Sparkles,
+  ChevronDown,
 } from 'lucide-react'
 
 const LIMIT_MS = 15000
@@ -36,6 +39,10 @@ const REVEAL_MS = 1600
 const COURSE_ICONS = {
   'capsule-101': ShieldCheck,
   'capsule-102': Briefcase,
+  'capsule-103': Smartphone,
+  'capsule-104': Wallet,
+  'capsule-105': Heart,
+  'capsule-106': Package,
 }
 
 
@@ -121,7 +128,7 @@ export default function QuizArena({
   courses = [],
   selectedCourseId,
   onSelectCourse,
-  onLockedCourse,
+  _onLockedCourse,
 }) {
   const { t } = useI18n()
   const bank = capsule.questions
@@ -137,7 +144,29 @@ export default function QuizArena({
   const [now, setNow] = useState(() => Date.now())
   const [lastPoints, setLastPoints] = useState(0)
   const [badge, setBadge] = useState(null)
+  const [coursePickerOpen, setCoursePickerOpen] = useState(false)
   const revealedFor = useRef(null)
+  const pickerRef = useRef(null)
+
+  useEffect(() => {
+    if (!coursePickerOpen) return
+    const handleClickOutside = (e) => {
+      if (pickerRef.current && !pickerRef.current.contains(e.target)) {
+        setCoursePickerOpen(false)
+      }
+    }
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setCoursePickerOpen(false)
+      }
+    }
+    document.addEventListener('pointerdown', handleClickOutside)
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      document.removeEventListener('pointerdown', handleClickOutside)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [coursePickerOpen])
 
   const current = index % players
   const state = states[current]
@@ -240,139 +269,181 @@ export default function QuizArena({
   // --- Intro View ---
   if (phase === 'intro') {
     return (
-      <div className="mx-auto flex flex-1 min-h-0 max-w-[430px] flex-col justify-between bg-[var(--color-bg)] p-5 text-[var(--color-ink)] shadow-2xl transition-colors duration-200">
-        <header className="flex items-center justify-between pt-2">
+      <div className="mx-auto flex flex-1 min-h-0 w-full max-w-[430px] flex-col justify-between bg-[var(--color-bg)] p-4 text-[var(--color-ink)] transition-colors duration-200">
+        <header className="flex items-center justify-between gap-2.5">
           <button
             type="button"
             onClick={onExit}
-            className="btn-press flex min-h-10 items-center gap-1.5 rounded-xl border border-[var(--color-line)] bg-[var(--color-surface)] px-3 text-xs font-bold text-[var(--color-muted)] hover:text-[var(--color-ink)]"
+            className="btn-press flex h-9 shrink-0 items-center gap-1.5 rounded-xl border border-[var(--color-line)] bg-[var(--color-surface)] px-3 text-xs font-bold text-[var(--color-muted)] hover:text-[var(--color-ink)]"
           >
             <ArrowLeft className="size-4 stroke-[2.5]" aria-hidden="true" />
-            {t('back')}
+            <span>{t('back')}</span>
           </button>
+
+          {courses.length > 0 && (() => {
+            const installedCourses = courses.filter((c) => c.installed !== false)
+            const activeCourse =
+              installedCourses.find((c) => c.id === selectedCourseId) ||
+              installedCourses[0] ||
+              courses[0]
+            const ActiveIcon = (activeCourse && COURSE_ICONS[activeCourse.id]) || ShieldCheck
+
+            return (
+              <div ref={pickerRef} className="relative min-w-0 flex-1 max-w-[270px]">
+                {/* Dropdown Select Trigger Button */}
+                <button
+                  type="button"
+                  aria-haspopup="listbox"
+                  aria-expanded={coursePickerOpen}
+                  onClick={() => setCoursePickerOpen((prev) => !prev)}
+                  className={`btn-press flex h-9 w-full items-center justify-between gap-1.5 rounded-xl border bg-[var(--color-surface)] px-2.5 text-left shadow-2xs transition-all ${
+                    coursePickerOpen
+                      ? 'border-[var(--color-accent)] ring-2 ring-[var(--color-accent)]/20'
+                      : 'border-[var(--color-line)] hover:border-[var(--color-accent)]/60'
+                  }`}
+                >
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <span className="sr-only">{t('chooseCourse')}:</span>
+                    <div className="flex size-5.5 items-center justify-center rounded-md bg-[var(--color-accent-subtle)] text-[var(--color-accent)] shrink-0">
+                      <ActiveIcon className="size-3.5 stroke-[2.2]" aria-hidden="true" />
+                    </div>
+                    <span className="truncate text-xs font-bold text-[var(--color-ink)]">
+                      {activeCourse?.title || t('chooseCourse')}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-1.5 shrink-0 pl-1">
+                    <ChevronDown
+                      className={`size-3.5 text-[var(--color-muted)] transition-transform duration-200 ${
+                        coursePickerOpen ? 'rotate-180 text-[var(--color-accent)]' : ''
+                      }`}
+                      aria-hidden="true"
+                    />
+                  </div>
+                </button>
+
+                {/* Dropdown Menu Options */}
+                {coursePickerOpen && (
+                  <div
+                    role="listbox"
+                    aria-label={t('chooseCourse')}
+                    className="absolute right-0 top-full mt-1.5 z-40 w-72 max-w-[calc(100vw-2rem)] rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface)] p-1.5 shadow-2xl ring-1 ring-black/10 space-y-1"
+                  >
+                    <div className="flex items-center justify-between px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-wider text-[var(--color-muted)] border-b border-[var(--color-line)]/50 pb-1 mb-1">
+                      <span className="flex items-center gap-1">
+                        <Sparkles className="size-3 text-[var(--color-accent)] stroke-[2.5]" aria-hidden="true" />
+                        <span>{t('chooseCourse')}</span>
+                      </span>
+                      <span className="rounded-full bg-[var(--color-surface-sunken)] px-1.5 py-0.5 text-[9px] font-bold text-[var(--color-muted)] border border-[var(--color-line)]">
+                        {installedCourses.length === 1
+                          ? t('courseCountSingle', { n: installedCourses.length })
+                          : t('courseCountPlural', { n: installedCourses.length })}
+                      </span>
+                    </div>
+
+                    {installedCourses.map((course) => {
+                      const Icon = COURSE_ICONS[course.id] || ShieldCheck
+                      const selected = course.id === (activeCourse?.id || selectedCourseId)
+                      return (
+                        <button
+                          key={course.id}
+                          type="button"
+                          role="option"
+                          aria-selected={selected}
+                          aria-pressed={selected ? 'true' : 'false'}
+                          onClick={() => {
+                            setCoursePickerOpen(false)
+                            onSelectCourse?.(course.id)
+                          }}
+                          className={`btn-press group flex w-full items-center justify-between rounded-xl px-2.5 py-2 text-left transition-all duration-150 ${
+                            selected
+                              ? 'bg-[var(--color-accent-subtle)]/70 text-[var(--color-ink)]'
+                              : 'hover:bg-[var(--color-surface-hover)] text-[var(--color-ink)]'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <div
+                              className={`flex size-7 items-center justify-center rounded-lg transition-colors shrink-0 ${
+                                selected
+                                  ? 'bg-[var(--color-accent)] text-[var(--color-on-accent)] shadow-xs'
+                                  : 'bg-[var(--color-accent-subtle)] text-[var(--color-accent)]'
+                              }`}
+                            >
+                              <Icon className="size-3.5 stroke-[2.2]" aria-hidden="true" />
+                            </div>
+
+                            <div className="min-w-0 flex-1">
+                              <span className="block text-xs font-bold truncate leading-tight">
+                                {course.title}
+                              </span>
+                            </div>
+                          </div>
+                        </button>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
+            )
+          })()}
         </header>
 
-        <div className="my-auto py-6 text-center space-y-4">
-          {courses.length > 0 && (
-            <section className="space-y-1.5 text-left">
-              <p className="text-[10px] font-extrabold uppercase tracking-widest text-[var(--color-muted)]">
-                {t('chooseCourse')}
-              </p>
-              <div className="grid grid-cols-2 gap-2">
-                {courses.map((course) => {
-                  const Icon = COURSE_ICONS[course.id] || ShieldCheck
-                  const selected = course.id === selectedCourseId
-                  return (
-                    <button
-                      key={course.id}
-                      type="button"
-                      aria-pressed={course.installed ? selected : undefined}
-                      onClick={() =>
-                        course.installed
-                          ? onSelectCourse?.(course.id)
-                          : (onLockedCourse ?? onExit)?.()
-                      }
-                      className={`btn-press flex flex-col items-start gap-1 rounded-xl border-2 p-2.5 text-left transition-colors ${
-                        !course.installed
-                          ? 'border-dashed border-[var(--color-line)] bg-[var(--color-surface-sunken)] hover:border-[var(--color-accent)]'
-                          : selected
-                            ? 'border-[var(--color-accent)] bg-[var(--color-accent-subtle)]'
-                            : 'border-[var(--color-line)] bg-[var(--color-surface)] hover:border-[var(--color-accent)]'
-                      }`}
-                    >
-                      <span
-                        className={
-                          course.installed && selected
-                            ? 'text-[var(--color-accent)]'
-                            : 'text-[var(--color-muted)]'
-                        }
-                      >
-                        {course.installed ? (
-                          <Icon className="size-3.5 stroke-[2.5]" aria-hidden="true" />
-                        ) : (
-                          <Lock className="size-3.5 stroke-[2.5]" aria-hidden="true" />
-                        )}
-                      </span>
-                      <span className="text-[11px] font-bold leading-snug text-[var(--color-ink)]">
-                        {course.title}
-                      </span>
-                      <span className="text-[10px] text-[var(--color-muted)]">
-                        {course.installed
-                          ? t('questionsMeta', { n: course.questions })
-                          : t('quizCourseLocked')}
-                      </span>
-                    </button>
-                  )
-                })}
-              </div>
-            </section>
-          )}
+        {/* Unified Arena Lobby Card */}
+        <div className="my-auto py-2">
+          <div className="relative overflow-hidden rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface)] p-5 shadow-md text-center">
+            {/* Subtle atmospheric accent glow for dark and light modes */}
+            <div className="pointer-events-none absolute -top-12 left-1/2 -translate-x-1/2 size-40 rounded-full bg-[var(--color-accent)]/10 blur-2xl" aria-hidden="true" />
 
-          <div className="mx-auto flex size-18 items-center justify-center rounded-3xl bg-gradient-to-tr from-[var(--color-accent)] to-[var(--color-terracotta)] text-white shadow-lg shadow-[var(--color-accent)]/20 animate-bounce">
-            <Trophy className="size-9 stroke-[2.2]" aria-hidden="true" />
-          </div>
+            <div className="relative mx-auto mb-3 inline-flex items-center gap-1.5 rounded-full bg-[var(--color-accent-subtle)] border border-[var(--color-accent-border)] px-3 py-1 shadow-2xs">
+              <Trophy className="size-3.5 text-[var(--color-accent-strong)] stroke-[2.5]" aria-hidden="true" />
+              <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--color-accent-strong)] truncate max-w-[220px]">
+                {capsule.title}
+              </span>
+            </div>
 
-          <div>
-            <p className="text-xs font-extrabold uppercase tracking-widest text-[var(--color-terracotta)]">
-              {capsule.title}
-            </p>
-            <h1 className="mt-1 text-3xl font-black tracking-tight text-[var(--color-ink)]">
+            <h1 className="relative text-xl sm:text-2xl font-black tracking-tight text-[var(--color-ink)]">
               {t('quizTitle')}
             </h1>
-            <p className="mt-2 text-xs leading-relaxed text-[var(--color-muted)]">
+            <p className="relative mt-1.5 text-xs text-[var(--color-muted)] leading-relaxed max-w-[300px] mx-auto">
               {t('quizSubtitle', { count: bank.length })}
             </p>
-          </div>
-
-          {/* Rules & Game Stats pill */}
-          <div className="grid grid-cols-2 gap-2 text-left">
-            <div className="rounded-xl border border-[var(--color-line)] bg-[var(--color-surface)] p-3 shadow-xs">
-              <div className="flex items-center gap-1.5 font-bold text-sm text-[var(--color-ink)]">
-                <Timer className="size-4 text-[var(--color-accent)] stroke-[2.5]" aria-hidden="true" />
-                <span>{t('stat15s')}</span>
-              </div>
-              <p className="text-[11px] text-[var(--color-muted)]">{t('stat15sSub')}</p>
-            </div>
-            <div className="rounded-xl border border-[var(--color-line)] bg-[var(--color-surface)] p-3 shadow-xs">
-              <div className="flex items-center gap-1.5 font-bold text-sm text-[var(--color-ink)]">
-                <TrendingUp className="size-4 text-[var(--color-good)] stroke-[2.5]" aria-hidden="true" />
-                <span>{t('statAdaptive')}</span>
-              </div>
-              <p className="text-[11px] text-[var(--color-muted)]">{t('statAdaptiveSub')}</p>
-            </div>
           </div>
         </div>
 
         {/* Mode Select Buttons */}
-        <div className="space-y-3 pb-4">
+        <div className="space-y-2.5 pb-2">
           <button
             type="button"
             onClick={() => start(1)}
-            className="btn-press flex min-h-14 w-full items-center justify-between rounded-2xl bg-[var(--color-accent)] px-5 text-left font-bold text-[var(--color-on-accent)] shadow-md hover:bg-[var(--color-accent-strong)]"
+            className="btn-press flex min-h-12 w-full items-center justify-between rounded-xl bg-[var(--color-accent)] px-4 py-2 text-left font-bold text-[var(--color-on-accent)] shadow-md hover:bg-[var(--color-accent-strong)] transition-all"
           >
-            <div className="flex items-center gap-3">
-              <User className="size-5 stroke-[2.5]" aria-hidden="true" />
-              <div>
-                <p className="text-base font-extrabold">{t('playSolo')}</p>
-                <p className="text-xs font-medium text-blue-100">{t('playSoloSub')}</p>
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="flex size-8 items-center justify-center rounded-lg bg-white/20 text-white shrink-0">
+                <User className="size-4 stroke-[2.5]" aria-hidden="true" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-extrabold leading-tight">{t('playSolo')}</p>
+                <p className="text-[11px] font-medium text-blue-100 leading-tight mt-0.5 truncate">{t('playSoloSub')}</p>
               </div>
             </div>
-            <span className="text-sm font-bold">{t('startQuizCta')}</span>
+            <span className="text-xs font-bold shrink-0 pl-2">{t('startQuizCta')}</span>
           </button>
 
           <button
             type="button"
             onClick={() => start(2)}
-            className="btn-press flex min-h-14 w-full items-center justify-between rounded-2xl border-2 border-[var(--color-line)] bg-[var(--color-surface)] px-5 text-left font-bold text-[var(--color-ink)] shadow-sm hover:border-[var(--color-accent)]"
+            className="btn-press flex min-h-12 w-full items-center justify-between rounded-xl border border-[var(--color-line)] bg-[var(--color-surface)] px-4 py-2 text-left font-bold text-[var(--color-ink)] shadow-2xs hover:border-[var(--color-accent)] transition-all"
           >
-            <div className="flex items-center gap-3">
-              <Users className="size-5 text-[var(--color-accent)] stroke-[2.5]" aria-hidden="true" />
-              <div>
-                <p className="text-base font-extrabold">{t('playPass')}</p>
-                <p className="text-xs font-medium text-[var(--color-muted)]">{t('playPassSub')}</p>
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="flex size-8 items-center justify-center rounded-lg bg-[var(--color-accent-subtle)] text-[var(--color-accent)] shrink-0">
+                <Users className="size-4 text-[var(--color-accent)] stroke-[2.5]" aria-hidden="true" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-extrabold leading-tight">{t('playPass')}</p>
+                <p className="text-[11px] font-medium text-[var(--color-muted)] leading-tight mt-0.5 truncate">{t('playPassSub')}</p>
               </div>
             </div>
-            <span className="text-sm font-bold text-[var(--color-accent)]">{t('startQuizCta')}</span>
+            <span className="text-xs font-bold text-[var(--color-accent)] shrink-0 pl-2">{t('startQuizCta')}</span>
           </button>
         </div>
       </div>

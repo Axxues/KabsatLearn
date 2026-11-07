@@ -40,6 +40,24 @@ The failures most likely to bite a user, each pinned to a task below:
 
 Last updated 09:10, about 40 minutes into the build.
 
+### Course catalogue extension (2026-11-07, tasks 5–7)
+
+- Added capsules 103–106: digital literacy, financial planning, family
+  planning, and inventory management. All four are catalog-only and are not
+  seeded; Capsule 101 remains the only pre-installed course.
+- Added `app/src/data/catalogue.js` so `App.jsx`, the Hub, the quiz picker, and
+  the reader discover courses from one registry.
+- Competencies grew from four to seven: `digital_literacy`, `family_health`,
+  `business_operations` were added; the dashboard renders seven bars.
+- Tests: 134 passing in 22 files via `npx vitest run`. Oxlint and Vite build
+  exit 0.
+- APK rebuilt and copied to `pitch/kabsatlearn-debug.apk` (7,101,956 bytes).
+  Verified that its bundle contains all four new course titles.
+- Known limits: Kabsat AI still grounds on Capsule 101 only, and the family
+  planning capsule needs review by a licensed midwife or physician before
+  public deployment.
+
+
 | Task | Status | Commit | Time |
 |---|---|---|---|
 | 1 Shell, offline cache, banner | done | `fa8f322` | 08:47 |

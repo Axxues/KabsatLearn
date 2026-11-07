@@ -13,7 +13,7 @@ import Dashboard from './ui/Dashboard.jsx'
 import StoryReader from './ui/StoryReader.jsx'
 import AnimatedSuccessCheck from './ui/AnimatedSuccessCheck.jsx'
 import Profile from './ui/Profile.jsx'
-import { loadProfile, saveProfile } from './lib/profile.js'
+import { loadProfile } from './lib/profile.js'
 import {
   BookOpen,
   Trophy,

@@ -1,6 +1,8 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { masteryByCompetency, proposedRemediations } from '../lib/mastery.js'
 import { flush, listQueue, queueEvent, queueSize } from '../lib/telemetry.js'
+import { listCapsules } from '../lib/capsuleStore.js'
+import { CAPSULE_BY_ID } from '../data/catalogue.js'
 import { useI18n } from '../lib/i18n.jsx'
 import RollingNumber from './RollingNumber.jsx'
 import AnimatedSuccessCheck from './AnimatedSuccessCheck.jsx'
@@ -12,7 +14,6 @@ import {
   Check,
   TrendingUp,
   MapPin,
-  ShieldCheck,
 } from 'lucide-react'
 
 const BARANGAYS = [
@@ -68,27 +69,67 @@ function Bar({ label, value }) {
   )
 }
 
-export default function Dashboard() {
+export default function Dashboard({ capsules: propCapsules } = {}) {
   const { t } = useI18n()
   const [events, setEvents] = useState([])
   const [queued, setQueued] = useState(0)
+  const [installedCapsules, setInstalledCapsules] = useState([])
   const [status, setStatus] = useState(null)
   const [approved, setApproved] = useState([])
   const [busy, setBusy] = useState(false)
 
   const refresh = useCallback(async () => {
-    setEvents(await listQueue())
-    setQueued(await queueSize())
+    const [q, s, loaded] = await Promise.all([listQueue(), queueSize(), listCapsules()])
+    setEvents(q)
+    setQueued(s)
+    setInstalledCapsules(loaded)
   }, [])
 
   useEffect(() => {
-    refresh()
-  }, [refresh])
+    let active = true
+    Promise.all([listQueue(), queueSize(), listCapsules()]).then(([q, s, loaded]) => {
+      if (!active) return
+      setEvents(q)
+      setQueued(s)
+      setInstalledCapsules(loaded)
+    })
+    return () => {
+      active = false
+    }
+  }, [])
 
-  const mastery = masteryByCompetency(events)
-  const remediations = proposedRemediations(events).filter(
-    (row) => !approved.includes(row.competency),
+  const installedList =
+    installedCapsules.length > 0
+      ? installedCapsules
+      : (propCapsules || []).filter((c) => c.installed)
+
+  const activeCompetencies = useMemo(() => {
+    const set = new Set()
+    for (const c of installedList) {
+      const full = CAPSULE_BY_ID[c.id] || c
+      if (Array.isArray(full.competency)) {
+        full.competency.forEach((comp) => set.add(comp))
+      } else if (typeof full.competency === 'string') {
+        set.add(full.competency)
+      }
+      if (Array.isArray(full.questions)) {
+        full.questions.forEach((q) => {
+          if (q?.competency) set.add(q.competency)
+        })
+      }
+    }
+    return set
+  }, [installedList])
+
+  const mastery = masteryByCompetency(
+    events,
+    activeCompetencies
   )
+  const remediations = proposedRemediations(
+    events,
+    60,
+    activeCompetencies
+  ).filter((row) => !approved.includes(row.competency))
 
   const validScores = mastery.map((m) => m.mastery).filter((v) => v !== null)
   const avgMastery =
@@ -184,9 +225,15 @@ export default function Dashboard() {
           </h2>
         </div>
         <ul className="mt-1 space-y-2">
-          {mastery.map((row) => (
-            <Bar key={row.competency} label={row.label} value={row.mastery} />
-          ))}
+          {mastery.length === 0 ? (
+            <li className="rounded-xl border border-dashed border-[var(--color-line)] p-4 text-center text-xs text-[var(--color-muted)]">
+              {t('noDownloadedCourses')}
+            </li>
+          ) : (
+            mastery.map((row) => (
+              <Bar key={row.competency} label={row.label} value={row.mastery} />
+            ))
+          )}
         </ul>
       </section>
 
@@ -242,17 +289,13 @@ export default function Dashboard() {
 
       {/* Facilitator Remediation Gate */}
       <section aria-labelledby="remediation-heading">
-        <div className="flex items-center justify-between pb-2">
+        <div className="pb-2">
           <h2
             id="remediation-heading"
             className="text-xs font-bold uppercase tracking-wider text-[var(--color-muted)]"
           >
             {t('remediationHeading')}
           </h2>
-          <span className="inline-flex items-center gap-1 rounded-full bg-[var(--color-terracotta-subtle)] px-2 py-0.5 text-[10px] font-bold text-[var(--color-terracotta)]">
-            <ShieldCheck className="size-3 stroke-[2.5]" aria-hidden="true" />
-            {t('humanApprovalTag')}
-          </span>
         </div>
 
         {remediations.length === 0 ? (

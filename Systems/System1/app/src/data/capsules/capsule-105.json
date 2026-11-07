@@ -1,0 +1,301 @@
+{
+  "id": "capsule-105",
+  "version": 1,
+  "title": "Plano ng Pamilya",
+  "subtitle": "Family planning, birth spacing, at malusog na desisyon",
+  "persona": "magulang at mag-asawang pumipili ng paraan ng family planning",
+  "competency": ["family_health"],
+  "shared_by": "K-0001",
+  "share_count": 0,
+  "cards": [
+    {
+      "id": "c1",
+      "title": "Ano ang family planning?",
+      "body": "Ang family planning ay pagpapasya kung magkakaroon ng anak, kailan, at ilan. Kasama dito ang kalusugan ng ina, pag-unawa sa fertility, at pagpili ng contraception. Desisyon ito ng mag-asawa, may gabay ng health worker.",
+      "tip": "Hindi ito tungkol sa pagpigil lang; tungkol ito sa planong kaya ng pamilya."
+    },
+    {
+      "id": "c2",
+      "title": "Birth spacing",
+      "body": "Ang hindi bababa sa dalawang taon sa pagitan ng panganganak ay nagbibigay ng panahon sa ina para makapag-recover at nagpapababa ng panganib sa susunod na pagbubuntis. Tanungin ang midwife o doktor kung ano ang ligtas para sa inyong sitwasyon.",
+      "tip": "Tanungin ang midwife o doktor kung ano ang ligtas para sa inyo."
+    },
+    {
+      "id": "c3",
+      "title": "Mga paraan",
+      "body": "May natural na paraan gaya ng calendar, LAM, at BBT; barrier gaya ng condom; hormonal gaya ng pills, injectable, at implant; long-acting gaya ng IUD; at permanenteng paraan gaya ng BTL at vasectomy. Iba-iba ang bisa ng bawat isa, kaya piliin ito kasama ng health worker.",
+      "tip": "Walang isang paraan na tama sa lahat."
+    },
+    {
+      "id": "c4",
+      "title": "Condom lang ang proteksyon sa STI",
+      "body": "Ang hormonal na paraan, IUD, BTL, at vasectomy ay hindi nagpoprotekta laban sa HIV o ibang STI. Ang condom ang paraang nagpoprotekta rin laban sa mga ito kapag tama ang gamit.",
+      "tip": "Para sa STI, kailangan ng condom, hindi lang pills."
+    },
+    {
+      "id": "c5",
+      "title": "Saan makakakuha",
+      "body": "May family planning information at serbisyo sa barangay health center, RHU, at pampublikong ospital. Sinisiguro ng RA 10354 ang access sa impormasyon at serbisyo. Karaniwang libre o mura ito. Magtanong tungkol sa side effects at sa follow-up.",
+      "tip": "Libre o mura ang serbisyo sa health center. Magtanong nang tapat.",
+      "drill": {
+        "prompt": "I-tap ang lahat ng maling paniniwala.",
+        "segments": [
+          { "text": "Nakakabaog ang pills.", "flag": true },
+          { "text": "May butas ang condom kaya hindi safe.", "flag": true },
+          { "text": "Desisyon ito ng mag-asawa.", "flag": false },
+          { "text": "Pinabababa ng vasectomy ang libido.", "flag": true },
+          { "text": "Kumonsulta sa health worker.", "flag": false }
+        ],
+        "hint": "Tatlo ang maling paniniwala. Hindi permanente ang pagkabaog mula sa pills; epektibo ang condom kapag tama ang gamit; at hindi binababa ng vasectomy ang libido."
+      }
+    },
+    {
+      "id": "c6",
+      "title": "Pag-uusap sa pamilya",
+      "body": "Desisyon ng mag-asawa ang family planning, walang pilitan sa isa't isa. Mahalaga ang consent at respeto sa pinili ng kapareha. Confidential ang konsultasyon sa health worker. Magtanong hanggang malinaw ang napiling paraan.",
+      "tip": "Ang desisyon ay dapat boluntaryo at walang pilitan."
+    }
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "band": "foundational",
+      "stem": "Ano ang family planning?",
+      "options": [
+        "Pagbili ng gamot para sa sakit",
+        "Pagpapasya kung ilan at kailan ang anak, kasama ang kalusugan",
+        "Pag-away tungkol sa pera",
+        "Pag-iwas sa pagbisita sa health center"
+      ],
+      "answer": 1,
+      "competency": "family_health"
+    },
+    {
+      "id": "q2",
+      "band": "foundational",
+      "stem": "Bakit mahalaga ang birth spacing?",
+      "options": [
+        "Para mas mabilis ang susunod na anak",
+        "Para hindi na kailangan ng doktor",
+        "Para makapag-recover ang katawan ng ina",
+        "Para laging lalaki ang pamilya"
+      ],
+      "answer": 2,
+      "competency": "family_health"
+    },
+    {
+      "id": "q3",
+      "band": "foundational",
+      "stem": "Saan makakakuha ng family planning service?",
+      "options": [
+        "Sa barangay health center o RHU",
+        "Sa tindahan ng gamot lang",
+        "Sa social media",
+        "Sa kapitbahay na walang training"
+      ],
+      "answer": 0,
+      "competency": "family_health"
+    },
+    {
+      "id": "q4",
+      "band": "foundational",
+      "stem": "Alin ang nagpoprotekta sa STI?",
+      "options": [
+        "Pills",
+        "IUD",
+        "Vasectomy",
+        "Condom"
+      ],
+      "answer": 3,
+      "competency": "family_health"
+    },
+    {
+      "id": "q5",
+      "band": "core",
+      "stem": "Ano ang kailangan para mabisang LAM?",
+      "options": [
+        "Formula feeding at regular na regla",
+        "Exclusive breastfeeding, walang regla, at wala pang 6 na buwan",
+        "Pag-inom ng pills araw-araw",
+        "Pag-iwas sa pagbisita sa midwife"
+      ],
+      "answer": 1,
+      "competency": "family_health"
+    },
+    {
+      "id": "q6",
+      "band": "core",
+      "stem": "Ano ang tama tungkol sa vasectomy?",
+      "options": [
+        "Pansamantala lang at dapat ulitin taun-taon",
+        "Para sa babae at nakakaapekto sa regla",
+        "Permanenteng paraan para sa lalaki at hindi nakakaapekto sa libido",
+        "Nakakaiwas din sa STI"
+      ],
+      "answer": 2,
+      "competency": "family_health"
+    },
+    {
+      "id": "q7",
+      "band": "core",
+      "stem": "Sino ang dapat kasama sa desisyon?",
+      "options": [
+        "Mag-asawa, nang may respeto at walang pilitan",
+        "Ang lalaki lang",
+        "Ang mga kapitbahay",
+        "Ang nagbebenta ng gamot"
+      ],
+      "answer": 0,
+      "competency": "family_health"
+    },
+    {
+      "id": "q8",
+      "band": "stretch",
+      "stem": "May nagsabing nakakabaog ang pills. Totoo ba?",
+      "options": [
+        "Oo, permanente ito",
+        "Hindi; karaniwang bumabalik ang fertility kapag tumigil, kaya konsultahin ang health worker",
+        "Oo, pero ligtas naman",
+        "Hindi, pero hindi na kailangan ng health worker"
+      ],
+      "answer": 1,
+      "competency": "family_health"
+    },
+    {
+      "id": "q9",
+      "band": "stretch",
+      "stem": "May side effect ka sa napiling paraan. Ano ang tamang gawin?",
+      "options": [
+        "Itigil agad at huwag sabihin sa iba",
+        "Uminom ng gamot ng kapitbahay",
+        "Bumalik sa health worker; huwag itigil nang basta at huwag mag-self-medicate",
+        "Maghintay ng isang taon bago magsabi"
+      ],
+      "answer": 2,
+      "competency": "family_health"
+    },
+    {
+      "id": "q10",
+      "band": "stretch",
+      "stem": "Alin ang permanenteng paraan?",
+      "options": [
+        "Pills at condom",
+        "Calendar at BBT",
+        "Injectable at implant",
+        "BTL at vasectomy"
+      ],
+      "answer": 3,
+      "competency": "family_health"
+    }
+  ],
+  "chunks": [
+    {
+      "id": "k1",
+      "concept": "What family planning is",
+      "competency": "family_health",
+      "difficulty": "foundational",
+      "text": "Ang family planning ay pagpapasya kung magkakaroon ng anak, kailan, at ilan, kasama ang kalusugan at pag-unawa sa fertility.",
+      "keywords": ["family planning", "anak", "kailan", "kalusugan", "fertility"],
+      "source_id": "c1"
+    },
+    {
+      "id": "k2",
+      "concept": "Why it matters",
+      "competency": "family_health",
+      "difficulty": "foundational",
+      "text": "Nakakatulong ang plano para maalagaan ng magulang ang mga anak at mabawasan ang hindi planadong pagbubuntis.",
+      "keywords": ["plano", "magulang", "anak", "pagbubuntis", "alaga"],
+      "source_id": "c1"
+    },
+    {
+      "id": "k3",
+      "concept": "Birth spacing",
+      "competency": "family_health",
+      "difficulty": "foundational",
+      "text": "Hindi bababa sa dalawang taon sa pagitan ng panganganak ang tumutulong sa ina na makapag-recover. Tanungin ang health worker.",
+      "keywords": ["birth spacing", "dalawang taon", "recover", "ina", "health worker"],
+      "source_id": "c2"
+    },
+    {
+      "id": "k4",
+      "concept": "Natural methods",
+      "competency": "family_health",
+      "difficulty": "core",
+      "text": "Ang calendar, LAM, at BBT ay natural na paraan na kailangan ng tamang gamit at pakikipagtulungan ng kapareha. May mahigpit na kondisyon ang LAM.",
+      "keywords": ["calendar", "lam", "bbt", "natural", "tamang gamit"],
+      "source_id": "c3"
+    },
+    {
+      "id": "k5",
+      "concept": "LAM conditions",
+      "competency": "family_health",
+      "difficulty": "core",
+      "text": "Mabisa ang LAM kung exclusive breastfeeding, walang regla, at wala pang anim na buwan ang sanggol.",
+      "keywords": ["lam", "breastfeeding", "regla", "anim na buwan", "sanggol"],
+      "source_id": "c3"
+    },
+    {
+      "id": "k6",
+      "concept": "Condoms and STIs",
+      "competency": "family_health",
+      "difficulty": "foundational",
+      "text": "Ang condom ang paraang nagpoprotekta rin laban sa HIV at ibang STI kapag tama ang gamit.",
+      "keywords": ["condom", "sti", "hiv", "proteksyon", "tamang gamit"],
+      "source_id": "c4"
+    },
+    {
+      "id": "k7",
+      "concept": "Hormonal methods",
+      "competency": "family_health",
+      "difficulty": "core",
+      "text": "Ang pills, injectable, at implant ay mabisa kapag tama ang gamit. Iba-iba ang side effects sa bawat tao.",
+      "keywords": ["pills", "injectable", "implant", "hormonal", "side effects"],
+      "source_id": "c3"
+    },
+    {
+      "id": "k8",
+      "concept": "Long-acting and permanent",
+      "competency": "family_health",
+      "difficulty": "core",
+      "text": "Ang IUD ay tumatagal ng maraming taon. Ang BTL at vasectomy ay permanente.",
+      "keywords": ["iud", "btl", "vasectomy", "permanente", "long-acting"],
+      "source_id": "c3"
+    },
+    {
+      "id": "k9",
+      "concept": "Where to get services",
+      "competency": "family_health",
+      "difficulty": "foundational",
+      "text": "May impormasyon at serbisyo sa barangay health center, RHU, at pampublikong ospital.",
+      "keywords": ["health center", "rhu", "ospital", "serbisyo", "impormasyon"],
+      "source_id": "c5"
+    },
+    {
+      "id": "k10",
+      "concept": "RA 10354",
+      "competency": "family_health",
+      "difficulty": "core",
+      "text": "Sinisiguro ng Responsible Parenthood and Reproductive Health Act ang access sa family planning information at serbisyo.",
+      "keywords": ["ra 10354", "batas", "access", "serbisyo", "impormasyon"],
+      "source_id": "c5"
+    },
+    {
+      "id": "k11",
+      "concept": "Myths",
+      "competency": "family_health",
+      "difficulty": "stretch",
+      "text": "Hindi permanente ang pagkabaog mula sa pills, mabisa ang condom kapag tama ang gamit, at hindi binababa ng vasectomy ang libido.",
+      "keywords": ["mito", "pills", "condom", "vasectomy", "libido"],
+      "source_id": "c5"
+    },
+    {
+      "id": "k12",
+      "concept": "Consent and follow-up",
+      "competency": "family_health",
+      "difficulty": "core",
+      "text": "Boluntaryo ang desisyon, iginagalang ang mag-asawa, at iniuulat sa health worker ang side effects.",
+      "keywords": ["consent", "boluntaryo", "mag-asawa", "side effects", "follow-up"],
+      "source_id": "c6"
+    }
+  ]
+}

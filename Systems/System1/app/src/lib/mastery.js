@@ -1,7 +1,7 @@
 import { COMPETENCIES, COMPETENCY_LABELS } from './schema.js'
 
 /** Roll answer events up into one mastery figure per competency. */
-export function masteryByCompetency(events) {
+export function masteryByCompetency(events, activeCompetencies = null) {
   const buckets = new Map()
 
   for (const event of events) {
@@ -12,7 +12,11 @@ export function masteryByCompetency(events) {
     buckets.set(event.competency, bucket)
   }
 
-  return COMPETENCIES.map((competency) => {
+  const list = activeCompetencies
+    ? COMPETENCIES.filter((c) => activeCompetencies.has(c))
+    : COMPETENCIES
+
+  return list.map((competency) => {
     const bucket = buckets.get(competency) ?? { attempts: 0, correct: 0 }
     return {
       competency,
@@ -25,8 +29,8 @@ export function masteryByCompetency(events) {
 }
 
 /** Competencies below the line, weakest first. These are what a facilitator acts on. */
-export function proposedRemediations(events, threshold = 60) {
-  return masteryByCompetency(events)
+export function proposedRemediations(events, threshold = 60, activeCompetencies = null) {
+  return masteryByCompetency(events, activeCompetencies)
     .filter((row) => row.mastery !== null && row.mastery < threshold)
     .sort((a, b) => a.mastery - b.mastery)
     .map((row) => ({

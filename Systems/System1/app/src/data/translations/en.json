@@ -26,5 +26,61 @@
     "k10": "In an online interview, ask about scope, hours, and payment. Be careful if they refuse to answer.",
     "k11": "If an employer scams you, report and block them, and screenshot the evidence. Do not pay more to recover what you lost.",
     "k12": "For your first client, start with a small task and a clear deadline. Good communication matters more than a fancy portfolio."
+  },
+  "capsule-103": {
+    "k1": "Digital literacy is the ability to find, check, and use information and apps safely. It is not measured by the price of your phone.",
+    "k2": "When searching, use specific keywords and add the place or the year. Open two results and compare them before believing either one.",
+    "k3": "Check who wrote a post and when it was published. Cross-check a second trustworthy source, and be wary of shocking posts and AI-generated images.",
+    "k4": "Install apps from Google Play only. A simple app should not ask for SMS, contacts, or your ID.",
+    "k5": "Permissions should match what the app does. Refuse access it does not need and uninstall apps you no longer use.",
+    "k6": "Use a long passphrase that you do not reuse on any other account, and never share it with anyone.",
+    "k7": "Two-step verification adds a second code or approval that protects the account even if the password leaks.",
+    "k8": "A signed-in Google account backs up contacts and photos. Keep recovery codes offline, outside the phone.",
+    "k9": "Delete unused media, install system updates, and avoid cleaner apps that promise speed.",
+    "k10": "Look for unnatural details in an image and find the original source before believing or sharing it.",
+    "k11": "A screenshot of your ID can be used to open accounts in your name. Blur the number and never post it publicly.",
+    "k12": "Download lessons on Wi-Fi and use them offline. Limit video streaming when you are on mobile data."
+  },
+  "capsule-104": {
+    "k1": "Track every expense for 30 days, including the small ones, so you can see where the money really goes.",
+    "k2": "Needs come first. Wants are optional and are the first thing to cut when income is short.",
+    "k3": "The 50/30/20 split is a guide for needs, wants, and savings, not a rule that fits every income.",
+    "k4": "Divide your cash into labeled envelopes so each category has a hard limit.",
+    "k5": "Set savings aside before you spend, even a small amount, as long as it is regular. Keep it in a separate wallet or container.",
+    "k6": "Target three to six months of needs. Start with one week, and keep the fund separate but easy to reach.",
+    "k7": "Compare the total repayment, not just the weekly installment. Informal 5-6 lending is expensive and the debt grows fast.",
+    "k8": "Before borrowing, write down the amount, the interest, the due date, and the payment schedule. Check that your income can carry the monthly payment.",
+    "k9": "Guaranteed high returns, urgency, and referral bonuses are red flags. A legitimate investment carries risk and paperwork.",
+    "k10": "Check an offer against the SEC list of registered entities before paying. Registration is not a promise of profit, but it is a sign of a legitimate company.",
+    "k11": "Save a little each month for known future costs such as school fees and Christmas, so they do not become debt.",
+    "k12": "Review the budget every month and adjust the categories when they do not fit. Do not throw the plan away and start over."
+  },
+  "capsule-105": {
+    "k1": "Family planning is deciding whether to have a child, when, and how many, including health and fertility awareness.",
+    "k2": "A plan helps parents care for their children and reduces unplanned pregnancies.",
+    "k3": "At least two years between births helps the mother recover. Ask a health worker.",
+    "k4": "The calendar, LAM, and BBT are natural methods that need correct use and a partner's cooperation. LAM has strict conditions.",
+    "k5": "LAM works only with exclusive breastfeeding, no period, and a baby under six months.",
+    "k6": "Condoms are the method that also protects against HIV and other STIs when used correctly.",
+    "k7": "Pills, injectables, and implants are effective when used correctly. Side effects vary from person to person.",
+    "k8": "An IUD lasts for years. BTL and vasectomy are permanent.",
+    "k9": "Barangay health centers, RHUs, and public hospitals provide information and services.",
+    "k10": "The Responsible Parenthood and Reproductive Health Act guarantees access to family planning information and services.",
+    "k11": "Pills do not cause permanent infertility, condoms are effective with correct use, and vasectomy does not lower libido.",
+    "k12": "Decisions are voluntary, both partners are respected, and side effects are reported to a health worker."
+  },
+  "capsule-106": {
+    "k1": "Inventory is a record of stock, quantity, and value. It shows what sells and what is missing.",
+    "k2": "Write the item, unit cost, selling price, stock in, stock out, balance, and expiry on the stock card.",
+    "k3": "Record every stock movement the same day, even small withdrawals.",
+    "k4": "The reorder point is average daily sales times lead time, plus safety stock.",
+    "k5": "The extra stock you keep covers delivery delays and sudden demand.",
+    "k6": "Sell older stock first, check dates weekly, and pull out expired items.",
+    "k7": "Breakage, spoilage, and missing items are losses and must be recorded right away.",
+    "k8": "Gross profit is sales minus the cost of the goods sold.",
+    "k9": "Keep store cash apart from household cash and record the owner's withdrawals.",
+    "k10": "Bundle, discount, or stop reordering items that do not sell.",
+    "k11": "Know the supplier's delivery days, minimum order, and credit terms before ordering.",
+    "k12": "Review a month of sales to decide what to reorder and what to drop."
   }
 }

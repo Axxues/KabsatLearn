@@ -41,6 +41,20 @@ describe('app header', () => {
     expect(header).toContain('alt="KabsatLearn logo"')
     expect(header).toMatch(/aria-label="Switch to dark mode"/)
   })
+
+  test('renders action buttons in order: Language toggle, Theme toggle, and Profile button as rightmost', () => {
+    const header = renderHeader()
+    const langIndex = header.indexOf('aria-label="Switch language to')
+    const themeIndex = header.indexOf('aria-label="Switch to dark mode"')
+    const profileIndex = header.indexOf('aria-label="Profile"')
+
+    expect(langIndex).toBeGreaterThan(-1)
+    expect(themeIndex).toBeGreaterThan(-1)
+    expect(profileIndex).toBeGreaterThan(-1)
+
+    expect(langIndex).toBeLessThan(themeIndex)
+    expect(themeIndex).toBeLessThan(profileIndex)
+  })
 })
 
 describe('theme toggle', () => {
@@ -133,6 +147,7 @@ describe('bottom navigation', () => {
     expect(form).not.toBeNull()
     expect(form.className).not.toContain('sticky bottom-0')
     expect(form.className).toContain('shrink-0')
+    expect(form.className).toContain('pb-7')
 
     const kabsatAiRoot = form.parentElement
     expect(kabsatAiRoot.className).toContain('flex-1')

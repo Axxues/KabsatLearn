@@ -54,7 +54,7 @@ describe('quiz course picker', () => {
     // App loads installed capsules from Dexie asynchronously; the hub swaps its
     // loading state for the greeting once refresh() settles.
     for (let attempt = 0; attempt < 100; attempt += 1) {
-      if (normalize(container.textContent).includes('Naimbag nga aldaw')) return
+      if (normalize(container.textContent).includes('Kabsat!')) return
       await act(async () => {
         await new Promise((resolve) => setTimeout(resolve, 10))
       })
@@ -74,12 +74,6 @@ describe('quiz course picker', () => {
     )
   }
 
-  function buttonContaining(text) {
-    return [...container.querySelectorAll('button')].find((button) =>
-      normalize(button.textContent).includes(text)
-    )
-  }
-
   function normalize(text) {
     return text.replace(/\s+/g, ' ').trim()
   }
@@ -88,24 +82,42 @@ describe('quiz course picker', () => {
     click(buttonStartingWith('Quiz'))
   }
 
-  test('lists all courses and marks an uninstalled course locked', async () => {
+  function openPicker() {
+    const trigger = container.querySelector('button[aria-haspopup="listbox"]')
+    if (trigger && trigger.getAttribute('aria-expanded') !== 'true') {
+      click(trigger)
+    }
+  }
+
+  function courseOption(text) {
+    return [...container.querySelectorAll('[role="option"]')].find((el) =>
+      normalize(el.textContent).includes(text)
+    )
+  }
+
+  test('lists only installed courses in dropdown and does not show uninstalled courses', async () => {
     await removeCapsule('capsule-102')
     await mount()
     openQuiz()
 
+    const trigger = container.querySelector('button[aria-haspopup="listbox"]')
+    expect(trigger).toBeTruthy()
+    expect(trigger.getAttribute('aria-expanded')).toBe('false')
+    expect(trigger.textContent).toContain('Ligtas na Digital Wallet')
+
+    openPicker()
+    expect(trigger.getAttribute('aria-expanded')).toBe('true')
+
     expect(container.textContent).toContain('Pumili ng kurso')
     expect(container.textContent).toContain('Ligtas na Digital Wallet')
-    expect(container.textContent).toContain('Unang Hakbang sa Online Trabaho')
+    expect(container.textContent).not.toContain('Unang Hakbang sa Online Trabaho')
 
-    const card101 = buttonContaining('Ligtas na Digital Wallet')
+    const card101 = courseOption('Ligtas na Digital Wallet')
     expect(card101).toBeTruthy()
     expect(card101.getAttribute('aria-pressed')).toBe('true')
 
-    const lockedCard = buttonContaining('Unang Hakbang sa Online Trabaho')
-    expect(lockedCard).toBeTruthy()
-    expect(lockedCard.textContent).toContain('I-download sa Aralin')
-    expect(lockedCard.querySelector('svg.lucide-lock')).not.toBeNull()
-    expect(lockedCard.hasAttribute('disabled')).toBe(false)
+    const uninstalledCard = courseOption('Unang Hakbang sa Online Trabaho')
+    expect(uninstalledCard).toBeUndefined()
   })
 
   test('starts the course that is selected', async () => {
@@ -119,19 +131,21 @@ describe('quiz course picker', () => {
     expect(container.textContent).not.toContain('Pumili ng kurso')
   })
 
-  test('installing a course unlocks it and its quiz uses its own question bank', async () => {
+  test('installing a course makes it show up and its quiz uses its own question bank', async () => {
     await seedCapsule(clone(capsule102))
     await mount()
     openQuiz()
 
-    const card102 = buttonContaining('Unang Hakbang sa Online Trabaho')
-    expect(card102.textContent).not.toContain('I-download sa Aralin')
+    openPicker()
+    const card102 = courseOption('Unang Hakbang sa Online Trabaho')
+    expect(card102).toBeTruthy()
     click(card102)
 
-    expect(buttonContaining('Unang Hakbang sa Online Trabaho').getAttribute('aria-pressed')).toBe(
+    openPicker()
+    expect(courseOption('Unang Hakbang sa Online Trabaho').getAttribute('aria-pressed')).toBe(
       'true'
     )
-    expect(buttonContaining('Ligtas na Digital Wallet').getAttribute('aria-pressed')).toBe('false')
+    expect(courseOption('Ligtas na Digital Wallet').getAttribute('aria-pressed')).toBe('false')
 
     click(buttonStartingWith('Isahang Laro'))
 
@@ -145,10 +159,14 @@ describe('quiz course picker', () => {
     await mount()
     openQuiz()
 
-    expect(buttonContaining('Unang Hakbang sa Online Trabaho').getAttribute('aria-pressed')).toBe(
+    const trigger = container.querySelector('button[aria-haspopup="listbox"]')
+    expect(trigger.textContent).toContain('Unang Hakbang sa Online Trabaho')
+
+    openPicker()
+    expect(courseOption('Unang Hakbang sa Online Trabaho').getAttribute('aria-pressed')).toBe(
       'true'
     )
-    expect(buttonContaining('Ligtas na Digital Wallet').getAttribute('aria-pressed')).toBe('false')
+    expect(courseOption('Ligtas na Digital Wallet').getAttribute('aria-pressed')).toBe('false')
   })
 
   test('falls back to the first installed course without overwriting a stale saved id', async () => {
@@ -157,22 +175,108 @@ describe('quiz course picker', () => {
     await mount()
     openQuiz()
 
-    expect(buttonContaining('Ligtas na Digital Wallet').getAttribute('aria-pressed')).toBe('true')
+    const trigger = container.querySelector('button[aria-haspopup="listbox"]')
+    expect(trigger.textContent).toContain('Ligtas na Digital Wallet')
+
+    openPicker()
+    expect(courseOption('Ligtas na Digital Wallet').getAttribute('aria-pressed')).toBe('true')
     expect(localStorage.getItem(STORAGE_KEY)).toBe('capsule-102')
   })
 
-  test('a locked course routes to Aralin and keeps the saved choice', async () => {
+  test('uninstalled courses never show up in the dropdown and no lock icons appear', async () => {
     await removeCapsule('capsule-102')
     await mount()
     openQuiz()
 
-    const quizIntro = container.textContent
-    expect(quizIntro).toContain('Quiz Arena')
+    openPicker()
+    const options = container.querySelectorAll('[role="option"]')
+    expect(options.length).toBe(1)
+    expect(options[0].textContent).toContain('Ligtas na Digital Wallet')
+    expect(container.querySelector('[role="listbox"] svg.lucide-lock')).toBeNull()
+  })
 
-    click(buttonContaining('Unang Hakbang sa Online Trabaho'))
+  test('toggles dropdown open and closed on trigger click', async () => {
+    await mount()
+    openQuiz()
 
-    expect(container.textContent).not.toContain('Quiz Arena')
-    expect(container.textContent).toContain('Naimbag nga aldaw')
-    expect(localStorage.getItem(STORAGE_KEY)).toBeNull()
+    const trigger = container.querySelector('button[aria-haspopup="listbox"]')
+    expect(trigger.getAttribute('aria-expanded')).toBe('false')
+    expect(container.querySelector('[role="listbox"]')).toBeNull()
+
+    click(trigger)
+    expect(trigger.getAttribute('aria-expanded')).toBe('true')
+    expect(container.querySelector('[role="listbox"]')).not.toBeNull()
+
+    click(trigger)
+    expect(trigger.getAttribute('aria-expanded')).toBe('false')
+    expect(container.querySelector('[role="listbox"]')).toBeNull()
+  })
+
+  test('picker does not render Active or Ready badges or questions meta subtitle, and pluralizes course count in Filipino', async () => {
+    await seedCapsule(clone(capsule102))
+    await mount()
+    openQuiz()
+
+    const trigger = container.querySelector('button[aria-haspopup="listbox"]')
+    expect(trigger.textContent).not.toMatch(/Aktibo|Active/)
+
+    openPicker()
+    expect(trigger.textContent).not.toMatch(/Aktibo|Active/)
+
+    const options = container.querySelectorAll('[role="option"]')
+    expect(options.length).toBe(2)
+    for (const opt of options) {
+      expect(opt.textContent).not.toMatch(/Aktibo|Active|Handa|Ready/)
+      expect(opt.textContent).not.toMatch(/tanong|questions/)
+    }
+
+    const headerBadge = container.querySelector('[role="listbox"] > div:first-child span.rounded-full')
+    expect(headerBadge.textContent.trim()).toBe('2 mga kurso')
+  })
+
+  test('picker header count tag renders singular "kurso" when only 1 course installed', async () => {
+    await removeCapsule('capsule-102')
+    await mount()
+    openQuiz()
+    openPicker()
+
+    const trigger = container.querySelector('button[aria-haspopup="listbox"]')
+    expect(trigger.textContent).not.toMatch(/Aktibo|Active/)
+
+    const options = container.querySelectorAll('[role="option"]')
+    expect(options.length).toBe(1)
+    expect(options[0].textContent).not.toMatch(/Aktibo|Active|Handa|Ready/)
+    expect(options[0].textContent).not.toMatch(/tanong|questions/)
+
+    const headerBadge = container.querySelector('[role="listbox"] > div:first-child span.rounded-full')
+    expect(headerBadge.textContent.trim()).toBe('1 kurso')
+  })
+
+  test('picker header count tag renders singular "1 course" and plural "2 courses" in English', async () => {
+    localStorage.setItem('kabsat_lang', 'en')
+    await removeCapsule('capsule-102')
+    await mount()
+    openQuiz()
+    openPicker()
+
+    const trigger = container.querySelector('button[aria-haspopup="listbox"]')
+    expect(trigger.textContent).not.toMatch(/Aktibo|Active/)
+
+    let headerBadge = container.querySelector('[role="listbox"] > div:first-child span.rounded-full')
+    expect(headerBadge.textContent.trim()).toBe('1 course')
+
+    // Now re-mount with second capsule installed
+    act(() => {
+      root.unmount()
+    })
+    container.innerHTML = ''
+    await seedCapsule(clone(capsule102))
+    localStorage.setItem('kabsat_lang', 'en')
+    await mount()
+    openQuiz()
+    openPicker()
+
+    headerBadge = container.querySelector('[role="listbox"] > div:first-child span.rounded-full')
+    expect(headerBadge.textContent.trim()).toBe('2 courses')
   })
 })

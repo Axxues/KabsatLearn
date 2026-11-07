@@ -82,6 +82,14 @@ describe('QuizArena two-player header', () => {
     expect(header.querySelector('svg.lucide-zap')).toBeNull()
   })
 
+  test('intro card does not render 15 seconds or adaptive stat badges', () => {
+    expect(container.textContent).not.toContain('15 Seconds')
+    expect(container.textContent).not.toContain('15 Segundo')
+    expect(container.textContent).not.toContain('Adaptive')
+    expect(container.querySelector('svg.lucide-timer')).toBeNull()
+    expect(container.querySelector('svg.lucide-trending-up')).toBeNull()
+  })
+
   test('turn label has a leading Users icon and no emoji', () => {
     const passButton = [...container.querySelectorAll('button')].find((button) =>
       button.textContent.replace(/\s+/g, ' ').trim().startsWith('Pass and Play')
@@ -138,5 +146,14 @@ describe('QuizArena two-player header', () => {
     expect(text).toBe('2x Streak (+Puntos!)')
     expect(text).not.toMatch(EMOJI)
     expect(streak.parentElement.querySelector('svg.lucide-flame')).not.toBeNull()
+  })
+
+  test('lobby card uses elevated surface styling and trophy badge', () => {
+    const trophyIcon = container.querySelector('svg.lucide-trophy')
+    expect(trophyIcon).not.toBeNull()
+
+    const badge = trophyIcon.parentElement
+    expect(badge.className).toContain('bg-[var(--color-accent-subtle)]')
+    expect(badge.className).toContain('border-[var(--color-accent-border)]')
   })
 })

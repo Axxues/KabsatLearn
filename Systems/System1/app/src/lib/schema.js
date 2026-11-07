@@ -7,6 +7,9 @@ export const COMPETENCIES = [
   'financial_literacy',
   'digital_livelihood',
   'disaster_ready',
+  'digital_literacy',
+  'family_health',
+  'business_operations',
 ]
 
 export const COMPETENCY_LABELS = {
@@ -14,6 +17,9 @@ export const COMPETENCY_LABELS = {
   financial_literacy: 'Financial literacy',
   digital_livelihood: 'Digital livelihood',
   disaster_ready: 'Disaster readiness',
+  digital_literacy: 'Digital literacy',
+  family_health: 'Family planning',
+  business_operations: 'Business operations',
 }
 
 /** Sort keys so two equal payloads always hash the same. */

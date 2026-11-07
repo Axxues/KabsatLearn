@@ -94,6 +94,15 @@ describe('CourseHub capsule cards and counters', () => {
     })
   }
 
+  async function expandAvailable() {
+    const section = container.querySelector('section[aria-labelledby="available-heading"]')
+    const toggle = section.querySelector('h2 button')
+    await act(async () => {
+      toggle.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    })
+    return section
+  }
+
   test('installed card does NOT render "Ready", "Handa", or Check icon', async () => {
     await renderComponent(oneInstalledOneAvailable, 'en')
 
@@ -108,10 +117,43 @@ describe('CourseHub capsule cards and counters', () => {
   test('available card renders its KB size', async () => {
     await renderComponent(oneInstalledOneAvailable, 'en')
 
-    const availableSection = container.querySelector('section[aria-labelledby="available-heading"]')
+    const availableSection = await expandAvailable()
     const availableCard = availableSection.querySelector('li')
 
     expect(availableCard.textContent).toContain('128 KB')
+  })
+
+  test('available section is collapsed by default', async () => {
+    await renderComponent(oneInstalledOneAvailable, 'en')
+
+    const section = container.querySelector('section[aria-labelledby="available-heading"]')
+    const toggle = section.querySelector('h2 button')
+    const list = section.querySelector('#available-course-list')
+
+    expect(toggle.getAttribute('aria-expanded')).toBe('false')
+    expect(list.hidden).toBe(true)
+    expect(toggle.textContent).toContain('Available to download when online')
+    expect(toggle.textContent).toContain('1 available')
+  })
+
+  test('available section expands and collapses on header click', async () => {
+    await renderComponent(oneInstalledOneAvailable, 'en')
+
+    const section = container.querySelector('section[aria-labelledby="available-heading"]')
+    const toggle = section.querySelector('h2 button')
+    const list = section.querySelector('#available-course-list')
+
+    await act(async () => {
+      toggle.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    })
+    expect(toggle.getAttribute('aria-expanded')).toBe('true')
+    expect(list.hidden).toBe(false)
+
+    await act(async () => {
+      toggle.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    })
+    expect(toggle.getAttribute('aria-expanded')).toBe('false')
+    expect(list.hidden).toBe(true)
   })
 
   test('installed counter displays "1 course" in English when 1 capsule is installed', async () => {
@@ -148,5 +190,150 @@ describe('CourseHub capsule cards and counters', () => {
     const counterBadge = installedSection.querySelector('#installed-heading + span')
 
     expect(counterBadge.textContent.trim()).toBe('2 mga kurso')
+  })
+
+  test('card category tag and code come from the capsule when it carries a tone', async () => {
+    await renderComponent(
+      [
+        {
+          id: 'capsule-105',
+          title: 'Plano ng Pamilya',
+          subtitle: 'Pamilya at kalusugan',
+          installed: false,
+          kb: 64,
+          cards: 6,
+          questions: 10,
+          category: 'Pamilya',
+          code: 'KABSAT-105',
+          tone: 'family',
+        },
+      ],
+      'en'
+    )
+
+    const availableSection = await expandAvailable()
+    const card = availableSection.querySelector('li')
+    const tag = card.querySelector('span')
+    const tagText = tag.textContent.replace(/\s+/g, ' ').trim()
+
+    expect(tagText).toContain('Pamilya')
+    expect(tagText).toContain('KABSAT-105')
+    expect(card.querySelector('svg.lucide-heart')).not.toBeNull()
+  })
+
+  test('greeting card does not render small subtitle text below the welcome title in English', async () => {
+    await renderComponent(oneInstalledOneAvailable, 'en')
+
+    expect(container.textContent).toContain('Welcome, Kabsat!')
+    expect(container.textContent).not.toContain('Micro-learning crafted for you')
+  })
+
+  test('greeting card does not render small subtitle text below the welcome title in Filipino', async () => {
+    await renderComponent(oneInstalledOneAvailable, 'fil')
+
+    expect(container.textContent).toContain('Naimbag nga aldaw, Kabsat!')
+    expect(container.textContent).not.toContain('Maikling aralin na angkop para sa iyo')
+  })
+
+  test('download button uses high-contrast text and does not use variable ink color on white background', async () => {
+    await renderComponent(oneInstalledOneAvailable, 'en')
+
+    const availableSection = await expandAvailable()
+    const downloadButton = availableSection.querySelector('li button')
+
+    expect(downloadButton).not.toBeNull()
+    expect(downloadButton.className).toContain('text-slate-900')
+    expect(downloadButton.className).not.toContain('text-[var(--color-ink)]')
+  })
+
+  test('clicking an available course card opens download confirmation modal, cancel dismisses it', async () => {
+    let downloadedId = null
+    localStorage.setItem('kabsat_lang', 'en')
+    await act(async () => {
+      root.render(
+        <I18nProvider>
+          <CourseHub
+            capsules={oneInstalledOneAvailable}
+            onOpen={() => {}}
+            onDownload={(id) => {
+              downloadedId = id
+            }}
+            onShare={() => {}}
+            onImport={() => {}}
+          />
+        </I18nProvider>
+      )
+    })
+
+    const availableSection = await expandAvailable()
+    const downloadButton = availableSection.querySelector('li button')
+
+    // Click download button
+    await act(async () => {
+      downloadButton.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    })
+
+    // Confirmation modal should be open
+    const modal = container.querySelector('[aria-labelledby="confirm-download-modal-title"]')
+    expect(modal).not.toBeNull()
+    expect(modal.textContent).toContain('Download Course')
+    expect(modal.textContent).toContain('Hanapbuhay Skills')
+    expect(modal.textContent).toContain('128 KB')
+    expect(downloadedId).toBeNull()
+
+    // Click Cancel button in modal
+    const cancelBtn = [...modal.querySelectorAll('button')].find(
+      (b) => b.textContent.trim() === 'Cancel'
+    )
+    expect(cancelBtn).toBeTruthy()
+    await act(async () => {
+      cancelBtn.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    })
+
+    // Modal is dismissed, onDownload was not called
+    expect(container.querySelector('[aria-labelledby="confirm-download-modal-title"]')).toBeNull()
+    expect(downloadedId).toBeNull()
+  })
+
+  test('confirming download in modal triggers onDownload with capsule id', async () => {
+    let downloadedId = null
+    localStorage.setItem('kabsat_lang', 'en')
+    await act(async () => {
+      root.render(
+        <I18nProvider>
+          <CourseHub
+            capsules={oneInstalledOneAvailable}
+            onOpen={() => {}}
+            onDownload={(id) => {
+              downloadedId = id
+            }}
+            onShare={() => {}}
+            onImport={() => {}}
+          />
+        </I18nProvider>
+      )
+    })
+
+    const availableSection = await expandAvailable()
+    const downloadButton = availableSection.querySelector('li button')
+
+    await act(async () => {
+      downloadButton.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    })
+
+    const modal = container.querySelector('[aria-labelledby="confirm-download-modal-title"]')
+    expect(modal).not.toBeNull()
+
+    const confirmBtn = [...modal.querySelectorAll('button')].find((b) =>
+      b.textContent.includes('Download Now')
+    )
+    expect(confirmBtn).toBeTruthy()
+
+    await act(async () => {
+      confirmBtn.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    })
+
+    expect(downloadedId).toBe('capsule-201')
+    expect(container.querySelector('[aria-labelledby="confirm-download-modal-title"]')).toBeNull()
   })
 })

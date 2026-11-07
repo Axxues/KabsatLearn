@@ -67,7 +67,7 @@ roll up to municipal, provincial, and regional level without a code change.
 - On-device neural embeddings. Retrieval stays lexical (BM25); the only model on
   the device is the small generative LLM described below.
 - Real LGU system integration. The dashboard is a local prototype.
-- More than two capsules.
+- More than six capsules.
 - A custom Bluetooth stack, Web Bluetooth GATT transfer, or Wi-Fi Direct.
   Browsers cannot advertise as a Bluetooth peripheral, so browser-to-browser
   file transfer over Bluetooth is not possible.
@@ -195,8 +195,9 @@ The agent recommends. The facilitator approves remediation before it is saved.
 ## Features (v1)
 
 1. **App shell** — offline banner, install prompt, four-tab navigation.
-2. **Course Hub** — Capsule 101 pre-installed; Capsule 102 downloadable;
-   simulated 2-second download with progress.
+2. **Course Hub** — Capsule 101 pre-installed; Capsules 102–106 available on
+   demand; simulated download with progress. Only a downloaded capsule opens,
+   appears in the quiz picker, and can be shared.
 3. **Story Reader** — 5–7 swipeable cards, "Pakinggan" TTS readout, one
    "tap the red flag" drill, Filipino/English interface toggle.
 4. **Quiz Arena** — four answer tiles, countdown, combo multiplier, adaptive
@@ -206,12 +207,33 @@ The agent recommends. The facilitator approves remediation before it is saved.
    answers; content answers generated on-device over retrieved chunks, with an
    extractive fallback; source citation; TTS readout; answers mirror the
    question's language.
-6. **Insights Dashboard** — mastery radar across four pillars, weak-concept list,
-   sync queue, simulated reconnection flush, barangay and municipality rollups,
-   facilitator approval gate, and provincial/regional aggregation.
+6. **Insights Dashboard** — mastery bars across seven competencies, weak-concept
+   list, sync queue, simulated reconnection flush, barangay and municipality
+   rollups, facilitator approval gate, and provincial/regional aggregation.
 7. **Kabsat Pass** — send a capsule through the OS share sheet, import a
    `.kabsat` file, verify its hash, and unlock the course offline. Shows who
    shared it and how many hops it has travelled.
+
+## Course catalog (v1)
+
+Six capsules ship with the app. Capsule 101 is seeded on first launch; 102–106
+appear under "Available to download" and are written to IndexedDB only when the
+learner taps Download.
+
+| ID | Title | Audience | Competency tags |
+|---|---|---|---|
+| 101 | Ligtas na Digital Wallet | seniors and families with e-wallets | cyber_safety, financial_literacy |
+| 102 | Unang Hakbang sa Online Trabaho | out-of-school youth seeking income | digital_livelihood, cyber_safety |
+| 103 | Kumpiyansa sa Smartphone | new smartphone users | digital_literacy, cyber_safety |
+| 104 | Perang May Plano | young earners and low-income families | financial_literacy |
+| 105 | Plano ng Pamilya | parents and couples | family_health |
+| 106 | Tindahang Maayos | sari-sari and small-shop owners | business_operations, financial_literacy |
+
+A capsule is six cards (one optional red-flag drill), ten questions across the
+three bands (4 foundational, 3 core, 3 stretch), twelve retrieval chunks, and an
+English translation for every chunk. Adding one means a JSON file, a catalogue
+entry, an icon, and translations; the store, retriever, and quiz engine do not
+change.
 
 ## Adaptive rule
 
@@ -227,6 +249,12 @@ overclaiming.
 - [ ] After first load, the app opens and completes a quiz with the device in
       airplane mode.
 - [ ] Both capsules persist across a reload (IndexedDB).
+- [ ] Capsules 102–106 each appear under "Available to download", and none is
+      installed until its download button is tapped.
+- [ ] Downloading any of 102–106 persists it and unlocks the reader, quiz, and
+      Pass for that capsule.
+- [ ] Every shipped capsule passes `validateCapsule` and has an English
+      translation for every chunk.
 - [ ] Two consecutive misses produce an easy question and a remediation card.
 - [ ] Two correct answers under 6 s produce a harder question.
 - [ ] A personal question ("sino ka?", "who are you?") answers immediately, in
@@ -251,9 +279,11 @@ overclaiming.
 
 - Banding is a heuristic, not a validated mastery model.
 - The item bank is small and synthetic.
-- v1 content covers two of the eight target segments — senior citizens and
-  out-of-school youth. The other six are served by the same engine but have no
-  capsules yet, and the pitch must not imply otherwise.
+- v1 ships six capsules. They reach every sector in the table, but not every
+  sector has a dedicated capsule; the pitch must not imply otherwise.
+- Family planning content is health-adjacent. It cites the barangay health
+  center and public facilities and must be reviewed by a licensed midwife or
+  physician before public deployment.
 - Ilocano and Pangasinan copy need native-speaker checks. v1 ships Tagalog and
   English only, so the app is usable region-wide but not yet fully localised.
 - Content answers are generated by a 0.5B model: about 2.6 tokens/second, 70–100
@@ -267,6 +297,9 @@ overclaiming.
   output works offline.
 - Capsule transfer is OS-mediated. The app does not implement Bluetooth itself,
   and the demo phones may need to be paired beforehand.
+- Kabsat AI grounds on Capsule 101 only. Questions about capsules 102–106 are
+  refused with the out-of-scope message, even after those capsules are
+  downloaded. The tutor is not course-scoped in v1.
 - The APK is a Capacitor WebView build, about 6.8 MB, not Kotlin-native. Say that
   plainly rather than claiming a 3 MB native footprint.
 

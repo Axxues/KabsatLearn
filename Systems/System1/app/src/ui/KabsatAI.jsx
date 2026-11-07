@@ -286,7 +286,7 @@ export default function KabsatAI({
           const text = event.target.elements?.ask?.value || input
           ask(text)
         }}
-        className="shrink-0 flex gap-2 border-t border-[var(--color-line)] bg-[var(--color-surface)]/95 p-3 backdrop-blur-md"
+        className="shrink-0 flex gap-2.5 border-t border-[var(--color-line)] bg-[var(--color-surface)]/95 px-4 pt-3 pb-7 backdrop-blur-md"
       >
         <label className="sr-only" htmlFor="ask">
           {t('askPlaceholder')}
