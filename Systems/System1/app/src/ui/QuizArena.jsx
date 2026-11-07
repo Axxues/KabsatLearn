@@ -9,35 +9,96 @@ import {
 } from '../lib/adaptive.js'
 import { playCorrect, playLevelUp, playTick, playWrong } from '../lib/audio.js'
 import { queueEvent } from '../lib/telemetry.js'
+import {
+  ArrowLeft,
+  Trophy,
+  Timer,
+  Zap,
+  User,
+  Users,
+  RotateCcw,
+  Check,
+  Sparkles,
+  Lightbulb,
+  Flame,
+  X,
+  TrendingUp,
+} from 'lucide-react'
 
 const LIMIT_MS = 15000
 const REVEAL_MS = 1600
 
 const TILES = [
-  { color: '#e21b3c', shape: '▲', label: 'Triangle' },
-  { color: '#1368ce', shape: '◆', label: 'Diamond' },
-  { color: '#d89e00', shape: '●', label: 'Circle' },
-  { color: '#26890c', shape: '■', label: 'Square' },
+  {
+    color: '#e11d48',
+    bgClass: 'from-[#e11d48] to-[#be123c] border-[#9f1239]',
+    shape: '▲',
+    label: 'Tatsulok',
+  },
+  {
+    color: '#2563eb',
+    bgClass: 'from-[#2563eb] to-[#1d4ed8] border-[#1e40af]',
+    shape: '◆',
+    label: 'Diyamante',
+  },
+  {
+    color: '#d97706',
+    bgClass: 'from-[#d97706] to-[#b45309] border-[#92400e]',
+    shape: '●',
+    label: 'Bilog',
+  },
+  {
+    color: '#16a34a',
+    bgClass: 'from-[#16a34a] to-[#15803d] border-[#166534]',
+    shape: '■',
+    label: 'Kuwadrado',
+  },
 ]
 
 function Tile({ tile, index, text, state, disabled, onPick }) {
-  const dimmed = state === 'idle' || state === 'dimmed'
+  const isCorrect = state === 'correct'
+  const isWrong = state === 'wrong'
+  const isDimmed = state === 'dimmed'
+
   return (
     <button
       type="button"
       onClick={() => onPick(index)}
       disabled={disabled}
-      className={`flex min-h-[96px] items-center gap-3 rounded-xl p-3 text-left text-white transition-transform ${
-        dimmed ? 'opacity-100' : ''
-      } ${state === 'correct' ? 'ring-4 ring-white' : ''} ${
-        state === 'wrong' ? 'opacity-40' : ''
-      } ${disabled ? '' : 'active:scale-[0.98]'}`}
-      style={{ backgroundColor: tile.color }}
+      className={`group relative flex min-h-[105px] flex-col justify-between overflow-hidden rounded-2xl border-b-4 bg-gradient-to-br p-3.5 text-left text-white shadow-sm transition-all duration-100 ${
+        tile.bgClass
+      } ${
+        disabled
+          ? 'cursor-default'
+          : 'active:translate-y-1 active:border-b-0 active:brightness-95'
+      } ${
+        isCorrect
+          ? 'ring-4 ring-white ring-offset-2 ring-offset-[var(--color-bg)] scale-[1.02] z-10 shadow-lg'
+          : ''
+      } ${
+        isWrong
+          ? 'opacity-40 grayscale-[40%]'
+          : isDimmed
+            ? 'opacity-35'
+            : 'opacity-100'
+      }`}
     >
-      <span aria-hidden="true" className="text-2xl leading-none">
-        {tile.shape}
+      <div className="flex items-center justify-between w-full">
+        <span
+          aria-hidden="true"
+          className="flex size-7 items-center justify-center rounded-lg bg-black/25 text-base font-black shadow-inner"
+        >
+          {tile.shape}
+        </span>
+        {isCorrect && (
+          <span className="flex size-6 items-center justify-center rounded-full bg-white text-[var(--color-good)] shadow-md">
+            <Check className="size-4 stroke-[3]" aria-hidden="true" />
+          </span>
+        )}
+      </div>
+      <span className="mt-2 text-sm font-bold leading-snug line-clamp-3 drop-shadow-xs">
+        {text}
       </span>
-      <span className="text-sm font-semibold leading-snug">{text}</span>
     </button>
   )
 }
@@ -152,138 +213,285 @@ export default function QuizArena({ capsule, onExit }) {
     playTick()
   }
 
+  // --- Intro View ---
   if (phase === 'intro') {
     return (
-      <div className="flex min-h-dvh flex-col items-center justify-center gap-6 bg-[var(--color-bg)] px-6 text-center">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-accent)]">
-            {capsule.title}
-          </p>
-          <h1 className="mt-2 text-[32px] font-bold leading-tight">Quiz Arena</h1>
-          <p className="mt-2 text-sm text-[var(--color-muted)]">
-            {bank.length} questions. Sagot nang mabilis para mas mataas ang puntos.
-          </p>
+      <div className="mx-auto flex min-h-dvh max-w-[430px] flex-col justify-between bg-[var(--color-bg)] p-5 text-[var(--color-ink)] shadow-2xl transition-colors duration-200">
+        <header className="flex items-center justify-between pt-2">
+          <button
+            type="button"
+            onClick={onExit}
+            className="btn-press flex min-h-10 items-center gap-1.5 rounded-xl border border-[var(--color-line)] bg-[var(--color-surface)] px-3 text-xs font-bold text-[var(--color-muted)] hover:text-[var(--color-ink)]"
+          >
+            <ArrowLeft className="size-4 stroke-[2.5]" aria-hidden="true" />
+            Bumalik
+          </button>
+          <span className="inline-flex items-center gap-1 rounded-full bg-[var(--color-accent-subtle)] px-2.5 py-1 text-xs font-bold text-[var(--color-accent)]">
+            <Zap className="size-3.5 fill-[var(--color-accent)]" aria-hidden="true" />
+            Offline Quiz
+          </span>
+        </header>
+
+        <div className="my-auto py-6 text-center space-y-4">
+          <div className="mx-auto flex size-18 items-center justify-center rounded-3xl bg-gradient-to-tr from-[var(--color-accent)] to-[var(--color-terracotta)] text-white shadow-lg shadow-[var(--color-accent)]/20 animate-bounce">
+            <Trophy className="size-9 stroke-[2.2]" aria-hidden="true" />
+          </div>
+
+          <div>
+            <p className="text-xs font-extrabold uppercase tracking-widest text-[var(--color-terracotta)]">
+              {capsule.title}
+            </p>
+            <h1 className="mt-1 text-3xl font-black tracking-tight text-[var(--color-ink)]">
+              Quiz Arena
+            </h1>
+            <p className="mt-2 text-xs leading-relaxed text-[var(--color-muted)]">
+              {bank.length} tanong. Mabilis at tamang sagot para sa mas mataas na score at streak multiplier!
+            </p>
+          </div>
+
+          {/* Rules & Game Stats pill */}
+          <div className="grid grid-cols-2 gap-2 text-left">
+            <div className="rounded-xl border border-[var(--color-line)] bg-[var(--color-surface)] p-3 shadow-xs">
+              <div className="flex items-center gap-1.5 font-bold text-sm text-[var(--color-ink)]">
+                <Timer className="size-4 text-[var(--color-accent)] stroke-[2.5]" aria-hidden="true" />
+                <span>15 Segundo</span>
+              </div>
+              <p className="text-[11px] text-[var(--color-muted)]">Bawat tanong</p>
+            </div>
+            <div className="rounded-xl border border-[var(--color-line)] bg-[var(--color-surface)] p-3 shadow-xs">
+              <div className="flex items-center gap-1.5 font-bold text-sm text-[var(--color-ink)]">
+                <TrendingUp className="size-4 text-[var(--color-good)] stroke-[2.5]" aria-hidden="true" />
+                <span>Adaptive</span>
+              </div>
+              <p className="text-[11px] text-[var(--color-muted)]">Umaayon sa galing mo</p>
+            </div>
+          </div>
         </div>
-        <div className="w-full max-w-[320px] space-y-3">
+
+        {/* Mode Select Buttons */}
+        <div className="space-y-3 pb-4">
           <button
             type="button"
             onClick={() => start(1)}
-            className="min-h-14 w-full rounded-xl bg-[var(--color-accent)] text-base font-bold text-[var(--color-on-accent)]"
+            className="btn-press flex min-h-14 w-full items-center justify-between rounded-2xl bg-[var(--color-accent)] px-5 text-left font-bold text-[var(--color-on-accent)] shadow-md hover:bg-[var(--color-accent-strong)]"
           >
-            Play solo
+            <div className="flex items-center gap-3">
+              <User className="size-5 stroke-[2.5]" aria-hidden="true" />
+              <div>
+                <p className="text-base font-extrabold">Isahang Laro (Solo)</p>
+                <p className="text-xs font-medium text-blue-100">Sanayin ang sariling talas</p>
+              </div>
+            </div>
+            <span className="text-sm font-bold">Magsimula →</span>
           </button>
+
           <button
             type="button"
             onClick={() => start(2)}
-            className="min-h-14 w-full rounded-xl border-2 border-[var(--color-accent)] text-base font-bold text-[var(--color-accent)]"
+            className="btn-press flex min-h-14 w-full items-center justify-between rounded-2xl border-2 border-[var(--color-line)] bg-[var(--color-surface)] px-5 text-left font-bold text-[var(--color-ink)] shadow-sm hover:border-[var(--color-accent)]"
           >
-            Pass and play (2 players)
-          </button>
-          <button type="button" onClick={onExit} className="min-h-11 w-full text-sm text-[var(--color-muted)]">
-            Back to courses
+            <div className="flex items-center gap-3">
+              <Users className="size-5 text-[var(--color-accent)] stroke-[2.5]" aria-hidden="true" />
+              <div>
+                <p className="text-base font-extrabold">Pass and Play (2 Manlalaro)</p>
+                <p className="text-xs font-medium text-[var(--color-muted)]">Salitan sa iisang telepono</p>
+              </div>
+            </div>
+            <span className="text-sm font-bold text-[var(--color-accent)]">Magsimula →</span>
           </button>
         </div>
       </div>
     )
   }
 
+  // --- Podium / Game Over View ---
   if (phase === 'done') {
     const winner = scores[0] === scores[1] ? null : scores[0] > scores[1] ? 0 : 1
     return (
-      <div className="flex min-h-dvh flex-col bg-[var(--color-bg)] px-6 py-10">
-        <h1 className="text-center text-[32px] font-bold">Podium</h1>
-        <p className="mt-1 text-center text-sm text-[var(--color-muted)]">
-          {players === 1 ? 'Round complete' : winner === null ? 'Draw!' : `Player ${winner + 1} wins`}
-        </p>
+      <div className="mx-auto flex min-h-dvh max-w-[430px] flex-col justify-between bg-[var(--color-bg)] p-5 text-[var(--color-ink)] shadow-2xl transition-colors duration-200">
+        <div className="pt-6 text-center space-y-2">
+          <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-[var(--color-good-subtle)] text-[var(--color-good)] shadow-inner">
+            <Trophy className="size-8 stroke-[2.5]" aria-hidden="true" />
+          </div>
+          <h1 className="text-2xl font-black text-[var(--color-ink)]">
+            {players === 1 ? 'Tapos na ang Pagsusulit!' : winner === null ? 'Tabla ang Laban!' : `Panalo si Manlalaro ${winner + 1}!`}
+          </h1>
+          <p className="text-xs text-[var(--color-muted)]">
+            Mahusay na pagsisikap sa araling {capsule.title}
+          </p>
+        </div>
 
-        <ol className="mt-8 space-y-3">
-          {scores.map((score, i) => (
-            <li
-              key={i}
-              className="flex items-center justify-between rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface)] p-4"
-            >
-              <div className="flex items-center gap-3">
-                <span className="grid size-9 place-items-center rounded-full bg-[var(--color-accent)]/10 text-sm font-bold text-[var(--color-accent)]">
-                  {i + 1}
-                </span>
-                <div>
-                  <p className="text-sm font-semibold">Player {i + 1}</p>
-                  <p className="text-xs text-[var(--color-muted)]">
-                    {correctCount[i]} / {Math.ceil(bank.length / players)} correct
+        <ol className="my-auto space-y-3 py-4">
+          {scores.map((score, i) => {
+            const isTop = players === 2 && i === winner
+            return (
+              <li
+                key={i}
+                className={`flex items-center justify-between rounded-2xl border p-4 shadow-sm transition-all ${
+                  isTop
+                    ? 'border-[var(--color-terracotta)] bg-[var(--color-terracotta-subtle)]/40 ring-2 ring-[var(--color-terracotta)]/30'
+                    : 'border-[var(--color-line)] bg-[var(--color-surface)]'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <span
+                    className={`grid size-10 place-items-center rounded-xl text-base font-black ${
+                      isTop
+                        ? 'bg-[var(--color-terracotta)] text-white'
+                        : 'bg-[var(--color-accent-subtle)] text-[var(--color-accent)]'
+                    }`}
+                  >
+                    #{i + 1}
+                  </span>
+                  <div>
+                    <p className="text-sm font-extrabold text-[var(--color-ink)]">
+                      {players === 1 ? 'Ang Iyong Iskor' : `Manlalaro ${i + 1}`}
+                    </p>
+                    <p className="text-xs text-[var(--color-muted)]">
+                      {correctCount[i]} ng {Math.ceil(bank.length / players)} tama
+                    </p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <span className="text-2xl font-black tabular-nums text-[var(--color-ink)]">
+                    {score}
+                  </span>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-muted)]">
+                    puntos
                   </p>
                 </div>
-              </div>
-              <p className="text-xl font-bold tabular-nums">{score}</p>
-            </li>
-          ))}
+              </li>
+            )
+          })}
         </ol>
 
-        <div className="mt-auto space-y-3 pt-8">
+        <div className="space-y-3 pb-4">
           <button
             type="button"
             onClick={() => start(players)}
-            className="min-h-14 w-full rounded-xl bg-[var(--color-accent)] text-base font-bold text-[var(--color-on-accent)]"
+            className="btn-press flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl bg-[var(--color-accent)] text-base font-bold text-[var(--color-on-accent)] shadow-md hover:bg-[var(--color-accent-strong)]"
           >
-            Play again
+            <RotateCcw className="size-5 stroke-[2.5]" aria-hidden="true" />
+            <span>Maglaro Muli</span>
           </button>
-          <button type="button" onClick={onExit} className="min-h-11 w-full text-sm text-[var(--color-muted)]">
-            Back to courses
+          <button
+            type="button"
+            onClick={onExit}
+            className="btn-press flex min-h-12 w-full items-center justify-center rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface)] text-sm font-bold text-[var(--color-muted)] hover:text-[var(--color-ink)]"
+          >
+            Bumalik sa Mga Kurso
           </button>
         </div>
       </div>
     )
   }
 
+  // --- No Question Fallback ---
   if (!question) {
     return (
-      <div className="p-6">
-        <p className="text-sm text-[var(--color-muted)]">No questions left in this course.</p>
-        <button type="button" onClick={onExit} className="mt-4 min-h-11 text-sm font-medium text-[var(--color-accent)]">
-          Back to courses
+      <div className="mx-auto flex min-h-dvh max-w-[430px] flex-col items-center justify-center p-6 text-center bg-[var(--color-bg)]">
+        <p className="text-sm font-semibold text-[var(--color-muted)]">
+          Wala nang natitirang tanong sa kursong ito.
+        </p>
+        <button
+          type="button"
+          onClick={onExit}
+          className="btn-press mt-4 min-h-11 rounded-xl bg-[var(--color-accent)] px-4 text-sm font-bold text-white"
+        >
+          Bumalik sa mga kurso
         </button>
       </div>
     )
   }
 
+  // Calculate timer percent and color
   const timerPercent = Math.max(0, (remaining / LIMIT_MS) * 100)
+  const timerColor =
+    timerPercent > 45
+      ? 'bg-[var(--color-good)]'
+      : timerPercent > 20
+        ? 'bg-[var(--color-warn)]'
+        : 'bg-[var(--color-danger)] animate-pulse'
 
   return (
-    <div className="flex min-h-dvh flex-col bg-[var(--color-bg)]">
-      <header className="px-4 pt-4">
-        <div className="flex items-center justify-between text-sm">
-          <span className="font-semibold">
-            {index + 1} / {bank.length}
-          </span>
-          <span className="rounded-full bg-[var(--color-accent)]/10 px-2 py-1 text-xs font-semibold text-[var(--color-accent)]">
-            {BAND_LABELS[state.band]}
-          </span>
-          <span className="tabular-nums font-semibold">{scores[current]}</span>
+    <div className="mx-auto flex min-h-dvh max-w-[430px] flex-col bg-[var(--color-bg)] text-[var(--color-ink)] shadow-2xl transition-colors duration-200">
+      {/* Quiz HUD Header */}
+      <header className="border-b border-[var(--color-line)] bg-[var(--color-surface)]/95 px-4 pt-3.5 pb-3 backdrop-blur-md">
+        <div className="flex items-center justify-between text-xs">
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={onExit}
+              className="btn-press flex size-8 items-center justify-center rounded-lg border border-[var(--color-line)] text-xs font-bold text-[var(--color-muted)] hover:text-[var(--color-ink)]"
+              aria-label="Lumabas sa Quiz"
+            >
+              <X className="size-4 stroke-[2.5]" aria-hidden="true" />
+            </button>
+            <span className="font-bold tabular-nums text-[var(--color-ink)]">
+              Tanong {index + 1} / {bank.length}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="rounded-full bg-[var(--color-accent-subtle)] px-2.5 py-0.5 text-[11px] font-bold text-[var(--color-accent)]">
+              {BAND_LABELS[state.band] || state.band}
+            </span>
+            <span className="rounded-lg bg-[var(--color-surface-sunken)] px-2 py-0.5 font-black tabular-nums text-[var(--color-ink)]">
+              {scores[current]} pts
+            </span>
+          </div>
         </div>
 
-        <div className="mt-2 h-2 overflow-hidden rounded-full bg-[var(--color-line)]" aria-hidden="true">
+        {/* 15s Countdown Progress Bar */}
+        <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-[var(--color-line)]" aria-hidden="true">
           <div
-            className="h-full rounded-full bg-[var(--color-accent)] transition-[width] duration-100 ease-linear"
+            className={`h-full rounded-full transition-all duration-100 ease-linear ${timerColor}`}
             style={{ width: `${timerPercent}%` }}
           />
         </div>
 
-        {players === 2 && phase !== 'done' && (
-          <p className="mt-2 text-center text-xs font-semibold text-[var(--color-accent)]">
-            Player {current + 1}&rsquo;s turn
-          </p>
-        )}
+        {/* Multi-Player Indicator or Streak info */}
+        <div className="mt-2 flex items-center justify-between text-[11px]">
+          {players === 2 ? (
+            <span className="font-bold text-[var(--color-accent)]">
+              👉 Turn ni Manlalaro {current + 1}
+            </span>
+          ) : (
+            <span className="flex items-center gap-1 text-[var(--color-muted)]">
+              {state.correctStreak > 1 ? (
+                <>
+                  <Flame className="size-3.5 text-[var(--color-terracotta)] fill-[var(--color-terracotta)] animate-bounce" aria-hidden="true" />
+                  <span className="font-bold text-[var(--color-terracotta)]">{state.correctStreak}x Streak (+Puntos!)</span>
+                </>
+              ) : (
+                'Sagot agad bago maubos ang oras'
+              )}
+            </span>
+          )}
 
-        {badge && (
-          <p className="mt-2 text-center text-sm font-bold text-[var(--color-accent)]" role="status">
-            ⚡ {badge === 'stretch' ? 'HARD MODE' : badge === 'core' ? 'CORE' : 'FOUNDATION'}
-          </p>
-        )}
+          {badge && (
+            <span
+              className="animate-bounce flex items-center gap-1 font-extrabold text-[var(--color-terracotta)]"
+              role="status"
+            >
+              <Zap className="size-3 fill-[var(--color-terracotta)]" aria-hidden="true" />
+              {badge === 'stretch' ? 'LEVEL UP!' : 'ADAPTIVE SHIFT'}
+            </span>
+          )}
+        </div>
       </header>
 
-      <main className="flex flex-1 flex-col px-4 py-4">
-        <h1 className="text-center text-[22px] font-bold leading-snug">{question.stem}</h1>
+      {/* Main Question & Kahoot Tiles Area */}
+      <main className="flex flex-1 flex-col justify-between px-4 py-4 space-y-4">
+        {/* Question Prompt Card */}
+        <div className="flex min-h-[90px] items-center justify-center rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface)] p-4 text-center shadow-sm">
+          <h1 className="text-lg font-extrabold leading-snug text-[var(--color-ink)]">
+            {question.stem}
+          </h1>
+        </div>
 
-        <div className="mt-4 grid flex-1 grid-cols-2 gap-2">
+        {/* 4 Color Tiles */}
+        <div className="grid flex-1 grid-cols-2 gap-2.5">
           {question.options.map((option, i) => {
             let tileState = 'idle'
             if (phase === 'reveal') {
@@ -305,16 +513,30 @@ export default function QuizArena({ capsule, onExit }) {
           })}
         </div>
 
+        {/* Reveal Feedback Banner */}
         {phase === 'reveal' && (
-          <div className="mt-3 rounded-xl bg-[var(--color-surface)] p-3 text-center" role="status">
+          <div
+            className={`rounded-2xl border p-3.5 text-center shadow-md animate-pop-in ${
+              result?.isCorrect
+                ? 'border-[var(--color-good)]/30 bg-[var(--color-good-subtle)] text-[var(--color-good)]'
+                : 'border-[var(--color-warn)]/30 bg-[var(--color-warn-subtle)] text-[var(--color-warn)]'
+            }`}
+            role="status"
+          >
             {result?.isCorrect ? (
-              <p className="text-sm font-bold text-[var(--color-good)]">
-                Tama! +{lastPoints} points
-              </p>
+              <div className="flex items-center justify-center gap-2">
+                <Sparkles className="size-4 stroke-[2.5]" aria-hidden="true" />
+                <p className="text-sm font-extrabold">
+                  Tama! +{lastPoints} points!
+                </p>
+              </div>
             ) : (
-              <p className="text-sm font-bold text-[var(--color-warn)]">
-                Mali. Ang tamang sagot ay ang naka-highlight.
-              </p>
+              <div className="flex items-center justify-center gap-2">
+                <Lightbulb className="size-4 stroke-[2.5]" aria-hidden="true" />
+                <p className="text-sm font-extrabold">
+                  Mali. Ang tamang sagot ay ang naka-highlight.
+                </p>
+              </div>
             )}
           </div>
         )}

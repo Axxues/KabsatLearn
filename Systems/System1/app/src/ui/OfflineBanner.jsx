@@ -1,25 +1,20 @@
-import { useOnline } from '../lib/useOnline.js'
-
-export default function OfflineBanner({ online: onlineProp }) {
-  const hookValue = useOnline()
-  const online = onlineProp ?? hookValue
-
-  if (online) {
-    return (
-      <p className="flex items-center gap-2 text-sm text-[var(--color-good)]">
-        <span aria-hidden="true" className="inline-block size-2 rounded-full bg-[var(--color-good)]" />
-        Online
-      </p>
-    )
-  }
+/**
+ * Full-width connectivity bar, rendered below the header by App.
+ * Nothing is shown while online, so the offline state is unmissable on stage.
+ *
+ * The value comes from App's single subscription. This component must not
+ * subscribe again: two Network listeners in the WebView is what produced the
+ * teardown error on device.
+ */
+export default function OfflineBanner({ online }) {
+  if (online) return null
 
   return (
-    <p
+    <div
       role="status"
-      className="flex items-center gap-2 rounded-full bg-[var(--color-accent)] px-3 py-1 text-xs font-semibold text-[var(--color-on-accent)]"
+      className="w-full bg-[var(--color-accent)] px-4 py-2 text-center text-sm font-semibold text-[var(--color-on-accent)]"
     >
-      <span aria-hidden="true" className="inline-block size-2 rounded-full bg-[var(--color-on-accent)]" />
-      Offline
-    </p>
+      ⚡ Offline mode — your courses still work
+    </div>
   )
 }
