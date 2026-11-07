@@ -43,6 +43,42 @@ describe('app header', () => {
   })
 })
 
+describe('theme toggle', () => {
+  let container
+  let root
+
+  beforeEach(async () => {
+    localStorage.clear()
+    document.documentElement.removeAttribute('data-theme')
+    container = document.createElement('div')
+    document.body.appendChild(container)
+    root = createRoot(container)
+    await act(async () => {
+      root.render(<App />)
+    })
+  })
+
+  afterEach(() => {
+    act(() => {
+      root.unmount()
+    })
+    container.remove()
+  })
+
+  test('toggles theme to dark and sets data-theme and localStorage', async () => {
+    const toggleBtn = container.querySelector('button[aria-label="Switch to dark mode"]')
+    expect(toggleBtn).not.toBeNull()
+
+    await act(async () => {
+      toggleBtn.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    })
+
+    expect(document.documentElement.getAttribute('data-theme')).toBe('dark')
+    expect(localStorage.getItem('kabsat_theme')).toBe('dark')
+    expect(toggleBtn.getAttribute('aria-label')).toBe('Switch to light mode')
+  })
+})
+
 describe('bottom navigation', () => {
   let container
   let root
