@@ -66,7 +66,7 @@ function CapsuleCard({ capsule, onOpen, onDownload, onShare, downloading }) {
   )
 }
 
-export default function CourseHub({ capsules, onOpen, onDownload, onShare, downloadingId }) {
+export default function CourseHub({ capsules, onOpen, onDownload, onShare, onImport, downloadingId }) {
   if (capsules.length === 0) {
     return <p className="text-sm text-[var(--color-muted)]">Loading your courses…</p>
   }
@@ -76,6 +76,19 @@ export default function CourseHub({ capsules, onOpen, onDownload, onShare, downl
 
   return (
     <div className="space-y-6">
+      <label className="flex min-h-11 cursor-pointer items-center justify-center rounded-xl border border-dashed border-[var(--color-line)] px-4 text-sm font-medium text-[var(--color-muted)]">
+        Import a .kabsat file from a classmate
+        <input
+          type="file"
+          accept=".kabsat,application/json"
+          className="sr-only"
+          onChange={(event) => {
+            const file = event.target.files?.[0]
+            if (file) onImport(file)
+            event.target.value = ''
+          }}
+        />
+      </label>
       <section aria-labelledby="installed-heading">
         <h2 id="installed-heading" className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--color-muted)]">
           On this phone

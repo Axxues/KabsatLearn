@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import capsule101 from './data/capsules/capsule-101.json'
 import capsule102 from './data/capsules/capsule-102.json'
 import { getCapsule, listCapsules, seedCapsule } from './lib/capsuleStore.js'
+import { importCapsuleFile, shareCapsule } from './lib/share.js'
 import { useOnline } from './lib/useOnline.js'
 import CourseHub from './ui/CourseHub.jsx'
 import OfflineBanner from './ui/OfflineBanner.jsx'
@@ -39,6 +40,7 @@ export default function App() {
   const [readerId, setReaderId] = useState(null)
   const [capsules, setCapsules] = useState([])
   const [downloadingId, setDownloadingId] = useState(null)
+  const [toast, setToast] = useState(null)
 
   const refresh = useCallback(async () => {
     const installed = await listCapsules()
@@ -70,6 +72,19 @@ export default function App() {
   }
 
   const openReader = (id) => setReaderId(id)
+
+  const share = async (id) => {
+    const result = await shareCapsule(id)
+    if (result.method === 'share') setToast('Capsule shared.')
+    else if (result.method === 'download') setToast('Saved as a .kabsat file.')
+    else setToast('Share cancelled.')
+  }
+
+  const importFile = async (file) => {
+    const result = await importCapsuleFile(file)
+    setToast(result.ok ? 'Capsule added.' : `Import refused: ${result.error}.`)
+    await refresh()
+  }
 
   if (readerId) {
     const capsule = [capsule101, capsule102].find((c) => c.id === readerId)
@@ -104,9 +119,15 @@ export default function App() {
             capsules={capsules}
             onOpen={openReader}
             onDownload={download}
-            onShare={() => {}}
+            onShare={share}
+            onImport={importFile}
             downloadingId={downloadingId}
           />
+        )}
+        {toast && (
+          <p role="status" className="mt-4 rounded-xl bg-[var(--color-surface)] p-3 text-sm">
+            {toast}
+          </p>
         )}
         {tab === 'dashboard' && <Dashboard />}
       </main>
