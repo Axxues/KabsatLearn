@@ -5,6 +5,7 @@ import { getCapsule, listCapsules, seedCapsule } from './lib/capsuleStore.js'
 import { useOnline } from './lib/useOnline.js'
 import CourseHub from './ui/CourseHub.jsx'
 import OfflineBanner from './ui/OfflineBanner.jsx'
+import QuizArena from './ui/QuizArena.jsx'
 import StoryReader from './ui/StoryReader.jsx'
 
 const TABS = [
@@ -71,6 +72,10 @@ export default function App() {
   if (readerId) {
     const capsule = [capsule101, capsule102].find((c) => c.id === readerId)
     return <StoryReader capsule={capsule} onExit={() => setReaderId(null)} />
+  }
+
+  if (tab === 'quiz') {
+    return <QuizArena capsule={capsule101} onExit={() => setTab('hub')} />
   }
 
   return (
