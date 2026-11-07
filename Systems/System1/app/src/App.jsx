@@ -3,9 +3,8 @@ import capsule101 from './data/capsules/capsule-101.json'
 import capsule102 from './data/capsules/capsule-102.json'
 import { getCapsule, listCapsules, seedCapsule } from './lib/capsuleStore.js'
 import { importCapsuleFile, shareCapsule } from './lib/share.js'
-import { useOnline } from './lib/useOnline.js'
+import { I18nProvider, useI18n } from './lib/i18n.jsx'
 import CourseHub from './ui/CourseHub.jsx'
-import OfflineBanner from './ui/OfflineBanner.jsx'
 import QuizArena from './ui/QuizArena.jsx'
 import KabsatAI from './ui/KabsatAI.jsx'
 import Dashboard from './ui/Dashboard.jsx'
@@ -19,35 +18,8 @@ import {
   Sun,
   Moon,
   X,
-  GraduationCap,
+  Languages,
 } from 'lucide-react'
-
-const TABS = [
-  {
-    id: 'hub',
-    label: 'Aralin',
-    subtitle: 'Mga kurso sa telepono',
-    icon: BookOpen,
-  },
-  {
-    id: 'quiz',
-    label: 'Quiz',
-    subtitle: 'Paligsahan ng galing',
-    icon: Trophy,
-  },
-  {
-    id: 'tutor',
-    label: 'Kabsat AI',
-    subtitle: 'Grounded na gabay',
-    icon: Sparkles,
-  },
-  {
-    id: 'dashboard',
-    label: 'LGU Hub',
-    subtitle: 'Ulat sa San Fernando',
-    icon: BarChart3,
-  },
-]
 
 const CATALOG = [capsule101, capsule102].map((capsule) => ({
   id: capsule.id,
@@ -58,8 +30,8 @@ const CATALOG = [capsule101, capsule102].map((capsule) => ({
   kb: Math.max(1, Math.round(JSON.stringify(capsule).length / 1024)),
 }))
 
-export default function App() {
-  const online = useOnline()
+function MainApp() {
+  const { lang, setLang, t } = useI18n()
   const [tab, setTab] = useState('hub')
   const [readerId, setReaderId] = useState(null)
   const [capsules, setCapsules] = useState([])
@@ -81,6 +53,10 @@ export default function App() {
 
   const toggleTheme = () => {
     setTheme((prev) => (prev === 'light' ? 'dark' : 'light'))
+  }
+
+  const toggleLang = () => {
+    setLang(lang === 'fil' ? 'en' : 'fil')
   }
 
   const refresh = useCallback(async () => {
@@ -123,14 +99,14 @@ export default function App() {
 
   const share = async (id) => {
     const result = await shareCapsule(id)
-    if (result.method === 'share') setToast('Naibahagi ang aralin via Nearby/Share.')
-    else if (result.method === 'download') setToast('Na-save bilang .kabsat file.')
-    else setToast('Nakansela ang pagbahagi.')
+    if (result.method === 'share') setToast(t('shareSuccess'))
+    else if (result.method === 'download') setToast(t('saveSuccess'))
+    else setToast(t('shareCancel'))
   }
 
   const importFile = async (file) => {
     const result = await importCapsuleFile(file)
-    setToast(result.ok ? 'Tagumpay: Naidagdag ang aralin sa iyong telepono!' : `Hindi tinanggap: ${result.error}.`)
+    setToast(result.ok ? t('importSuccess') : t('importRefused', { error: result.error }))
     await refresh()
   }
 
@@ -147,31 +123,69 @@ export default function App() {
     return <KabsatAI capsule={capsule101} onExit={() => setTab('hub')} />
   }
 
+  const tabs = [
+    {
+      id: 'hub',
+      label: t('coursesTab'),
+      subtitle: t('coursesTabSub'),
+      icon: BookOpen,
+    },
+    {
+      id: 'quiz',
+      label: t('quizTab'),
+      subtitle: t('quizTabSub'),
+      icon: Trophy,
+    },
+    {
+      id: 'tutor',
+      label: t('tutorTab'),
+      subtitle: t('tutorTabSub'),
+      icon: Sparkles,
+    },
+    {
+      id: 'dashboard',
+      label: t('dashboardTab'),
+      subtitle: t('dashboardTabSub'),
+      icon: BarChart3,
+    },
+  ]
+
   return (
-    <div className="mx-auto flex min-h-dvh max-w-[430px] flex-col bg-[var(--color-bg)] text-[var(--color-ink)] shadow-2xl transition-colors duration-200 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
+    <div className="mx-auto flex min-h-dvh max-w-[430px] flex-col bg-[var(--color-bg)] text-[var(--color-ink)] shadow-2xl transition-colors duration-200">
       {/* Top Mobile App Header */}
       <header className="sticky top-0 z-30 flex items-center justify-between border-b border-[var(--color-line)] bg-[var(--color-surface)]/95 px-4 py-3 backdrop-blur-md">
         <div className="flex items-center gap-2.5">
-          <div className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-tr from-[var(--color-accent)] to-[var(--color-accent-strong)] text-[var(--color-on-accent)] shadow-sm">
-            <GraduationCap className="size-5 stroke-[2.2]" aria-hidden="true" />
-          </div>
+          <img
+            src="/icon.svg"
+            alt="KabsatLearn logo"
+            className="size-9 rounded-xl border border-[var(--color-line)] bg-white p-1 shadow-xs shrink-0"
+          />
           <div>
             <div className="flex items-center gap-1.5">
               <span className="text-xs font-bold uppercase tracking-wider text-[var(--color-accent)]">
-                KabsatLearn
+                {t('appTitle')}
               </span>
               <span className="rounded-full bg-[var(--color-terracotta)]/15 px-1.5 py-0.2 text-[10px] font-bold text-[var(--color-terracotta)]">
-                La Union
+                {t('regionTag')}
               </span>
             </div>
             <h1 className="text-base font-bold leading-tight text-[var(--color-ink)]">
-              {tab === 'hub' ? 'Mga Kurso' : 'City Insights'}
+              {tab === 'hub' ? t('headerCourses') : t('headerDashboard')}
             </h1>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
-          <OfflineBanner online={online} />
+          {/* Language Toggle: Tagalog / English */}
+          <button
+            type="button"
+            onClick={toggleLang}
+            aria-label={`Switch language to ${lang === 'fil' ? 'English' : 'Tagalog'}`}
+            className="btn-press flex h-9 items-center gap-1 rounded-xl border border-[var(--color-line)] bg-[var(--color-surface)] px-2.5 text-xs font-bold text-[var(--color-accent)] hover:border-[var(--color-accent)]"
+          >
+            <Languages className="size-3.5 stroke-[2.5]" aria-hidden="true" />
+            <span className="font-mono tracking-tight">{lang.toUpperCase()}</span>
+          </button>
 
           {/* Theme Toggle Button */}
           <button
@@ -190,7 +204,7 @@ export default function App() {
       </header>
 
       {/* Main Content Area with Technique 05: Fast, then slow (page-enter) */}
-      <main key={tab} className="flex-1 px-4 py-5 page-enter">
+      <main key={`${tab}-${lang}`} className="flex-1 px-4 py-5 page-enter">
         {tab === 'hub' && (
           <CourseHub
             capsules={capsules}
@@ -231,7 +245,7 @@ export default function App() {
         aria-label="Main Navigation"
         className="sticky bottom-0 z-30 grid grid-cols-4 border-t border-[var(--color-line)] bg-[var(--color-surface)]/95 py-1.5 backdrop-blur-md"
       >
-        {TABS.map((item) => {
+        {tabs.map((item) => {
           const active = item.id === tab
           const Icon = item.icon
           return (
@@ -263,5 +277,13 @@ export default function App() {
         })}
       </nav>
     </div>
+  )
+}
+
+export default function App() {
+  return (
+    <I18nProvider>
+      <MainApp />
+    </I18nProvider>
   )
 }

@@ -9,6 +9,7 @@ import {
 } from '../lib/adaptive.js'
 import { playCorrect, playLevelUp, playTick, playWrong } from '../lib/audio.js'
 import { queueEvent } from '../lib/telemetry.js'
+import { useI18n } from '../lib/i18n.jsx'
 import RollingNumber from './RollingNumber.jsx'
 import AnimatedSuccessCheck from './AnimatedSuccessCheck.jsx'
 import {
@@ -34,25 +35,25 @@ const TILES = [
     color: '#e11d48',
     bgClass: 'from-[#e11d48] to-[#be123c] border-[#9f1239]',
     shape: '▲',
-    label: 'Tatsulok',
+    label: 'Triangle',
   },
   {
     color: '#2563eb',
     bgClass: 'from-[#2563eb] to-[#1d4ed8] border-[#1e40af]',
     shape: '◆',
-    label: 'Diyamante',
+    label: 'Diamond',
   },
   {
     color: '#d97706',
     bgClass: 'from-[#d97706] to-[#b45309] border-[#92400e]',
     shape: '●',
-    label: 'Bilog',
+    label: 'Circle',
   },
   {
     color: '#16a34a',
     bgClass: 'from-[#16a34a] to-[#15803d] border-[#166534]',
     shape: '■',
-    label: 'Kuwadrado',
+    label: 'Square',
   },
 ]
 
@@ -105,6 +106,7 @@ function Tile({ tile, index, text, state, disabled, onPick }) {
 }
 
 export default function QuizArena({ capsule, onExit }) {
+  const { t } = useI18n()
   const bank = capsule.questions
   const [players, setPlayers] = useState(1)
   const [phase, setPhase] = useState('intro')
@@ -225,11 +227,11 @@ export default function QuizArena({ capsule, onExit }) {
             className="btn-press flex min-h-10 items-center gap-1.5 rounded-xl border border-[var(--color-line)] bg-[var(--color-surface)] px-3 text-xs font-bold text-[var(--color-muted)] hover:text-[var(--color-ink)]"
           >
             <ArrowLeft className="size-4 stroke-[2.5]" aria-hidden="true" />
-            Bumalik
+            {t('back')}
           </button>
           <span className="inline-flex items-center gap-1 rounded-full bg-[var(--color-accent-subtle)] px-2.5 py-1 text-xs font-bold text-[var(--color-accent)]">
             <Zap className="size-3.5 fill-[var(--color-accent)]" aria-hidden="true" />
-            Offline Quiz
+            {t('offlineQuizBadge')}
           </span>
         </header>
 
@@ -243,10 +245,10 @@ export default function QuizArena({ capsule, onExit }) {
               {capsule.title}
             </p>
             <h1 className="mt-1 text-3xl font-black tracking-tight text-[var(--color-ink)]">
-              Quiz Arena
+              {t('quizTitle')}
             </h1>
             <p className="mt-2 text-xs leading-relaxed text-[var(--color-muted)]">
-              {bank.length} tanong. Mabilis at tamang sagot para sa mas mataas na score at streak multiplier!
+              {t('quizSubtitle', { count: bank.length })}
             </p>
           </div>
 
@@ -255,16 +257,16 @@ export default function QuizArena({ capsule, onExit }) {
             <div className="rounded-xl border border-[var(--color-line)] bg-[var(--color-surface)] p-3 shadow-xs">
               <div className="flex items-center gap-1.5 font-bold text-sm text-[var(--color-ink)]">
                 <Timer className="size-4 text-[var(--color-accent)] stroke-[2.5]" aria-hidden="true" />
-                <span>15 Segundo</span>
+                <span>{t('stat15s')}</span>
               </div>
-              <p className="text-[11px] text-[var(--color-muted)]">Bawat tanong</p>
+              <p className="text-[11px] text-[var(--color-muted)]">{t('stat15sSub')}</p>
             </div>
             <div className="rounded-xl border border-[var(--color-line)] bg-[var(--color-surface)] p-3 shadow-xs">
               <div className="flex items-center gap-1.5 font-bold text-sm text-[var(--color-ink)]">
                 <TrendingUp className="size-4 text-[var(--color-good)] stroke-[2.5]" aria-hidden="true" />
-                <span>Adaptive</span>
+                <span>{t('statAdaptive')}</span>
               </div>
-              <p className="text-[11px] text-[var(--color-muted)]">Umaayon sa galing mo</p>
+              <p className="text-[11px] text-[var(--color-muted)]">{t('statAdaptiveSub')}</p>
             </div>
           </div>
         </div>
@@ -279,11 +281,11 @@ export default function QuizArena({ capsule, onExit }) {
             <div className="flex items-center gap-3">
               <User className="size-5 stroke-[2.5]" aria-hidden="true" />
               <div>
-                <p className="text-base font-extrabold">Isahang Laro (Solo)</p>
-                <p className="text-xs font-medium text-blue-100">Sanayin ang sariling talas</p>
+                <p className="text-base font-extrabold">{t('playSolo')}</p>
+                <p className="text-xs font-medium text-blue-100">{t('playSoloSub')}</p>
               </div>
             </div>
-            <span className="text-sm font-bold">Magsimula →</span>
+            <span className="text-sm font-bold">{t('startQuizCta')}</span>
           </button>
 
           <button
@@ -294,11 +296,11 @@ export default function QuizArena({ capsule, onExit }) {
             <div className="flex items-center gap-3">
               <Users className="size-5 text-[var(--color-accent)] stroke-[2.5]" aria-hidden="true" />
               <div>
-                <p className="text-base font-extrabold">Pass and Play (2 Manlalaro)</p>
-                <p className="text-xs font-medium text-[var(--color-muted)]">Salitan sa iisang telepono</p>
+                <p className="text-base font-extrabold">{t('playPass')}</p>
+                <p className="text-xs font-medium text-[var(--color-muted)]">{t('playPassSub')}</p>
               </div>
             </div>
-            <span className="text-sm font-bold text-[var(--color-accent)]">Magsimula →</span>
+            <span className="text-sm font-bold text-[var(--color-accent)]">{t('startQuizCta')}</span>
           </button>
         </div>
       </div>
@@ -315,10 +317,14 @@ export default function QuizArena({ capsule, onExit }) {
             <Trophy className="size-8 stroke-[2.5]" aria-hidden="true" />
           </div>
           <h1 className="text-2xl font-black text-[var(--color-ink)]">
-            {players === 1 ? 'Tapos na ang Pagsusulit!' : winner === null ? 'Tabla ang Laban!' : `Panalo si Manlalaro ${winner + 1}!`}
+            {players === 1
+              ? t('roundCompleteSolo')
+              : winner === null
+                ? t('roundCompleteDraw')
+                : t('roundCompleteWinner', { winner: winner + 1 })}
           </h1>
           <p className="text-xs text-[var(--color-muted)]">
-            Mahusay na pagsisikap sa araling {capsule.title}
+            {t('roundEffort', { title: capsule.title })}
           </p>
         </div>
 
@@ -346,10 +352,13 @@ export default function QuizArena({ capsule, onExit }) {
                   </span>
                   <div>
                     <p className="text-sm font-extrabold text-[var(--color-ink)]">
-                      {players === 1 ? 'Ang Iyong Iskor' : `Manlalaro ${i + 1}`}
+                      {players === 1 ? t('yourScore') : t('playerLabel', { n: i + 1 })}
                     </p>
                     <p className="text-xs text-[var(--color-muted)]">
-                      {correctCount[i]} ng {Math.ceil(bank.length / players)} tama
+                      {t('correctTally', {
+                        correct: correctCount[i],
+                        total: Math.ceil(bank.length / players),
+                      })}
                     </p>
                   </div>
                 </div>
@@ -358,7 +367,7 @@ export default function QuizArena({ capsule, onExit }) {
                     <RollingNumber value={score} />
                   </span>
                   <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-muted)]">
-                    puntos
+                    {t('pointsLabel')}
                   </p>
                 </div>
               </li>
@@ -373,14 +382,14 @@ export default function QuizArena({ capsule, onExit }) {
             className="btn-press flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl bg-[var(--color-accent)] text-base font-bold text-[var(--color-on-accent)] shadow-md hover:bg-[var(--color-accent-strong)]"
           >
             <RotateCcw className="size-5 stroke-[2.5]" aria-hidden="true" />
-            <span>Maglaro Muli</span>
+            <span>{t('playAgain')}</span>
           </button>
           <button
             type="button"
             onClick={onExit}
             className="btn-press flex min-h-12 w-full items-center justify-center rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface)] text-sm font-bold text-[var(--color-muted)] hover:text-[var(--color-ink)]"
           >
-            Bumalik sa Mga Kurso
+            {t('backToCourses')}
           </button>
         </div>
       </div>
@@ -392,14 +401,14 @@ export default function QuizArena({ capsule, onExit }) {
     return (
       <div className="mx-auto flex min-h-dvh max-w-[430px] flex-col items-center justify-center p-6 text-center bg-[var(--color-bg)]">
         <p className="text-sm font-semibold text-[var(--color-muted)]">
-          Wala nang natitirang tanong sa kursong ito.
+          {t('noQuestions')}
         </p>
         <button
           type="button"
           onClick={onExit}
           className="btn-press mt-4 min-h-11 rounded-xl bg-[var(--color-accent)] px-4 text-sm font-bold text-white"
         >
-          Bumalik sa mga kurso
+          {t('backToCourses')}
         </button>
       </div>
     )
@@ -429,7 +438,7 @@ export default function QuizArena({ capsule, onExit }) {
               <X className="size-4 stroke-[2.5]" aria-hidden="true" />
             </button>
             <span className="font-bold tabular-nums text-[var(--color-ink)]">
-              Tanong {index + 1} / {bank.length}
+              {t('questionProgress', { current: index + 1, total: bank.length })}
             </span>
           </div>
 
@@ -438,7 +447,7 @@ export default function QuizArena({ capsule, onExit }) {
               {BAND_LABELS[state.band] || state.band}
             </span>
             <span className="rounded-lg bg-[var(--color-surface-sunken)] px-2 py-0.5 font-black tabular-nums text-[var(--color-ink)]">
-              <RollingNumber value={scores[current]} /> pts
+              <RollingNumber value={scores[current]} /> {t('pts')}
             </span>
           </div>
         </div>
@@ -455,17 +464,17 @@ export default function QuizArena({ capsule, onExit }) {
         <div className="mt-2 flex items-center justify-between text-[11px]">
           {players === 2 ? (
             <span className="font-bold text-[var(--color-accent)]">
-              👉 Turn ni Manlalaro {current + 1}
+              {t('turnIndicator', { n: current + 1 })}
             </span>
           ) : (
             <span className="flex items-center gap-1 text-[var(--color-muted)]">
               {state.correctStreak > 1 ? (
                 <>
                   <Flame className="size-3.5 text-[var(--color-terracotta)] fill-[var(--color-terracotta)] animate-bounce" aria-hidden="true" />
-                  <span className="font-bold text-[var(--color-terracotta)]">{state.correctStreak}x Streak (+Puntos!)</span>
+                  <span className="font-bold text-[var(--color-terracotta)]">{t('streakIndicator', { n: state.correctStreak })}</span>
                 </>
               ) : (
-                'Sagot agad bago maubos ang oras'
+                t('speedPrompt')
               )}
             </span>
           )}
@@ -476,7 +485,7 @@ export default function QuizArena({ capsule, onExit }) {
               role="status"
             >
               <Zap className="size-3 fill-[var(--color-terracotta)]" aria-hidden="true" />
-              {badge === 'stretch' ? 'LEVEL UP!' : 'ADAPTIVE SHIFT'}
+              {badge === 'stretch' ? t('levelUp') : t('adaptiveShift')}
             </span>
           )}
         </div>
@@ -528,14 +537,14 @@ export default function QuizArena({ capsule, onExit }) {
               <div className="flex items-center justify-center gap-2">
                 <AnimatedSuccessCheck className="size-5" circleColor="var(--color-good)" tickColor="var(--color-good)" />
                 <p className="text-sm font-extrabold">
-                  Tama! +{lastPoints} points!
+                  {t('correctAnswer', { points: lastPoints })}
                 </p>
               </div>
             ) : (
               <div className="flex items-center justify-center gap-2">
                 <Lightbulb className="size-4 stroke-[2.5]" aria-hidden="true" />
                 <p className="text-sm font-extrabold">
-                  Mali. Ang tamang sagot ay ang naka-highlight.
+                  {t('wrongAnswer')}
                 </p>
               </div>
             )}

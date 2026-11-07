@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { masteryByCompetency, proposedRemediations } from '../lib/mastery.js'
 import { flush, listQueue, queueEvent, queueSize } from '../lib/telemetry.js'
+import { useI18n } from '../lib/i18n.jsx'
 import RollingNumber from './RollingNumber.jsx'
 import AnimatedSuccessCheck from './AnimatedSuccessCheck.jsx'
 import {
@@ -23,6 +24,7 @@ const BARANGAYS = [
 ]
 
 function Bar({ label, value }) {
+  const { t } = useI18n()
   const width = value === null ? 0 : Math.max(4, value)
   const isHigh = value !== null && value >= 70
   const isMid = value !== null && value >= 50 && value < 70
@@ -51,7 +53,7 @@ function Bar({ label, value }) {
                     : 'bg-[var(--color-terracotta-subtle)] text-[var(--color-terracotta)]'
               }`}
             >
-              {isHigh ? 'Matatag' : isMid ? 'Katamtaman' : 'Gabayan'}
+              {isHigh ? t('masteryHigh') : isMid ? t('masteryMid') : t('masteryLow')}
             </span>
           )}
         </div>
@@ -67,6 +69,7 @@ function Bar({ label, value }) {
 }
 
 export default function Dashboard() {
+  const { t } = useI18n()
   const [events, setEvents] = useState([])
   const [queued, setQueued] = useState(0)
   const [status, setStatus] = useState(null)
@@ -99,8 +102,8 @@ export default function Dashboard() {
     await refresh()
     setStatus(
       result.sent === 0
-        ? 'Walang naka-queue na learning logs. Lahat ay naka-sync.'
-        : `Naipadala ang ${result.sent} telemetry logs sa City Education dashboard.`,
+        ? t('syncEmpty')
+        : t('syncSuccess', { n: result.sent }),
     )
     setBusy(false)
   }
@@ -133,7 +136,7 @@ export default function Dashboard() {
           </div>
         </div>
         <p className="mt-2 text-xs leading-relaxed text-[var(--color-muted)]">
-          Real-time offline telemetriya. Walang kinokolektang personal na impormasyon o pangalan ng kabataan.
+          {t('dashboardSubtitle')}
         </p>
       </section>
 
@@ -142,7 +145,7 @@ export default function Dashboard() {
         <div className="rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface)] p-3.5 shadow-xs">
           <div className="flex items-center justify-between">
             <p className="text-[11px] font-bold text-[var(--color-muted)] uppercase tracking-wider">
-              Naka-queue na Logs
+              {t('queuedLogs')}
             </p>
             <Package className="size-4 text-[var(--color-muted)] stroke-[2]" aria-hidden="true" />
           </div>
@@ -150,14 +153,14 @@ export default function Dashboard() {
             <span className="text-2xl font-black tabular-nums text-[var(--color-ink)]">
               <RollingNumber value={queued} />
             </span>
-            <span className="text-xs font-semibold text-[var(--color-muted)]">events</span>
+            <span className="text-xs font-semibold text-[var(--color-muted)]">{t('events')}</span>
           </div>
         </div>
 
         <div className="rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface)] p-3.5 shadow-xs">
           <div className="flex items-center justify-between">
             <p className="text-[11px] font-bold text-[var(--color-muted)] uppercase tracking-wider">
-              Average Mastery
+              {t('avgMastery')}
             </p>
             <TrendingUp className="size-4 text-[var(--color-accent)] stroke-[2.2]" aria-hidden="true" />
           </div>
@@ -165,7 +168,7 @@ export default function Dashboard() {
             <span className="text-2xl font-black tabular-nums text-[var(--color-accent)]">
               {avgMastery === null ? '—' : <><RollingNumber value={avgMastery} />%</>}
             </span>
-            <span className="text-xs font-semibold text-[var(--color-muted)]">overall</span>
+            <span className="text-xs font-semibold text-[var(--color-muted)]">{t('overall')}</span>
           </div>
         </div>
       </div>
@@ -177,7 +180,7 @@ export default function Dashboard() {
             id="mastery-heading"
             className="text-xs font-bold uppercase tracking-wider text-[var(--color-muted)]"
           >
-            Mastery ng Kakayahan (Competency)
+            {t('masteryHeading')}
           </h2>
         </div>
         <ul className="mt-1 space-y-2">
@@ -198,16 +201,16 @@ export default function Dashboard() {
               <Package className="size-4 stroke-[2.2]" aria-hidden="true" />
             </span>
             <h2 id="queue-heading" className="text-xs font-bold uppercase tracking-wider text-[var(--color-ink)]">
-              Offline Telemetry Queue
+              {t('queueCardTitle')}
             </h2>
           </div>
           <span className="rounded-full bg-[var(--color-surface-sunken)] px-2.5 py-0.5 text-xs font-bold tabular-nums text-[var(--color-muted)]">
-            {queued} pending
+            {t('syncPending', { n: queued })}
           </span>
         </div>
 
         <p className="mt-2 text-xs leading-relaxed text-[var(--color-muted)]">
-          Naka-imbak sa device ang mga resulta ng quiz. Awtomatikong ipapadala sa City Hall kapag nakakonekta sa Wi-Fi.
+          {t('queueCardSub')}
         </p>
 
         <button
@@ -219,12 +222,12 @@ export default function Dashboard() {
           {busy ? (
             <>
               <RotateCw className="size-4 animate-spin stroke-[2.5]" aria-hidden="true" />
-              <span>Nagsi-sync sa barangay network…</span>
+              <span>{t('syncingButton')}</span>
             </>
           ) : (
             <>
               <Wifi className="size-4 stroke-[2.5]" aria-hidden="true" />
-              <span>Subukan ang Barangay Wi-Fi Sync</span>
+              <span>{t('syncWifiButton')}</span>
             </>
           )}
         </button>
@@ -244,18 +247,18 @@ export default function Dashboard() {
             id="remediation-heading"
             className="text-xs font-bold uppercase tracking-wider text-[var(--color-muted)]"
           >
-            Iminumungkahing Remediation (Approval Gate)
+            {t('remediationHeading')}
           </h2>
           <span className="inline-flex items-center gap-1 rounded-full bg-[var(--color-terracotta-subtle)] px-2 py-0.5 text-[10px] font-bold text-[var(--color-terracotta)]">
             <ShieldCheck className="size-3 stroke-[2.5]" aria-hidden="true" />
-            Human Approval
+            {t('humanApprovalTag')}
           </span>
         </div>
 
         {remediations.length === 0 ? (
           <div className="rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface)] p-4 text-center">
             <p className="text-xs font-medium text-[var(--color-muted)]">
-              Wala pang follow-up na kailangang aprubahan. Matapos ang quiz, dito lilitaw ang mga kakayahang kailangan pang palakasin.
+              {t('noRemediations')}
             </p>
           </div>
         ) : (
@@ -275,7 +278,7 @@ export default function Dashboard() {
                     </p>
                   </div>
                   <span className="shrink-0 rounded-md bg-[var(--color-terracotta-subtle)] px-1.5 py-0.5 text-[10px] font-bold text-[var(--color-terracotta)]">
-                    Kailangan
+                    {t('remediationNeeded')}
                   </span>
                 </div>
                 <button
@@ -284,7 +287,7 @@ export default function Dashboard() {
                   className="btn-press mt-3 flex min-h-10 w-full items-center justify-center gap-1.5 rounded-xl bg-[var(--color-accent)] text-xs font-bold text-[var(--color-on-accent)] shadow-xs hover:bg-[var(--color-accent-strong)]"
                 >
                   <Check className="size-3.5 stroke-[3]" aria-hidden="true" />
-                  <span>Aprubahan ang Remediation</span>
+                  <span>{t('approveButton')}</span>
                 </button>
               </li>
             ))}
@@ -294,7 +297,7 @@ export default function Dashboard() {
         {approved.length > 0 && (
           <p className="mt-2 flex items-center gap-1.5 text-xs font-semibold text-[var(--color-good)] animate-pop-in">
             <AnimatedSuccessCheck className="size-4" circleColor="var(--color-good)" tickColor="var(--color-good)" />
-            <span>Naaprubahan na ang {approved.length} remediation action ng facilitator.</span>
+            <span>{t('remediationApprovedSummary', { n: approved.length })}</span>
           </p>
         )}
       </section>
@@ -307,7 +310,7 @@ export default function Dashboard() {
             id="barangay-heading"
             className="text-xs font-bold uppercase tracking-wider text-[var(--color-muted)]"
           >
-            Barangay Heatmap · Synthetic Sample
+            {t('barangayHeading')}
           </h2>
         </div>
         <ul className="space-y-2">
@@ -320,7 +323,7 @@ export default function Dashboard() {
           ))}
         </ul>
         <p className="mt-2 text-[11px] text-[var(--color-muted)] leading-relaxed">
-          Sample data para sa demo ng San Fernando City Government. Walang totoong citizen records ang ginamit alinsunod sa Data Privacy Act.
+          {t('barangayDisclaimer')}
         </p>
       </section>
     </div>

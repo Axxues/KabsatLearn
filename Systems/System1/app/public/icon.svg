@@ -1,16 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
-  <!-- Launcher squircle background matching reference (#161e2e) -->
-  <rect width="100" height="100" rx="26" fill="#161e2e"/>
-  <rect x="0.5" y="0.5" width="99" height="99" rx="25.5" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
-  
-  <!-- Centered Twin Barrel Surf K -->
+  <rect width="100" height="100" rx="26" fill="#FFFFFF"/>
+  <rect x="0.5" y="0.5" width="99" height="99" rx="25.5" stroke="#E2E8F0" stroke-width="1"/>
   <g transform="translate(14, 14) scale(0.72)">
-    <path d="M22 80 C18 64 20 44 26 30 C30 20 40 18 42 26 C40 34 32 38 30 48 C28 60 32 72 38 80 Z" fill="#0369A1"/>
-    <path d="M26 30 C30 20 40 18 42 26 C40 33 33 36 31 46 C30 54 32 64 36 76 C32 76 28 66 26 56 C24 46 24 36 26 30 Z" fill="#7DD3FC"/>
-    <path d="M38 52 C46 44 58 32 72 24 C80 20 84 25 80 32 C74 40 62 50 50 56 Z" fill="#0284C7"/>
-    <path d="M52 38 C64 28 72 24 74 24 C78 22 80 25 78 29 C72 36 62 45 52 50 Z" fill="#BAE6FD"/>
-    <path d="M52 46 C62 38 72 32 82 28 C84 32 80 38 72 44 C64 50 56 54 48 56 Z" fill="#0EA5E9"/>
-    <path d="M46 56 C54 62 66 72 80 84 C72 88 62 86 52 78 C46 72 42 64 46 56 Z" fill="#1E40AF"/>
-    <path d="M48 58 C56 64 68 74 78 82 C74 84 66 82 58 76 C52 70 48 64 48 58 Z" fill="#38BDF8"/>
+    <path d="M22 80 C18 64 20 44 26 30 C30 20 40 18 42 26 C40 34 32 38 30 48 C28 60 32 72 38 80 Z" fill="#0284C7"/>
+    <path d="M38 52 C46 44 58 32 72 24 C80 20 84 25 80 32 C74 40 62 50 50 56 Z" fill="#38BDF8"/>
+    <path d="M46 56 C54 62 66 72 80 84 C72 88 62 86 52 78 C46 72 42 64 46 56 Z" fill="#1D4ED8"/>
   </g>
 </svg>

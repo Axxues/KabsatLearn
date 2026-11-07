@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { speak } from '../lib/tts.js'
+import { useI18n } from '../lib/i18n.jsx'
 import AnimatedSuccessCheck from './AnimatedSuccessCheck.jsx'
 import {
   ArrowLeft,
@@ -10,6 +11,7 @@ import {
 } from 'lucide-react'
 
 function Drill({ drill, onComplete }) {
+  const { t } = useI18n()
   const [selected, setSelected] = useState([])
   const flags = useMemo(
     () => drill.segments.map((segment, index) => (segment.flag ? index : -1)).filter((i) => i >= 0),
@@ -33,10 +35,10 @@ function Drill({ drill, onComplete }) {
         </span>
         <div>
           <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--color-terracotta)]">
-            Subukan ang Galing
+            {t('drillBadge')}
           </h3>
           <p className="text-xs font-semibold text-[var(--color-ink)]">
-            Tukuyin ang mga kahina-hinalang bahagi
+            {t('drillSubtitle')}
           </p>
         </div>
       </div>
@@ -80,13 +82,13 @@ function Drill({ drill, onComplete }) {
               <AnimatedSuccessCheck className="size-5" circleColor="var(--color-good)" tickColor="var(--color-good)" />
             </span>
             <p>
-              Mahusay! Nakita mo ang lahat ng kahina-hinalang detalye. {drill.hint}
+              {t('drillFoundAll', { hint: drill.hint })}
             </p>
           </div>
         ) : (
           <div className="flex items-center justify-between rounded-xl border border-[var(--color-line)] bg-[var(--color-surface-sunken)] px-3 py-2 text-xs">
             <span className="font-semibold text-[var(--color-muted)]">
-              Nahanap: <span className="font-bold text-[var(--color-ink)]">{selected.length}</span> / {flags.length}
+              {t('drillProgress', { current: selected.length, total: flags.length })}
             </span>
             <span className="text-[11px] text-[var(--color-muted)]">
               {drill.hint}
@@ -100,7 +102,7 @@ function Drill({ drill, onComplete }) {
           disabled={!foundAll}
           className="btn-press flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-[var(--color-accent)] px-4 text-sm font-bold text-[var(--color-on-accent)] shadow-sm hover:bg-[var(--color-accent-strong)] disabled:opacity-40 disabled:cursor-not-allowed"
         >
-          <span>Magpatuloy sa Aralin</span>
+          <span>{t('drillContinue')}</span>
           <ArrowRight className="size-4 stroke-[2.5]" aria-hidden="true" />
         </button>
       </div>
@@ -109,6 +111,7 @@ function Drill({ drill, onComplete }) {
 }
 
 export default function StoryReader({ capsule, onExit }) {
+  const { lang, t } = useI18n()
   const [index, setIndex] = useState(0)
   const [isPlayingAudio, setIsPlayingAudio] = useState(false)
   const card = capsule.cards[index]
@@ -116,7 +119,7 @@ export default function StoryReader({ capsule, onExit }) {
 
   const handleSpeak = () => {
     setIsPlayingAudio(true)
-    speak(`${card.title}. ${card.body}`)
+    speak(`${card.title}. ${card.body}`, { lang: lang === 'en' ? 'en-US' : 'fil-PH' })
     setTimeout(() => setIsPlayingAudio(false), 5000)
   }
 
@@ -130,12 +133,12 @@ export default function StoryReader({ capsule, onExit }) {
           className="btn-press flex min-h-10 items-center gap-1.5 rounded-xl border border-[var(--color-line)] bg-[var(--color-surface)] px-3 text-xs font-bold text-[var(--color-accent)] hover:bg-[var(--color-accent-subtle)]"
         >
           <ArrowLeft className="size-4 stroke-[2.5]" aria-hidden="true" />
-          Bumalik
+          {t('back')}
         </button>
 
         <div className="flex items-center gap-2">
           <span className="rounded-full bg-[var(--color-accent-subtle)] px-2.5 py-1 text-xs font-bold tabular-nums text-[var(--color-accent)]">
-            Aralin {index + 1} ng {capsule.cards.length}
+            {t('cardProgress', { current: index + 1, total: capsule.cards.length })}
           </span>
         </div>
       </header>
@@ -166,7 +169,7 @@ export default function StoryReader({ capsule, onExit }) {
         {/* Content Card Presentation with Technique 05: Fast, then slow */}
         <article key={card.id} className="mt-5 space-y-4 page-enter">
           <div className="inline-flex items-center gap-1.5 rounded-md bg-[var(--color-accent-subtle)] px-2 py-0.5 text-[11px] font-bold text-[var(--color-accent)]">
-            <span>Kurso: {capsule.title}</span>
+            <span>{t('coursePrefix')} {capsule.title}</span>
           </div>
 
           <h1 className="text-2xl font-extrabold leading-tight tracking-tight text-[var(--color-ink)]">
@@ -185,7 +188,7 @@ export default function StoryReader({ capsule, onExit }) {
               }`}
             >
               <Volume2 className={`size-4 stroke-[2.5] ${isPlayingAudio ? 'text-white animate-pulse' : 'text-[var(--color-accent)]'}`} aria-hidden="true" />
-              <span>{isPlayingAudio ? 'Nagsasalita…' : 'Pakinggan ang Aralin'}</span>
+              <span>{isPlayingAudio ? t('speakingState') : t('listenButton')}</span>
 
               {isPlayingAudio && (
                 <div className="flex items-center gap-0.5 ml-1" aria-hidden="true">
@@ -196,7 +199,7 @@ export default function StoryReader({ capsule, onExit }) {
               )}
             </button>
             <span className="text-[11px] text-[var(--color-muted)]">
-              Filipino Text-to-Speech
+              {t('ttsLabel')}
             </span>
           </div>
 
@@ -214,7 +217,7 @@ export default function StoryReader({ capsule, onExit }) {
                 <Lightbulb className="size-3.5 stroke-[2.5]" aria-hidden="true" />
               </span>
               <div className="flex-1">
-                <p className="font-bold text-[var(--color-terracotta)]">Mahalagang Paalala</p>
+                <p className="font-bold text-[var(--color-terracotta)]">{t('tipTitle')}</p>
                 <p className="mt-0.5 text-[var(--color-ink)]">{card.tip}</p>
               </div>
             </div>
@@ -241,14 +244,14 @@ export default function StoryReader({ capsule, onExit }) {
               className="btn-press flex min-h-12 items-center justify-center gap-1.5 rounded-xl border border-[var(--color-line)] bg-[var(--color-surface)] px-4 text-sm font-bold text-[var(--color-muted)] hover:text-[var(--color-ink)] disabled:opacity-30 disabled:cursor-not-allowed"
             >
               <ArrowLeft className="size-4 stroke-[2.5]" aria-hidden="true" />
-              <span>Nakaraan</span>
+              <span>{t('previous')}</span>
             </button>
             <button
               type="button"
               onClick={() => (isLast ? onExit() : setIndex(index + 1))}
               className="btn-press flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-[var(--color-accent)] px-4 text-sm font-bold text-[var(--color-on-accent)] shadow-md hover:bg-[var(--color-accent-strong)]"
             >
-              <span>{isLast ? 'Tapusin ang Kurso' : 'Susunod na Aralin'}</span>
+              <span>{isLast ? t('finishCourse') : t('nextLesson')}</span>
               <ArrowRight className="size-4 stroke-[2.5]" aria-hidden="true" />
             </button>
           </div>

@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { answerOffline } from '../lib/rag.js'
 import { speak } from '../lib/tts.js'
+import { useI18n } from '../lib/i18n.jsx'
 import {
   ArrowLeft,
   Bot,
@@ -11,20 +12,14 @@ import {
   Sparkles,
 } from 'lucide-react'
 
-const CHIPS = [
-  'Paano kung hinihingi ang OTP ko?',
-  'Peke ba ang link na ito?',
-  'May nagtext na ayuda, totoo ba?',
-  'Nabiktima ako, ano gagawin?',
-]
-
 function Bubble({ message }) {
+  const { lang, t } = useI18n()
   const mine = message.role === 'user'
   const [speaking, setSpeaking] = useState(false)
 
   const handleSpeak = () => {
     setSpeaking(true)
-    speak(message.text)
+    speak(message.text, { lang: lang === 'en' ? 'en-US' : 'fil-PH' })
     setTimeout(() => setSpeaking(false), 4500)
   }
 
@@ -51,7 +46,7 @@ function Bubble({ message }) {
             <div className="flex items-center gap-1.5 rounded-lg border border-[var(--color-accent)]/20 bg-[var(--color-accent-subtle)] px-2.5 py-1 text-xs text-[var(--color-accent)]">
               <BookOpen className="size-3.5 shrink-0 stroke-[2]" aria-hidden="true" />
               <span className="truncate font-semibold">
-                Sanggunian: {message.source.concept}
+                {t('sourceCitation')} {message.source.concept}
               </span>
               <span className="ml-auto font-mono text-[10px] font-bold">
                 {message.confidence}% match
@@ -63,7 +58,7 @@ function Bubble({ message }) {
           {!message.source && !mine && message.answered && (
             <div className="flex items-center gap-1.5 rounded-lg border border-[var(--color-warn)]/30 bg-[var(--color-warn-subtle)] px-2.5 py-1 text-xs font-semibold text-[var(--color-warn)]">
               <AlertCircle className="size-3.5 shrink-0 stroke-[2.5]" aria-hidden="true" />
-              <span>Walang tugma sa na-download na aralin.</span>
+              <span>{t('outOfScopeAlert')}</span>
             </div>
           )}
 
@@ -80,7 +75,7 @@ function Bubble({ message }) {
                 }`}
               >
                 <Volume2 className={`size-3 stroke-[2.5] ${speaking ? 'animate-pulse' : ''}`} aria-hidden="true" />
-                <span>{speaking ? 'Nagsasalita…' : 'Pakinggan'}</span>
+                <span>{speaking ? t('speakingState') : t('listenMessage')}</span>
                 {speaking && (
                   <span className="flex items-center gap-0.5 ml-0.5" aria-hidden="true">
                     <span className="w-0.5 h-2 rounded-full bg-white animate-soundwave-1" />
@@ -98,10 +93,11 @@ function Bubble({ message }) {
 }
 
 export default function KabsatAI({ capsule, onExit }) {
-  const [messages, setMessages] = useState([
+  const { t, translations } = useI18n()
+  const [messages, setMessages] = useState(() => [
     {
       role: 'assistant',
-      text: `Kumusta! Ako si Kabsat, ang iyong offline AI tutor para sa "${capsule.title}".\n\nLahat ng sagot ko ay 100% grounded sa na-download mong aralin — walang kailangang internet.`,
+      text: t('aiWelcome', { title: capsule.title }),
     },
   ])
   const [input, setInput] = useState('')
@@ -134,6 +130,8 @@ export default function KabsatAI({ capsule, onExit }) {
     setInput('')
   }
 
+  const chips = translations.quickChips || []
+
   return (
     <div className="mx-auto flex min-h-dvh max-w-[430px] flex-col bg-[var(--color-bg)] text-[var(--color-ink)] shadow-2xl transition-colors duration-200">
       {/* Header */}
@@ -144,16 +142,16 @@ export default function KabsatAI({ capsule, onExit }) {
           className="btn-press flex min-h-10 items-center gap-1.5 rounded-xl border border-[var(--color-line)] bg-[var(--color-surface)] px-3 text-xs font-bold text-[var(--color-accent)] hover:bg-[var(--color-accent-subtle)]"
         >
           <ArrowLeft className="size-4 stroke-[2.5]" aria-hidden="true" />
-          Bumalik
+          {t('back')}
         </button>
 
         <div className="text-right">
           <div className="flex items-center justify-end gap-1.5">
-            <span className="text-sm font-black text-[var(--color-ink)]">Kabsat AI</span>
+            <span className="text-sm font-black text-[var(--color-ink)]">{t('aiTitle')}</span>
             <span className="size-2 rounded-full bg-[var(--color-good)] animate-pulse" aria-hidden="true" />
           </div>
           <p className="text-[11px] font-medium text-[var(--color-muted)]">
-            Offline · Grounded sa Aralin
+            {t('aiSubtitle')}
           </p>
         </div>
       </header>
@@ -171,10 +169,10 @@ export default function KabsatAI({ capsule, onExit }) {
         <div className="pt-2">
           <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-[var(--color-muted)]">
             <Sparkles className="size-3.5 text-[var(--color-accent)] stroke-[2.5]" aria-hidden="true" />
-            Mabilis na Itanong
+            {t('quickQuestionsHeader')}
           </p>
           <div className="mt-2 flex flex-wrap gap-1.5">
-            {CHIPS.map((chip) => (
+            {chips.map((chip) => (
               <button
                 key={chip}
                 type="button"
@@ -197,13 +195,13 @@ export default function KabsatAI({ capsule, onExit }) {
         className="sticky bottom-0 z-30 flex gap-2 border-t border-[var(--color-line)] bg-[var(--color-surface)]/95 p-3 backdrop-blur-md"
       >
         <label className="sr-only" htmlFor="ask">
-          Itanong kay Kabsat
+          {t('askPlaceholder')}
         </label>
         <input
           id="ask"
           value={input}
           onChange={(event) => setInput(event.target.value)}
-          placeholder="Itanong kay Kabsat…"
+          placeholder={t('askPlaceholder')}
           className="min-h-12 flex-1 rounded-2xl border border-[var(--color-line)] bg-[var(--color-bg)] px-4 text-sm text-[var(--color-ink)] placeholder:text-[var(--color-muted)] focus:border-[var(--color-accent)] focus:outline-hidden"
         />
         <button
@@ -211,7 +209,7 @@ export default function KabsatAI({ capsule, onExit }) {
           disabled={!input.trim()}
           className="btn-press flex min-h-12 items-center justify-center gap-1.5 rounded-2xl bg-[var(--color-accent)] px-4 text-sm font-bold text-[var(--color-on-accent)] shadow-md hover:bg-[var(--color-accent-strong)] disabled:opacity-40 disabled:cursor-not-allowed"
         >
-          <span>Send</span>
+          <span>{t('send')}</span>
           <Send className="size-4 stroke-[2.5]" aria-hidden="true" />
         </button>
       </form>
